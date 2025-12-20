@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "../../globals.css";
 import Image from "next/image";
 import BgImg from "@/public/login-bg-img.png";
-import Logo from "@/public/logo.svg";
 import HomeLogo from "@/components/HomeLogo";
 
 const geistSans = Geist({
@@ -32,23 +31,23 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="container mx-auto p-20">
-          <div className="grid grid-cols-2 gap-10">
-            <div className="col-span-1">
-              <div className="pb-15">
-                <HomeLogo />
+        <div className="container mx-auto lg:p-20 md:p-20 p-5">
+            <div className="grid lg:grid-cols-2 md:grid-cols-1 gap-10">
+              <div className="col-span-1 ">
+                <div className="lg:pb-15 md:pb-10 pb-3 flex justify-center lg:justify-start">
+                  <HomeLogo />
+                </div>{children}
               </div>
-              {children}
+              <div className="col-span-1 lg:block hidden">
+                <Image
+                  src={BgImg}
+                  alt="A description of my hero image"
+                  className="max-h-full"
+                />
               </div>
-            <div className="col-span-1">
-              <Image
-                src={BgImg}
-                alt="A description of my hero image"
-                className="max-h-full"
-              />
             </div>
-          </div>
         </div>
+        
       </body>
     </html>
   );

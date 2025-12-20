@@ -6,20 +6,19 @@ import RegisterForm from "./actions/registerForm";
 export default function RegisterPage() {
   return (
     <>
-      <div className="text-center px-15">
-        <p className="lg:text-5xl md:text-4xl font-bold">Join Us</p>
+      <div className="text-center px-5 md:px-10 lg:px-10">
+        <p className="text-3xl font-bold md:text-4xl lg:text-5xl">Join Us</p>
 
-        <p className="text-lg text-center break-all font-thin py-5 ">
+        <p className="break-words py-5 text-center text-base font-thin md:text-lg lg:text-xl">
           Create your account to unlock a more secure, organized digital life.
-          <br />
           Your personal space, simplified and protected.
         </p>
       </div>
-      <div className="px-25">
+      <div className="lg:px-10 md:px-10 px-5">
         <RegisterForm />
-        <p className="text-center pb-8">or continue with</p>
+        <p className="text-center lg:pb-8">or continue with</p>
 
-        <div className="grid lg:grid-cols-1 md:grid-cols-1 gap-2 pb-10">
+        <div className="grid lg:grid-cols-2 md:grid-cols-1 lg:gap-6 md:gap-4 gap-3 pb-10">
           <div>
             <RegisterApple />
           </div>

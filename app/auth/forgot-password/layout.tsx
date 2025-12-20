@@ -28,30 +28,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+   <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="container mx-auto p-20">
-          <div className="grid grid-cols-2 gap-10">
-            <div className="col-span-1">
-              <div className="pb-15">
-                <HomeLogo />
-                
-                </div>
-              {children}
-
-              
+        <div className="container mx-auto lg:p-20 md:p-20 p-5">
+            <div className="grid lg:grid-cols-2 md:grid-cols-1 gap-10">
+              <div className="col-span-1 ">
+                <div className="lg:pb-15 md:pb-10 pb-3 flex justify-center lg:justify-start">
+                  <HomeLogo />
+                </div>{children}
               </div>
-            <div className="col-span-1">
-              <Image
-                src={BgImg}
-                alt="A description of my hero image"
-                className="max-h-full"
-              />
+              <div className="col-span-1 lg:block hidden">
+                <Image
+                  src={BgImg}
+                  alt="A description of my hero image"
+                  className="max-h-full"
+                />
+              </div>
             </div>
-          </div>
         </div>
+        
       </body>
     </html>
   );

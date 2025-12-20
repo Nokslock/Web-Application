@@ -5,6 +5,7 @@ import { createPortal } from "react-dom"; // 1. Import createPortal
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import AuthButton from "@/components/AuthButton";
 import { AnimatePresence, motion } from "framer-motion";
 
 const links = [
@@ -71,57 +72,77 @@ export default function NavLinks() {
           We teleport this overlay outside of the Navbar and attached it to document.body.
           This ensures it is ALWAYS full screen and on top of everything.
       */}
-      {mounted && createPortal(
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              // z-[9999] ensures it is higher than the Navbar (which is usually z-50)
-              className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white"
-            >
-              <button
-                className="absolute top-5 right-0 p-2 text-gray-700"
-                onClick={() => setIsOpen(false)}
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                // z-[9999] ensures it is higher than the Navbar (which is usually z-50)
+                className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-8 h-8"
+                <button
+                  className="absolute top-5 right-0 p-2 text-gray-700"
+                  onClick={() => setIsOpen(false)}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-
-              <div className="flex flex-col gap-8 text-center">
-                {links.map((link) => (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    onClick={() => setIsOpen(false)}
-                    className={clsx(
-                      "text-2xl font-medium text-gray-600 hover:text-blue-600 transition-colors",
-                      { "text-blue-600 font-bold": pathname === link.href }
-                    )}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-8 h-8"
                   >
-                    {link.name}
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+
+                <div className="flex flex-col gap-8 text-center">
+                  {links.map((link) => (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      onClick={() => setIsOpen(false)}
+                      className={clsx(
+                        "text-2xl font-medium text-gray-600 hover:text-blue-600 transition-colors",
+                        { "text-blue-600 font-bold": pathname === link.href }
+                      )}
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
+
+                  <Link href="/auth/login" className="w-full">
+                    <AuthButton
+                      variant="primary"
+                      type="button"
+                      className="w-full flex justify-center"
+                    >
+                      Login
+                    </AuthButton>
                   </Link>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body // Target container
-      )}
+                  <Link href="/auth/register" className="w-full">
+                    <AuthButton
+                      variant="outline"
+                      type="button"
+                      className="w-full flex justify-center"
+                    >
+                      Create Account
+                    </AuthButton>
+                  </Link>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body // Target container
+        )}
     </>
   );
 }

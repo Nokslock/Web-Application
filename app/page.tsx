@@ -16,7 +16,7 @@ export default function Home() {
             <p className="lg:text-6xl md:text-3xl text-2xl font-black lg:pb-10 md:pb-5 pb-5">
               Take Full Control of your Digital Security
             </p>
-            <p className="lg:text-2xl md:text-base font-thin pb-5 md:pb-5">
+            <p className="lg:text-2xl md:text-base font-base pb-5 md:pb-5">
               Log in to a simpler, more secure online experience.
               <br /> Your digital world, protected and organized.
             </p>

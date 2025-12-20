@@ -10,13 +10,13 @@ export default function Home() {
   return (
     <>
       <NavBar />
-      <div className="w-screen mx-auto lg:px-20 lg:pt-33 lg:pb-20 md:px-15 md:pt-25 md:pb-10 px-5 pt-20 pb-5 hero-section">
+      <div className="w-screen mx-auto lg:px-20 lg:pt-33 lg:pb-20 md:px-15 md:pt-25 md:pb-10 px-5 pt-25 pb-5 hero-section">
         <div className="grid lg:grid-cols-2 md:grid-cols-3 sm:grid-cols-1 gap-10 ">
           <div className="lg:col-span-1 md:col-span-2 self-center">
-            <p className="lg:text-6xl md:text-3xl text-2xl font-black lg:pb-10 md:pb-5">
+            <p className="lg:text-6xl md:text-3xl text-2xl font-black lg:pb-10 md:pb-5 pb-5">
               Take Full Control of your Digital Security
             </p>
-            <p className="lg:text-2xl md:text-base font-thin pb-10 md:pb-5">
+            <p className="lg:text-2xl md:text-base font-thin pb-5 md:pb-5">
               Log in to a simpler, more secure online experience.
               <br /> Your digital world, protected and organized.
             </p>

@@ -82,7 +82,7 @@ export default function NavLinks() {
               className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white"
             >
               <button
-                className="absolute top-5 right-5 p-2 text-gray-700"
+                className="absolute top-5 right-0 p-2 text-gray-700"
                 onClick={() => setIsOpen(false)}
               >
                 <svg

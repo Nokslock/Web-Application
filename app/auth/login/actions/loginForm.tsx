@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function LoginForm() {
   return (
     <>
-      <form action="" className="pb-10">
+      <form action="" className=" lg:pb-10 md:pb-5 pb-5">
         <div className="pb-5">
           <label className="block text-sm font-bold text-gray-500">Email</label>
           <input

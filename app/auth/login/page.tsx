@@ -6,20 +6,20 @@ import Link from "next/link";
 export default function LoginPage() {
   return (
     <>
-            <div className="text-center px-20">
-              <p className="lg:text-5xl md:text-4xl font-bold">Welcome Back</p>
-              
-                <p className="text-lg text-center break-all font-thin py-5 ">
-                  Log in to a simpler, more secure online experience.<br /> Your
-                  digital world, protected and organized.
-                </p>
-                
-            </div>
-            <div className="px-25">
-              <LoginForm />
-              <p className="text-center pb-8">or continue with</p>
+           <div className="text-center px-5 md:px-10 lg:px-10"> {/* reduced mobile padding slightly */}
+  <p className="text-3xl font-bold md:text-4xl lg:text-5xl">Welcome Back</p>
 
-              <div className="grid lg:grid-cols-2 md:grid-cols-1 gap-6 pb-10">
+  {/* CHANGED: Removed 'break-all', added 'break-words' (optional, but safer) */}
+  <p className="break-words py-5 text-center text-base font-thin md:text-lg lg:text-xl">
+    Log in to a simpler, more secure online experience.
+    <br /> Your digital world, protected and organized.
+  </p>
+</div>
+            <div className="lg:px-10 md:px-10 px-5">
+              <LoginForm />
+              <p className="text-center lg:pb-8">or continue with</p>
+
+              <div className="grid lg:grid-cols-2 md:grid-cols-1 lg:gap-6 md:gap-4 gap-3 pb-10">
                 <div>
                   <LoginApple />
                 </div>

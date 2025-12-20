@@ -32,20 +32,20 @@ export default function NavBar() {
         }
       )}
     >
-      <div className="container mx-auto px-5 lg:px-20">
-        <div className="flex items-center justify-between gap-5 md:grid md:grid-cols-8">
+      <div className="mx-auto px-5 lg:px-20">
+        <div className="flex items-center justify-between gap-5 lg:grid lg:grid-cols-8 md:grid md:grid-cols-8">
           
-          <div className="flex h-full w-full items-center justify-start md:col-span-2">
+          <div className="flex h-full w-full items-center justify-start lg:col-span-1 md:col-span-2">
             <div className="flex items-center">
               <HomeLogo />
             </div>
           </div>
 
-          <div className="flex h-full items-center justify-end md:col-span-4 md:justify-center">
+          <div className="flex h-full items-center justify-end lg:col-span-6 md:col-span-4 md:justify-center">
             <NavLinks />
           </div>
 
-          <div className="hidden h-full items-center md:flex md:col-span-2 w-full">
+          <div className="hidden h-full items-center md:flex lg:col-span-1 md:col-span-2 w-full">
             <Link href="/auth/login" className="w-full">
               <AuthButton
                 variant="primary"

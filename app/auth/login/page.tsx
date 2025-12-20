@@ -1,9 +1,6 @@
 import LoginGoogle from "./actions/loginGoogle";
 import LoginApple from "./actions/loginApple";
 import LoginForm from "./actions/loginForm";
-import Image from "next/image";
-import Logo from "@/public/logo.svg";
-import BgImg from "@/public/login-bg-img.png";
 import Link from "next/link";
 
 export default function LoginPage() {

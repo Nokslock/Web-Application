@@ -1,41 +1,126 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom"; // 1. Import createPortal
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import { AnimatePresence, motion } from "framer-motion";
 
 const links = [
   { name: "About", href: "#" },
-  {
-    name: "Features",
-    href: "#",
-  },
+  { name: "Features", href: "#" },
   { name: "Download", href: "#" },
 ];
 
 export default function NavLinks() {
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // 2. Prevent Hydration Errors: Only render portal on the client
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
-    // 1. PARENT CONTAINER: flex-row makes the items sit side-by-side
-    <div className="flex w-full flex-row gap-2">
-      {links.map((link) => {
-        return (
-          <Link
-            key={link.name}
-            href={link.href}
-            // 2. LINK ITEMS: 'grow' ensures they fill the width evenly on smaller screens
-            className={clsx(
-              "flex h-[48px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3",
-              {
-                "bg-sky-100 text-blue-600": pathname === link.href,
-              }
-            )}
+    <>
+      <div className="flex w-full items-center justify-end md:justify-center">
+        {/* Desktop Menu */}
+        <div className="hidden md:flex flex-row gap-2">
+          {links.map((link) => (
+            <Link
+              key={link.name}
+              href={link.href}
+              className={clsx(
+                "flex h-[48px] items-center justify-center gap-2 rounded-md px-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600",
+                { "bg-sky-100 text-blue-600": pathname === link.href }
+              )}
+            >
+              <p>{link.name}</p>
+            </Link>
+          ))}
+        </div>
+
+        {/* Hamburger Button */}
+        {!isOpen && (
+          <button
+            className="ml-auto block md:hidden p-2 text-gray-700"
+            onClick={() => setIsOpen(true)}
           >
-            <p className="hidden md:block">{link.name}</p>
-          </Link>
-        );
-      })}
-    </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-8 h-8"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+              />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      {/* 3. THE PORTAL
+          We teleport this overlay outside of the Navbar and attached it to document.body.
+          This ensures it is ALWAYS full screen and on top of everything.
+      */}
+      {mounted && createPortal(
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              // z-[9999] ensures it is higher than the Navbar (which is usually z-50)
+              className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white"
+            >
+              <button
+                className="absolute top-5 right-5 p-2 text-gray-700"
+                onClick={() => setIsOpen(false)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-8 h-8"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+
+              <div className="flex flex-col gap-8 text-center">
+                {links.map((link) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className={clsx(
+                      "text-2xl font-medium text-gray-600 hover:text-blue-600 transition-colors",
+                      { "text-blue-600 font-bold": pathname === link.href }
+                    )}
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body // Target container
+      )}
+    </>
   );
 }

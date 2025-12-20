@@ -1,40 +1,64 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import HomeLogo from "@/components/HomeLogo";
 import NavLinks from "@/components/NavLinks";
 import AuthButton from "@/components/AuthButton";
 import Link from "next/link";
+import clsx from "clsx";
 
 export default function NavBar() {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <>
-      <nav className="absolute inset-x-0 top-0">
-        <div className="conatiner mx-auto lg:px-20 py-5">
-          <div className="grid grid-cols-8 ">
-            <div className="col-span-2">
+    <nav style={{ backdropFilter: "blur(6px)" }}
+      className={clsx(
+        "fixed inset-x-0 top-0 w-full z-50 transition-all duration-300 ease-in-out",
+        {
+          "bg-transparent py-5": !isScrolled,
+          // CHANGED: 
+          // 1. bg-white/50 (More transparent so blur is visible)
+          // 2. backdrop-filter (Forces the CSS property)
+          // 3. backdrop-blur-md (Standard blur amount)
+          "bg-white/80 backdrop-filter backdrop-blur-sm shadow-md py-3": isScrolled,
+        }
+      )}
+    >
+      <div className="container mx-auto px-5 lg:px-20">
+        <div className="flex items-center justify-between gap-5 md:grid md:grid-cols-8">
+          
+          <div className="flex h-full w-full items-center justify-start md:col-span-2">
+            <div className="flex items-center">
               <HomeLogo />
             </div>
-            <div className="col-span-4">
-              <NavLinks />
-            </div>
-            <div className="col-span-2">
-              <div className="grid lg:grid-cols-2 gap-5">
-                <div>
-                    
-                </div>
-                <div>
-                  <Link href="/auth/login">
-                    <AuthButton
-                      variant="primary"
-                      type="button"
-                    >
-                      Login
-                    </AuthButton>
-                  </Link>
-                </div>
-              </div>
-            </div>
           </div>
+
+          <div className="flex h-full items-center justify-end md:col-span-4 md:justify-center">
+            <NavLinks />
+          </div>
+
+          <div className="hidden h-full items-center md:flex md:col-span-2 w-full">
+            <Link href="/auth/login" className="w-full">
+              <AuthButton
+                variant="primary"
+                type="button"
+                className="w-full flex justify-center"
+              >
+                Login
+              </AuthButton>
+            </Link>
+          </div>
+          
         </div>
-      </nav>
-    </>
+      </div>
+    </nav>
   );
 }

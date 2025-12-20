@@ -36,7 +36,7 @@ export default function RootLayout({
       >
         <div className="container mx-auto p-20">
             <div className="grid grid-cols-2 gap-10">
-              <div className="col-span-1">
+              <div className="col-span-1 ">
                 <div className="pb-15">
                   <HomeLogo />
                 </div>{children}

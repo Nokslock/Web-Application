@@ -27,12 +27,12 @@ export default function LoginForm() {
 
         <div className="pb-5">
           <p className="text-md text-end text-blue-400">
-            <Link href="/auth/forgot-password">Forgot Password?</Link>
+            <Link href="/forgot-password">Forgot Password?</Link>
           </p>
         </div>
 
         <div>
-          <Link href="/auth/login/email-otp">
+          <Link href="/login/email-otp">
             <AuthButton
                       variant="primary"
                       type="button"

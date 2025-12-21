@@ -80,7 +80,7 @@ export default function BioForm() {
       // Clear storage since we are done with it
       sessionStorage.removeItem("registerEmail");
       
-      router.push("/auth/register/email-otp/");
+      router.push("/register/email-otp/");
       
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");

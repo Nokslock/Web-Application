@@ -7,7 +7,7 @@ export default function EmailOtpVerification() {
   return (
     <>
       <div className="pb-3">
-        <Link href="/auth/forgot-password/">
+        <Link href="/forgot-password/">
           <div className="px-5 flex items-center gap-2 text-blue-400 text-lg font-medium">
             <FaAngleLeft /> Back
           </div>

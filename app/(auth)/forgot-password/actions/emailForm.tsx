@@ -14,7 +14,7 @@ export default function EmailForm() {
           />
         </div>
         
-         <Link href="/auth/forgot-password/email-otp">
+         <Link href="/forgot-password/email-otp">
           <AuthButton
                       variant="primary"
                       type="button"
@@ -26,7 +26,7 @@ export default function EmailForm() {
 
         <p className="text-center pt-10 pb-10 ">
           Already have an Account? &nbsp;
-          <Link href="/auth/login" className="text-blue-400">
+          <Link href="/login" className="text-blue-400">
             Login
           </Link>
         </p>

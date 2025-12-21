@@ -119,7 +119,7 @@ export default function NavLinks() {
                     </Link>
                   ))}
 
-                  <Link href="/auth/login" className="w-full">
+                  <Link href="/login" className="w-full">
                     <AuthButton
                       variant="primary"
                       type="button"
@@ -128,7 +128,7 @@ export default function NavLinks() {
                       Login
                     </AuthButton>
                   </Link>
-                  <Link href="/auth/register" className="w-full">
+                  <Link href="/register" className="w-full">
                     <AuthButton
                       variant="outline"
                       type="button"

@@ -29,7 +29,7 @@ export default function RegisterPage() {
 
         <p className="text-center pb-10 ">
           Already have an Account? &nbsp;
-          <Link href="/auth/login" className="text-blue-400">
+          <Link href="/login" className="text-blue-400">
             Login
           </Link>
         </p>

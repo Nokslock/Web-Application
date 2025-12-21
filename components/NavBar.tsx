@@ -46,7 +46,7 @@ export default function NavBar() {
           </div>
 
           <div className="hidden h-full items-center md:flex lg:col-span-1 md:col-span-2 w-full">
-            <Link href="/auth/login" className="w-full">
+            <Link href="/login" className="w-full">
               <AuthButton
                 variant="primary"
                 type="button"

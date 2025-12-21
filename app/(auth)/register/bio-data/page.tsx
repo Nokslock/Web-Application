@@ -8,7 +8,7 @@ export default function RegisterBioDataPage() {
   return (
     <>
       <div className="pb-3">
-        <Link href="/auth/register">
+        <Link href="/register">
           <div className="px-5 flex items-center gap-2 text-blue-400 text-lg font-medium">
             <FaAngleLeft /> Back
           </div>

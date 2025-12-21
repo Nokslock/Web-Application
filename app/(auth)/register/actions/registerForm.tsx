@@ -9,7 +9,7 @@ export default function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleContinue = async (e) => {
+  const handleContinue = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

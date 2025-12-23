@@ -28,10 +28,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-   <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
         <div className="container mx-auto lg:p-20 md:p-20 p-5">
             <div className="grid lg:grid-cols-2 md:grid-cols-1 gap-10">
               <div className="col-span-1 ">
@@ -48,8 +44,5 @@ export default function RootLayout({
               </div>
             </div>
         </div>
-        
-      </body>
-    </html>
   );
 }

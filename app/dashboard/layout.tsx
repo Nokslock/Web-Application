@@ -47,10 +47,7 @@ export default async function RootLayout({
   const email = user?.email || "Please sign in";
 
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    
         <div>
           <div className="grid grid-cols-5 h-screen overflow-hidden">
             <div className="col-span-1 p-10">
@@ -92,7 +89,5 @@ export default async function RootLayout({
             </div>
           </div>
         </div>
-      </body>
-    </html>
   );
 }

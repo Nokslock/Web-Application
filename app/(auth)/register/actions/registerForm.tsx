@@ -21,8 +21,8 @@ export default function RegisterForm() {
     }
 
     setIsLoading(true);
-    // small delay to simulate server request
 
+    // small delay to simulate server request
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // This saves the email in the browser's invisible storage for this tab

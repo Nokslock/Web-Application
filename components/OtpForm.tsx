@@ -1,16 +1,13 @@
-"use client";
+"use client"; // This MUST be at the top
 
-// 1. THIS LINE FIXES THE BUILD ERROR
-export const dynamic = "force-dynamic";
-
-import { useState, useRef, Suspense } from "react";
+import { useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import AuthButton from "@/components/AuthButton";
 import Link from "next/link";
 import { FaAngleLeft } from "react-icons/fa6";
 
-function OtpVerificationForm() {
+export default function OtpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = getSupabaseBrowserClient();
@@ -118,10 +115,7 @@ function OtpVerificationForm() {
         <form onSubmit={handleVerify}>
           <div className="flex pb-10 pt-5 justify-center gap-3 md:gap-4">
             {otp.map((digit, index) => (
-              <div
-                key={index}
-                className="w-12 h-12 md:w-14 md:h-14 relative"
-              >
+              <div key={index} className="w-12 h-12 md:w-14 md:h-14 relative">
                 <input
                   ref={(el) => { inputRefs.current[index] = el }}
                   type="text"
@@ -160,14 +154,5 @@ function OtpVerificationForm() {
         </p>
       </div>
     </>
-  );
-}
-
-// Keep the Suspense wrapper too, just to be safe!
-export default function EmailOtpVerificationPage() {
-  return (
-    <Suspense fallback={<div className="text-center p-10">Loading verification...</div>}>
-      <OtpVerificationForm />
-    </Suspense>
   );
 }

@@ -3,8 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "@/app/globals.css";
 import Image from "next/image";
 import Pfp from "@/public/pfp-default.jpg";
-import { FaCrown } from "react-icons/fa6"; // Import Crown Icon for the button
-
+import { FaCrown } from "react-icons/fa6"; 
 import HomeLogo from "@/components/HomeLogo";
 import NavLinks from "@/app/dashboard/DbNavLinks";
 
@@ -124,6 +123,7 @@ export default async function RootLayout({
           {/* MAIN CONTENT */}
           <main className="flex-1 overflow-y-auto p-4 md:p-10">
             {children}
+
           </main>
           
         </div>

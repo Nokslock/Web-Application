@@ -3,7 +3,37 @@
 import { createBrowserClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-type SupabaseSchema = Record<string, never>;
+// --- UPDATED SCHEMA DEFINITION ---
+type SupabaseSchema = {
+  public: {
+    Tables: {
+      vault_items: {
+        Row: {
+          id: string;
+          user_id: string;
+          type: "password" | "card" | "crypto" | "file"; // Match the SQL check
+          name: string;
+          ciphertext: string; // This is the encrypted string
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          type: "password" | "card" | "crypto" | "file";
+          name: string;
+          ciphertext: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          type?: "password" | "card" | "crypto" | "file";
+          name?: string;
+          ciphertext?: string;
+        };
+      };
+    };
+  };
+};
 
 let client: SupabaseClient<SupabaseSchema> | null = null;
 

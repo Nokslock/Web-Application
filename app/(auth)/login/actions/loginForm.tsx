@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client"; 
 import AuthButton from "@/components/AuthButton";
 import Link from "next/link";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -20,19 +21,29 @@ export default function LoginForm() {
     setLoading(true);
     setError(null);
 
+    // 1. SANITIZE INPUT (The Fix)
+    // We trim spaces to ensure clean data is sent
+    const cleanEmail = email.trim(); 
+
+    // 2. DEBUG LOGS (Check your browser console!)
+    // If you see " user@gmail.com " (with quotes & spaces) in the first log,
+    // but the second log is clean, then this fix is working.
+    console.log("Raw Input:", JSON.stringify(email));
+    console.log("Sending to Supabase:", JSON.stringify(cleanEmail));
+
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: cleanEmail,
       password,
     });
 
     if (error) {
+      console.error("Login Error:", error.message); // See the specific error
       setError(error.message);
-      setLoading(false); // Stop loading if error
+      setLoading(false);
     } else {
+      console.log("Login Success! Redirecting...");
       router.push("/dashboard"); 
       router.refresh();
-      // Note: We don't set loading(false) here because we are navigating away.
-      // Keeping it true prevents the user from clicking the button again while the page redirects.
     }
   };
 
@@ -63,7 +74,7 @@ export default function LoginForm() {
           <label className="block text-sm font-bold text-gray-500">
             Password
           </label>
-          <input
+          <PasswordInput
             type="password"
             placeholder="Your Password"
             value={password}

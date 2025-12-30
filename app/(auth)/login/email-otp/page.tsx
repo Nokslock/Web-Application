@@ -1,8 +1,6 @@
 "use client";
 
-// 1. THIS LINE FIXES THE BUILD ERROR
 export const dynamic = "force-dynamic";
-
 import { useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
@@ -163,7 +161,6 @@ function OtpVerificationForm() {
   );
 }
 
-// Keep the Suspense wrapper too, just to be safe!
 export default function EmailOtpVerificationPage() {
   return (
     <Suspense fallback={<div className="text-center p-10">Loading verification...</div>}>

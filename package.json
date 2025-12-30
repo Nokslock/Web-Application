@@ -13,6 +13,7 @@
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.89.0",
     "clsx": "^2.1.1",
+    "crypto-js": "^4.2.0",
     "framer-motion": "^12.23.26",
     "next": "^16.1.0",
     "react": "19.2.0",
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/postcss": "^4",
+    "@types/crypto-js": "^4.2.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

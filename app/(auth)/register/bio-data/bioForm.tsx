@@ -4,8 +4,9 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AuthButton from "@/components/AuthButton";
-import PhoneInput from 'react-phone-input-2'
-import 'react-phone-input-2/lib/style.css'
+import PasswordInput from "@/components/PasswordInput";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 export default function BioForm() {
   const router = useRouter();
@@ -159,7 +160,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           <label className="block text-sm font-bold text-gray-500">
             Password
           </label>
-          <input
+          <PasswordInput
             name="password"
             type="password"
             value={formData.password}
@@ -173,7 +174,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           <label className="block text-sm font-bold text-gray-500">
             Verify Password
           </label>
-          <input
+          <PasswordInput
             name="verifyPassword"
             type="password"
             value={formData.verifyPassword}

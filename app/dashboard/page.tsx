@@ -50,7 +50,7 @@ export default async function DashboardPage() {
           {/* Recent Passwords */}
           <div className="h-80 col-span-1 lg:col-span-4 p-6 bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col">
             <div className="flex justify-between items-center mb-5">
-              <h2 className="font-bold text-xl text-gray-800">Recent Passwords</h2>
+              <h2 className="font-bold text-lg text-gray-800">Recent Passwords</h2>
               <button className="text-sm text-end font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1 rounded-full transition">
                 View All
               </button>

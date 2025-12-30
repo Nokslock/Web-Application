@@ -1,9 +1,9 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 import { redirect } from "next/navigation";
-import { FaIdCard, FaWallet } from "react-icons/fa6";
-import { IoKey, IoApps, IoDocumentText } from "react-icons/io5";
+import { IoKey } from "react-icons/io5";
 import NotificationBell from "@/components/NotificationBell";
 import DashboardFab from "@/components/DashboardFab";
+import DashboardStatsGrid from "@/components/DashboardStatsGrid"; 
 
 export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient();
@@ -16,29 +16,11 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  // 1. FETCH DATA (Get all items for this user)
-  // We only select 'type' to keep the query super fast and lightweight
+  // 1. FETCH DATA (Get all items to pass to the grid)
   const { data: items } = await supabase
     .from("vault_items")
-    .select("type");
-
-  // 2. CALCULATE COUNTS (Process the data)
-  // We start with 0 for everything
-  const counts = {
-    card: 0,
-    crypto: 0,
-    file: 0,
-    password: 0,
-    app: 0 // You don't have an 'app' type in DB yet, but we'll handle it
-  };
-
-  // Loop through the fetched items and count them up
-  items?.forEach((item) => {
-    if (item.type === "card") counts.card++;
-    if (item.type === "crypto") counts.crypto++;
-    if (item.type === "file") counts.file++;
-    if (item.type === "password") counts.password++;
-  });
+    .select("id, type, name, ciphertext, created_at")
+    .order("created_at", { ascending: false });
 
   return (
     <>
@@ -59,16 +41,8 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* QUICK ACTIONS GRID (Updated with real counts) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 mb-10">
-          <DashboardCard icon={<FaIdCard />} label="Cards" count={counts.card} />
-          <DashboardCard icon={<FaWallet />} label="Wallets" count={counts.crypto} />
-          {/* We map 'password' from DB to Passkeys here */}
-          <DashboardCard icon={<IoKey />} label="Passkeys" count={counts.password} />
-          {/* If you add an 'app' type later, you can use counts.app */}
-          <DashboardCard icon={<IoApps />} label="Apps" count={0} />
-          <DashboardCard icon={<IoDocumentText />} label="Files" count={counts.file} />
-        </div>
+        {/* --- INTERACTIVE GRID (Cards + Popups) --- */}
+        <DashboardStatsGrid items={items || []} />
 
         {/* MAIN CONTENT GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-7 gap-6 md:gap-10">
@@ -91,13 +65,14 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* Statistics Section */}
+          {/* Statistics Section (GRAPH RESTORED HERE) */}
           <div className="h-80 col-span-1 lg:col-span-3 p-6 bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col">
             <div className="flex justify-between items-center mb-6">
                <h2 className="font-bold text-xl text-gray-800">Security Score</h2>
                <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded">GOOD</span>
             </div>
 
+            {/* --- THE GRAPH UI --- */}
             <div className="flex-1 flex flex-col items-end justify-end">
               <div className="w-full flex items-end justify-between gap-2 h-40 px-2">
                  <ChartBar height="40%" color="bg-blue-200" label="Mon" />
@@ -114,31 +89,13 @@ export default async function DashboardPage() {
         </div>
       </div>
 
+      {/* The Floating Action Button */}
       <DashboardFab />
     </>
   );
 }
 
-// --- SUB-COMPONENTS ---
-
-function DashboardCard({ icon, label, count }: { icon: React.ReactNode; label: string, count?: number }) {
-  return (
-    <div className="group flex flex-row items-center gap-4 p-4 bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-200 cursor-pointer h-full relative overflow-hidden">
-      <div className="flex flex-shrink-0 items-center justify-center h-12 w-12 bg-blue-50 border border-blue-100 rounded-full text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-200">
-        <span className="text-lg">{icon}</span>
-      </div>
-      <div className="flex flex-col">
-        <span className="font-bold text-gray-800 text-sm md:text-base">{label}</span>
-        {/* We updated this check to handle 0 correctly (0 is falsy in JS) */}
-        {count !== undefined && (
-          <span className="text-xs text-gray-400 font-medium">{count} Items</span>
-        )}
-      </div>
-      <div className="absolute right-0 top-0 h-16 w-16 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 rounded-bl-full transition-opacity duration-300 pointer-events-none" />
-    </div>
-  );
-}
-
+// --- SUB-COMPONENT: CHART BAR ---
 function ChartBar({ height, color, label }: { height: string; color: string; label: string }) {
   return (
     <div className="flex flex-col items-center gap-2 w-full">

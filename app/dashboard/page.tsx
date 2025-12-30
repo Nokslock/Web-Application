@@ -42,15 +42,15 @@ export default async function DashboardPage() {
 
       {/* QUICK ACTIONS GRID */}
       {/* Mobile: 2 columns | Tablet: 3 columns | Desktop: 5 columns */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 mb-10">
-        <DashboardCard icon={<FaIdCard />} label="Cards" count={3} />
-        <DashboardCard icon={<FaWallet />} label="Wallets" count={1} />
-        <DashboardCard icon={<IoKey />} label="Passkeys" count={5} />
-        <DashboardCard icon={<IoApps />} label="Apps" count={12} />
-        <div className="col-span-2 md:col-span-1">
-           <DashboardCard icon={<IoDocumentText />} label="Files" count={8} />
-        </div>
-      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 mb-10">
+  <DashboardCard icon={<FaIdCard />} label="Cards" count={3} />
+  <DashboardCard icon={<FaWallet />} label="Wallets" count={1} />
+  <DashboardCard icon={<IoKey />} label="Passkeys" count={5} />
+  <DashboardCard icon={<IoApps />} label="Apps" count={12} />
+  
+  {/* Removed the wrapper div here since 'col-span-2' is not needed for 1-column mobile view */}
+  <DashboardCard icon={<IoDocumentText />} label="Files" count={8} />
+</div>
 
       {/* MAIN CONTENT GRID */}
       {/* Mobile: 1 column (Stacked) | Desktop: 7 columns (Side by side) */}

@@ -46,7 +46,7 @@ export default function BioForm() {
       if (error) setError("");
     };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -63,7 +63,7 @@ export default function BioForm() {
       return;
     }
 
-    // Password Regex: at least 8 characters, one uppercase, one lowercase, one number, one special character
+    // Password Regex
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
@@ -75,8 +75,7 @@ export default function BioForm() {
       return;
     }
 
-    //password match check
-
+    // Password match check
     if (formData.password !== formData.verifyPassword) {
       setError("Passwords do not match.");
       setLoading(false);
@@ -86,12 +85,11 @@ export default function BioForm() {
     try {
       // Submit to Supabase
       const { data, error: supabaseError } = await supabase.auth.signUp({
-        email: email, // Using the email from state
+        email: email, 
         password: formData.password,
         options: {
           data: {
-            name: formData.fullName,
-            full_name: formData.fullName,
+            full_name: formData.fullName, // Supabase standard uses 'full_name'
             phone: formData.phoneNumber,
           },
         },
@@ -99,10 +97,13 @@ export default function BioForm() {
 
       if (supabaseError) throw supabaseError;
 
-      // Clear storage since we are done with it
+      // Clear storage
       sessionStorage.removeItem("registerEmail");
 
-      router.push("/register/email-otp/");
+      // --- CRITICAL CHANGE HERE ---
+      // We pass the email as a query parameter so the OTP page can read it.
+      router.push(`/register/email-otp?email=${encodeURIComponent(email)}`);
+      
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");
     } finally {

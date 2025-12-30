@@ -6,6 +6,7 @@ import Pfp from "@/public/pfp-default.jpg";
 import { FaCrown } from "react-icons/fa6"; 
 import HomeLogo from "@/components/HomeLogo";
 import NavLinks from "@/app/dashboard/DbNavLinks";
+import Link from "next/link"; // <--- 1. IMPORT ADDED
 
 import { createSupabaseServerClient } from "@/lib/supabase/server-client"; 
 import SignOutButton from "@/components/SignOutButton";
@@ -41,7 +42,6 @@ export default async function RootLayout({
   const email = user?.email || "Please sign in";
 
   return (
-        
         <div className="flex h-screen overflow-hidden bg-neutral-100">
           
           {/* SIDEBAR */}
@@ -64,14 +64,18 @@ export default async function RootLayout({
             {/* Bottom Section: Promo Button + Profile */}
             <div className="flex flex-col gap-4">
               
-              {/* --- FLASHY PLUS BUTTON --- */}
-              <button className="
-                group relative flex items-center justify-center lg:justify-start gap-3 
-                p-3 w-full rounded-xl 
-                bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 
-                text-white shadow-lg shadow-purple-200 
-                transition-all duration-300 hover:scale-[1.02] hover:shadow-purple-300
-              ">
+              {/* --- FLASHY PLUS BUTTON (UPDATED TO LINK) --- */}
+              <Link 
+                href="/pricing" 
+                className="
+                  group relative flex items-center justify-center lg:justify-start gap-3 
+                  p-3 w-full rounded-xl 
+                  bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 
+                  text-white shadow-lg shadow-purple-200 
+                  transition-all duration-300 hover:scale-[1.02] hover:shadow-purple-300
+                  cursor-pointer
+                "
+              >
                 {/* Shining effect overlay */}
                 <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
@@ -85,7 +89,7 @@ export default async function RootLayout({
                     Upgrade for Vault access
                   </p>
                 </div>
-              </button>
+              </Link>
 
               {/* --- PROFILE CARD --- */}
               {user && (
@@ -123,7 +127,6 @@ export default async function RootLayout({
           {/* MAIN CONTENT */}
           <main className="flex-1 overflow-y-auto p-4 md:p-10">
             {children}
-
           </main>
           
         </div>

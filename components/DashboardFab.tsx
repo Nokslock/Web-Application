@@ -90,7 +90,7 @@ export default function DashboardFab() {
       {/* --- 1. THE TRIGGER: SMALL CIRCLE BUTTON (Bottom Right) --- */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-xl shadow-blue-300 flex items-center justify-center transition-transform hover:scale-110 active:scale-95 z-50"
+        className="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-xl shadow-blue-300 flex items-center justify-center transition-transform hover:scale-110 active:scale-95 z-1"
       >
         <FaPlus size={24} />
       </button>

@@ -13,8 +13,13 @@ const links = [
   { name: 'Vault', href: '/dashboard/vault', icon: BsFillShieldFill },
   { name: 'Settings', href: '/dashboard/settings', icon: IoSettingsSharp },
 ];
+
+// 1. Define the props to accept the state from the Sidebar
+interface NavLinksProps {
+  isExpanded?: boolean;
+}
  
-export default function NavLinks() {
+export default function NavLinks({ isExpanded }: NavLinksProps) {
   const pathname = usePathname();
  
   return (
@@ -28,29 +33,35 @@ export default function NavLinks() {
             key={link.name}
             href={link.href}
             className={clsx(
-              // BASE STYLES (Mobile/Tablet - Narrow Sidebar)
-              // 1. justify-center: Centers the icon when sidebar is collapsed
-              // 2. h-[60px]: Adjusted height for better vertical rhythm
-              'flex h-[60px] items-center justify-center rounded-xl transition-colors duration-200',
+              // BASE STYLES
+              'flex h-[60px] items-center rounded-xl transition-all duration-200',
               
-              // LARGE SCREEN STYLES (Desktop - Expanded Sidebar)
-              // 1. lg:justify-start: Aligns content to left
-              // 2. lg:px-4: Adds internal padding
-              // 3. lg:gap-4: Adds space between icon and text
+              // ALIGNMENT LOGIC:
+              // If Expanded: Left align with padding
+              // If Collapsed (default mobile): Center align
+              // Desktop (lg): Always Left align
+              isExpanded ? 'justify-start px-4 gap-4' : 'justify-center',
               'lg:justify-start lg:px-4 lg:gap-4',
 
-              // CONDITIONAL STYLES (Active vs Inactive)
+              // ACTIVE STATES
               {
                 'bg-blue-600 text-white shadow-md shadow-blue-200': isActive,
                 'text-gray-500 hover:bg-gray-100 hover:text-blue-600': !isActive,
               },
             )}
           >
-            {/* Icon size adjusted slightly */}
             <LinkIcon className="w-6 h-6 shrink-0" />
             
-            {/* Text is HIDDEN by default, appears only on LG screens */}
-            <p className="hidden lg:block font-medium text-sm">
+            {/* TEXT VISIBILITY LOGIC:
+                1. Hidden by default on mobile.
+                2. Block (Visible) if isExpanded is true.
+                3. Block (Visible) always on Desktop (lg).
+            */}
+            <p className={clsx(
+                'font-medium text-sm whitespace-nowrap',
+                isExpanded ? 'block' : 'hidden', 
+                'lg:block'
+            )}>
                 {link.name}
             </p>
           </Link>

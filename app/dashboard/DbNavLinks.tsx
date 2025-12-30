@@ -10,11 +10,7 @@ import clsx from 'clsx';
  
 const links = [
   { name: 'Dashboard', href: '/dashboard', icon: TbLayoutDashboardFilled },
-  {
-    name: 'Vault',
-    href: '/dashboard/vault',
-    icon: BsFillShieldFill,
-  },
+  { name: 'Vault', href: '/dashboard/vault', icon: BsFillShieldFill },
   { name: 'Settings', href: '/dashboard/settings', icon: IoSettingsSharp },
 ];
  
@@ -22,24 +18,41 @@ export default function NavLinks() {
   const pathname = usePathname();
  
   return (
-    // CHANGE 1: 'flex-col' stacks them vertically
-    // CHANGE 2: 'gap-4' adds more vertical space between them (was gap-2)
-    <div className="flex w-full flex-col gap-4">
+    <div className="flex w-full flex-col gap-2 mt-5">
       {links.map((link) => {
         const LinkIcon = link.icon;
+        const isActive = pathname === link.href;
+
         return (
           <Link
             key={link.name}
             href={link.href}
             className={clsx(
-              'flex h-[70px] grow items-center justify-center gap-7 rounded-md p-3 text-2xl font-medium hover:bg-sky-100 hover:text-blue-400 md:flex-none md:justify-start md:p-2 md:px-3',
+              // BASE STYLES (Mobile/Tablet - Narrow Sidebar)
+              // 1. justify-center: Centers the icon when sidebar is collapsed
+              // 2. h-[60px]: Adjusted height for better vertical rhythm
+              'flex h-[60px] items-center justify-center rounded-xl transition-colors duration-200',
+              
+              // LARGE SCREEN STYLES (Desktop - Expanded Sidebar)
+              // 1. lg:justify-start: Aligns content to left
+              // 2. lg:px-4: Adds internal padding
+              // 3. lg:gap-4: Adds space between icon and text
+              'lg:justify-start lg:px-4 lg:gap-4',
+
+              // CONDITIONAL STYLES (Active vs Inactive)
               {
-                'bg-sky-500 text-white': pathname === link.href,
+                'bg-blue-600 text-white shadow-md shadow-blue-200': isActive,
+                'text-gray-500 hover:bg-gray-100 hover:text-blue-600': !isActive,
               },
             )}
           >
-            <LinkIcon className="w-6" />
-            <p className="hidden md:block">{link.name}</p>
+            {/* Icon size adjusted slightly */}
+            <LinkIcon className="w-6 h-6 shrink-0" />
+            
+            {/* Text is HIDDEN by default, appears only on LG screens */}
+            <p className="hidden lg:block font-medium text-sm">
+                {link.name}
+            </p>
           </Link>
         );
       })}

@@ -10,4 +10,14 @@ module.exports = {
     },
   },
   plugins: [],
+  theme: {
+  extend: {
+    // Add these keyframes
+    keyframes: {
+      shimmer: {
+        '100%': { transform: 'translateX(100%)' },
+      },
+    },
+  },
+},
 }

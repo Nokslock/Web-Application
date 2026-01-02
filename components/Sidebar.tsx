@@ -11,7 +11,7 @@ import Pfp from "@/public/pfp-default.jpg";
 
 interface SidebarProps {
   user: any;
-  fullName: string;
+  fullName?: string; // Made optional as we prefer metadata now
   email: string;
 }
 
@@ -20,8 +20,20 @@ export default function Sidebar({ user, fullName, email }: SidebarProps) {
   const touchStart = useRef<number | null>(null);
   const touchEnd = useRef<number | null>(null);
 
-  // 👇 LOGIC: Use uploaded avatar if it exists, otherwise use default Pfp
+  // --- DATA LOGIC ---
+  // 1. Get Avatar
   const avatarUrl = user?.user_metadata?.avatar_url || Pfp;
+
+  // 2. Get Name (Prioritize separate fields from metadata)
+  const meta = user?.user_metadata || {};
+  const firstName = meta.first_name;
+  const lastName = meta.last_name;
+
+  // Construct the display name:
+  // If we have separate names, join them. Otherwise use the old fullName prop or metadata fallback.
+  const displayName = (firstName && lastName) 
+    ? `${firstName} ${lastName}`
+    : (fullName || meta.full_name || "User");
 
   // --- Touch Handlers for Swiping ---
   const onTouchStart = (e: React.TouchEvent) => {
@@ -95,7 +107,6 @@ export default function Sidebar({ user, fullName, email }: SidebarProps) {
               className="flex items-center gap-3 p-2 rounded-xl bg-neutral-50 border border-neutral-200 cursor-pointer transition-all hover:bg-neutral-100 justify-center lg:justify-start"
             >
               <div className="shrink-0 relative w-10 h-10">
-                {/* 👇 UPDATED IMAGE SRC */}
                 <Image 
                   src={avatarUrl} 
                   alt="Profile" 
@@ -105,7 +116,8 @@ export default function Sidebar({ user, fullName, email }: SidebarProps) {
               </div>
 
               <div className={`${isExpanded ? "block" : "hidden"} lg:block overflow-hidden`}>
-                <p className="font-medium text-sm truncate">{fullName}</p>
+                {/* 👇 UPDATED: Uses displayName derived from first/last name */}
+                <p className="font-medium text-sm truncate capitalize">{displayName}</p>
                 <p className="font-thin text-gray-400 text-xs truncate max-w-[120px]">
                   {email}
                 </p>

@@ -7,6 +7,7 @@ import AuthButton from "@/components/AuthButton";
 import PasswordInput from "@/components/PasswordInput";
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
+import { FaCheck, FaCircle } from "react-icons/fa6"; 
 
 export default function BioForm() {
   const router = useRouter();
@@ -15,7 +16,8 @@ export default function BioForm() {
   const [email, setEmail] = useState("");
 
   const [formData, setFormData] = useState({
-    fullName: "",
+    firstName: "",
+    lastName: "",
     phoneNumber: "",
     password: "",
     verifyPassword: "",
@@ -24,14 +26,19 @@ export default function BioForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    // Get email from the browser storage
-    const storedEmail = sessionStorage.getItem("registerEmail");
+  // --- NEW: Password Requirement Logic ---
+  const passwordRequirements = [
+    { label: "At least 8 characters", valid: formData.password.length >= 8 },
+    { label: "At least one lowercase letter", valid: /[a-z]/.test(formData.password) },
+    { label: "At least one uppercase letter", valid: /[A-Z]/.test(formData.password) },
+    { label: "At least one number", valid: /\d/.test(formData.password) },
+  ];
 
+  useEffect(() => {
+    const storedEmail = sessionStorage.getItem("registerEmail");
     if (storedEmail) {
       setEmail(storedEmail);
     } else {
-      // If no email is found, go back to the first step
       router.push("/register");
     }
   }, [router]);
@@ -41,20 +48,19 @@ export default function BioForm() {
     if (error) setError("");
   };
 
-   // Specific handler for PhoneInput
-    const handlePhoneChange = (value: string | undefined) => {
-      setFormData({ ...formData, phoneNumber: value || "" });
-      if (error) setError("");
-    };
+  const handlePhoneChange = (value: string | undefined) => {
+    setFormData({ ...formData, phoneNumber: value || "" });
+    if (error) setError("");
+  };
 
-const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    // Validation
     if (
-      !formData.fullName ||
+      !formData.firstName ||
+      !formData.lastName ||
       !formData.phoneNumber ||
       !formData.password ||
       !formData.verifyPassword
@@ -64,19 +70,19 @@ const handleSubmit = async (e: React.FormEvent) => {
       return;
     }
 
-    // Password Regex
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    // --- UPDATED REGEX ---
+    // 1. (?=.*[a-z]) -> Must contain lowercase
+    // 2. (?=.*[A-Z]) -> Must contain uppercase
+    // 3. (?=.*\d)    -> Must contain digit
+    // 4. .{8,}       -> Any character, at least 8 long
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
     if (!passwordRegex.test(formData.password)) {
-      setError(
-        "Password must contain at least 8 characters, including uppercase, lowercase, numbers, and symbols."
-      );
+      setError("Password does not meet all requirements below.");
       setLoading(false);
       return;
     }
 
-    // Password match check
     if (formData.password !== formData.verifyPassword) {
       setError("Passwords do not match.");
       setLoading(false);
@@ -84,13 +90,14 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
 
     try {
-      // Submit to Supabase
       const { data, error: supabaseError } = await supabase.auth.signUp({
-        email: email, 
+        email: email,
         password: formData.password,
         options: {
           data: {
-            full_name: formData.fullName, // Supabase standard uses 'full_name'
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            full_name: `${formData.firstName} ${formData.lastName}`,
             phone: formData.phoneNumber,
           },
         },
@@ -98,11 +105,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
       if (supabaseError) throw supabaseError;
 
-      // Clear storage
       sessionStorage.removeItem("registerEmail");
-
-      // --- CRITICAL CHANGE HERE ---
-      // We pass the email as a query parameter so the OTP page can read it.
       router.push(`/register/email-otp?email=${encodeURIComponent(email)}`);
       
     } catch (err: any) {
@@ -112,13 +115,11 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
   };
 
-  // If email hasn't loaded yet, show nothing (prevents hydration mismatch)
   if (!email) return null;
 
   return (
     <>
       <form className="pb-10">
-        {/* 2. Read-Only Email Field (Visual Confirmation) */}
         <div className="pb-5">
           <label className="block text-sm font-bold text-gray-500">
             Email Address
@@ -126,36 +127,46 @@ const handleSubmit = async (e: React.FormEvent) => {
           <input
             type="email"
             value={email}
-            disabled // User cannot change this here
+            disabled
             className="mt-1 w-full h-13 rounded-md border border-gray-200 bg-gray-100 p-2 px-4 text-sm text-gray-500 cursor-not-allowed"
           />
         </div>
 
-        <div className="pb-5">
-          <label className="block text-sm font-bold text-gray-500">
-            Full Name
-          </label>
-          <input
-            name="fullName"
-            type="text"
-            value={formData.fullName}
-            onChange={handleChange}
-            placeholder="Your Full Name"
-            className="mt-1 w-full h-13 rounded-md border border-gray-200 bg-white p-2 px-4 text-sm text-gray-700 focus:border-emerald-500 focus:outline-none"
-          />
+        <div className="flex gap-4 pb-5">
+          <div className="w-1/2">
+            <label className="block text-sm font-bold text-gray-500">First Name</label>
+            <input
+              name="firstName"
+              type="text"
+              value={formData.firstName}
+              onChange={handleChange}
+              placeholder="First Name"
+              className="mt-1 w-full h-13 rounded-md border border-gray-200 bg-white p-2 px-4 text-sm text-gray-700 focus:border-emerald-500 focus:outline-none"
+            />
+          </div>
+          <div className="w-1/2">
+            <label className="block text-sm font-bold text-gray-500">Last Name</label>
+            <input
+              name="lastName"
+              type="text"
+              value={formData.lastName}
+              onChange={handleChange}
+              placeholder="Last Name"
+              className="mt-1 w-full h-13 rounded-md border border-gray-200 bg-white p-2 px-4 text-sm text-gray-700 focus:border-emerald-500 focus:outline-none"
+            />
+          </div>
         </div>
 
         <div className="pb-5"> 
-          <label className="block text-sm font-bold text-gray-500">
-            Phone Number
-          </label>
+          <label className="block text-sm font-bold text-gray-500">Phone Number</label>
           <PhoneInput
               country={'ng'}
               value={formData.phoneNumber}
               onChange={handlePhoneChange}
             />
-          </div>
+        </div>
 
+        {/* --- PASSWORD FIELD WITH LIVE CHECKLIST --- */}
         <div className="pb-5">
           <label className="block text-sm font-bold text-gray-500">
             Password
@@ -168,6 +179,22 @@ const handleSubmit = async (e: React.FormEvent) => {
             placeholder="Password"
             className="mt-1 w-full h-13 rounded-md border border-gray-200 bg-white p-2 px-4 text-sm text-gray-700 focus:border-emerald-500 focus:outline-none"
           />
+          
+          {/* Visual Checklist */}
+          <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+            {passwordRequirements.map((req, index) => (
+              <div key={index} className="flex items-center gap-2">
+                {req.valid ? (
+                  <FaCheck className="text-emerald-500 text-xs" />
+                ) : (
+                  <FaCircle className="text-gray-300 text-[8px]" />
+                )}
+                <span className={`text-xs ${req.valid ? "text-emerald-600 font-medium" : "text-gray-500"}`}>
+                  {req.label}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="pb-5">

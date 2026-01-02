@@ -15,7 +15,7 @@ import {
   FaTrash,
   FaFloppyDisk,
   FaTriangleExclamation,
-  FaDownload // Added download icon
+  FaDownload 
 } from "react-icons/fa6";
 import { IoKey, IoApps, IoDocumentText } from "react-icons/io5";
 import { decryptData, encryptData } from "@/lib/crypto"; 
@@ -58,7 +58,7 @@ export default function DashboardStatsGrid({ items }: { items: VaultItem[] }) {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false); // New state for download spinner
+  const [isDownloading, setIsDownloading] = useState(false); 
 
   // 3. Filter Items
   const categoryItems = selectedCategory === "nok" 
@@ -88,9 +88,6 @@ export default function DashboardStatsGrid({ items }: { items: VaultItem[] }) {
 
     setIsLoading(true);
     try {
-      // Optional: If it's a file, delete from storage bucket too?
-      // For now, we just delete the database record as per standard flow.
-      
       const { error } = await supabase
         .from("vault_items")
         .delete()
@@ -150,17 +147,14 @@ export default function DashboardStatsGrid({ items }: { items: VaultItem[] }) {
       if (error) throw error;
       if (!data) throw new Error("No data received");
 
-      // Create a temporary URL for the downloaded blob
       const url = window.URL.createObjectURL(data);
       
-      // Create a hidden link and click it to trigger download
       const link = document.createElement("a");
       link.href = url;
-      link.download = decryptedDetails.fileName; // Set the filename
+      link.download = decryptedDetails.fileName; 
       document.body.appendChild(link);
       link.click();
       
-      // Cleanup
       link.remove();
       window.URL.revokeObjectURL(url);
       
@@ -203,7 +197,8 @@ export default function DashboardStatsGrid({ items }: { items: VaultItem[] }) {
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 mb-10">
         <DashboardCard icon={<FaIdCard />} label="Cards" count={counts.card} onClick={() => setSelectedCategory("card")} />
         <DashboardCard icon={<FaWallet />} label="Wallets" count={counts.crypto} onClick={() => setSelectedCategory("crypto")} />
-        <DashboardCard icon={<IoKey />} label="Passkeys" count={counts.password} onClick={() => setSelectedCategory("password")} />
+        {/* CHANGED LABEL HERE */}
+        <DashboardCard icon={<IoKey />} label="Passwords" count={counts.password} onClick={() => setSelectedCategory("password")} />
         <DashboardCard icon={<FaUserShield />} label="Next of Kin" count={counts.nok} onClick={() => setSelectedCategory("nok")} />
         <DashboardCard icon={<IoDocumentText />} label="Files" count={counts.file} onClick={() => setSelectedCategory("file")} />
       </div>

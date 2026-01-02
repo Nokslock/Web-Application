@@ -19,6 +19,104 @@ import {
 import NextOfKinForm from "@/app/dashboard/settings/NextOfKinForm";
 import ProfileForm from "@/app/dashboard/settings/profileForm";
 
+// --- SUB-COMPONENT: DELETE ACCOUNT SECTION ---
+function DeleteAccountSection() {
+  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const supabase = getSupabaseBrowserClient();
+
+  const handleDeleteAccount = async () => {
+    setLoading(true);
+    try {
+      // Call the Postgres function
+      const { error } = await supabase.rpc("delete_own_account");
+      if (error) throw error;
+
+      // Clean up local session
+      await supabase.auth.signOut();
+
+      toast.success("Account deleted successfully.");
+      router.push("/");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to delete account");
+      setLoading(false);
+      setShowModal(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="p-4 rounded-xl border border-red-100 bg-red-50/50">
+        <h4 className="text-xs font-bold text-red-400 uppercase tracking-wider mb-2">
+          Danger Zone
+        </h4>
+        <p className="text-[10px] text-red-600/70 mb-4">
+          Permanently delete your account and all encrypted data. This cannot be
+          undone.
+        </p>
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg border border-red-200 text-red-600 text-xs font-bold hover:bg-red-100 hover:border-red-300 transition-colors"
+        >
+          <FaTrash size={12} /> Delete Account
+        </button>
+      </div>
+
+      {/* MODAL */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-neutral-200 relative animate-in zoom-in-95 duration-200">
+            <button
+              onClick={() => setShowModal(false)}
+              disabled={loading}
+              className="absolute top-3 right-3 text-neutral-400 hover:text-neutral-600 p-1"
+            >
+              <FaXmark size={18} />
+            </button>
+
+            <div className="p-6 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <FaTriangleExclamation className="text-red-600 text-xl" />
+              </div>
+
+              <h3 className="text-lg font-bold text-neutral-900 mb-2">
+                Delete Account?
+              </h3>
+
+              <p className="text-sm text-neutral-500 mb-6">
+                Are you sure? This will{" "}
+                <span className="font-bold text-red-600">
+                  permanently erase
+                </span>{" "}
+                all your data. This cannot be undone.
+              </p>
+
+              <div className="flex flex-col gap-3 w-full">
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={loading}
+                  className="w-full py-3 px-4 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded-lg font-bold text-sm transition-colors disabled:opacity-50"
+                >
+                  {loading ? "Deleting..." : "Yes, Delete Everything"}
+                </button>
+
+                <button
+                  onClick={() => setShowModal(false)}
+                  disabled={loading}
+                  className="w-full py-3 px-4 bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-700 rounded-lg font-bold text-sm transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
 // --- ANIMATION VARIANTS ---
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -203,106 +301,9 @@ export default function SettingsContent({
 
             {/* DANGER ZONE (Functional Component) */}
             <DeleteAccountSection />
-
           </motion.section>
         </div>
       </div>
     </motion.div>
-  );
-}
-
-// --- SUB-COMPONENT: DELETE ACCOUNT SECTION ---
-function DeleteAccountSection() {
-  const [showModal, setShowModal] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-  const supabase = getSupabaseBrowserClient();
-
-  const handleDeleteAccount = async () => {
-    setLoading(true);
-    try {
-      // Call the Postgres function
-      const { error } = await supabase.rpc('delete_own_account');
-      if (error) throw error;
-
-      // Clean up local session
-      await supabase.auth.signOut();
-
-      toast.success("Account deleted successfully.");
-      router.push("/");
-      
-    } catch (error: any) {
-      console.error(error);
-      toast.error(error.message || "Failed to delete account");
-      setLoading(false);
-      setShowModal(false);
-    }
-  };
-
-  return (
-    <>
-      <div className="p-4 rounded-xl border border-red-100 bg-red-50/50">
-        <h4 className="text-xs font-bold text-red-400 uppercase tracking-wider mb-2">
-          Danger Zone
-        </h4>
-        <p className="text-[10px] text-red-600/70 mb-4">
-          Permanently delete your account and all encrypted data. This cannot be undone.
-        </p>
-        <button 
-          onClick={() => setShowModal(true)}
-          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg border border-red-200 text-red-600 text-xs font-bold hover:bg-red-100 hover:border-red-300 transition-colors"
-        >
-          <FaTrash size={12} /> Delete Account
-        </button>
-      </div>
-
-      {/* MODAL */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-neutral-200 relative animate-in zoom-in-95 duration-200">
-            
-            <button 
-              onClick={() => setShowModal(false)}
-              disabled={loading}
-              className="absolute top-3 right-3 text-neutral-400 hover:text-neutral-600 p-1"
-            >
-              <FaXmark size={18} />
-            </button>
-
-            <div className="p-6 flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                <FaTriangleExclamation className="text-red-600 text-xl" />
-              </div>
-              
-              <h3 className="text-lg font-bold text-neutral-900 mb-2">
-                Delete Account?
-              </h3>
-              
-              <p className="text-sm text-neutral-500 mb-6">
-                Are you sure? This will <span className="font-bold text-red-600">permanently erase</span> all your data. This cannot be undone.
-              </p>
-
-              <div className="flex flex-col gap-3 w-full">
-                <button
-                  onClick={handleDeleteAccount}
-                  disabled={loading}
-                  className="w-full py-3 px-4 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded-lg font-bold text-sm transition-colors disabled:opacity-50"
-                >
-                  {loading ? "Deleting..." : "Yes, Delete Everything"}
-                </button>
-                
-                <button
-                  onClick={() => setShowModal(false)}
-                  disabled={loading}
-                  className="w-full py-3 px-4 bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-700 rounded-lg font-bold text-sm transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
   );
 }

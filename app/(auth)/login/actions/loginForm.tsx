@@ -6,6 +6,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import AuthButton from "@/components/AuthButton";
 import Link from "next/link";
 import PasswordInput from "@/components/PasswordInput";
+import { toast } from "sonner"; // <--- Import Sonner
 
 export default function LoginForm() {
   const router = useRouter();
@@ -14,36 +15,34 @@ export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
 
-    // 1. SANITIZE INPUT (The Fix)
-    // We trim spaces to ensure clean data is sent
     const cleanEmail = email.trim(); 
 
-    // 2. DEBUG LOGS (Check your browser console!)
-    // If you see " user@gmail.com " (with quotes & spaces) in the first log,
-    // but the second log is clean, then this fix is working.
-    console.log("Raw Input:", JSON.stringify(email));
-    console.log("Sending to Supabase:", JSON.stringify(cleanEmail));
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password,
+      });
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: cleanEmail,
-      password,
-    });
+      if (error) {
+        // Show error toast instead of setting state
+        toast.error(error.message || "Invalid login credentials.");
+        setLoading(false);
+        return;
+      }
 
-    if (error) {
-      console.error("Login Error:", error.message); // See the specific error
-      setError(error.message);
-      setLoading(false);
-    } else {
-      console.log("Login Success! Redirecting...");
+      // Success
+      toast.success("Welcome back! Redirecting...");
       router.push("/dashboard"); 
       router.refresh();
+      
+    } catch (err: any) {
+      toast.error("An unexpected error occurred.");
+      setLoading(false);
     }
   };
 
@@ -51,13 +50,6 @@ export default function LoginForm() {
     <>
       <form onSubmit={handleLogin} className="lg:pb-10 md:pb-5 pb-5">
         
-        {/* Error Message Display */}
-        {error && (
-          <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-500 border border-red-200">
-            {error}
-          </div>
-        )}
-
         <div className="pb-5">
           <label className="block text-sm font-bold text-gray-500">Email</label>
           <input
@@ -95,6 +87,7 @@ export default function LoginForm() {
             variant="primary"
             type="submit"
             loading={loading} 
+            className="w-full flex justify-center"
           >
             Login
           </AuthButton>

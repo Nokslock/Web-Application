@@ -1,20 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "../../globals.css";
-import Image from "next/image";
-import BgImg from "@/public/login-bg-img.png";
-import Logo from "@/public/logo.svg";
-import HomeLogo from "@/components/HomeLogo";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import ForgotPasswordLayoutClient from "./ForgotPasswordLayoutClient"; // <--- Import new client layout
 
 export const metadata: Metadata = {
   title: "Nockslock - Password Recovery",
@@ -27,22 +13,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-        <div className="container mx-auto lg:p-20 md:p-20 p-5">
-            <div className="grid lg:grid-cols-2 md:grid-cols-1 gap-10">
-              <div className="col-span-1 ">
-                <div className="lg:pb-15 md:pb-10 pb-3 flex justify-center lg:justify-start">
-                  <HomeLogo />
-                </div>{children}
-              </div>
-              <div className="col-span-1 lg:block hidden">
-                <Image
-                  src={BgImg}
-                  alt="A description of my hero image"
-                  className="max-h-full"
-                />
-              </div>
-            </div>
-        </div>
-  );
+  return <ForgotPasswordLayoutClient>{children}</ForgotPasswordLayoutClient>;
 }

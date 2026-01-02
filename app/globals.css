@@ -21,6 +21,17 @@
   }
 } **/
 
+/* globals.css */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
+
 /* Styling for React Phone Number Input */
 .react-tel-input .form-control {
   border: none;

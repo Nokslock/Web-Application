@@ -13,21 +13,18 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  // 1. FETCH DATA
+  // --- THE FIX IS HERE ---
+  // Added "share_with_nok" to the select list
   const { data: items } = await supabase
     .from("vault_items")
-    .select("id, type, name, ciphertext, created_at")
+    .select("id, type, name, ciphertext, created_at, share_with_nok") 
     .order("created_at", { ascending: false });
 
-  // 2. SANITIZE USER DATA (Fixes Hydration Error)
-  // We extract only what we need. Passing the full 'user' object causes issues.
   const serializedUser = {
     id: user.id,
     email: user.email,
     user_metadata: user.user_metadata,
-    // Add other fields if strictly necessary
   };
 
-  // 3. Pass sanitized data to the Client Component
   return <DashboardContent user={serializedUser} items={items || []} />;
 }

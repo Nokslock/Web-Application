@@ -1,12 +1,11 @@
 "use client";
 
 import Image from "next/image";
-// 1. Importing 'Variants' fixes the TypeScript red lines
 import { motion, Variants } from "framer-motion"; 
 import Block from "@/public/block.png";
 import landingOneImage from "@/public/demo-img.png"; 
 
-// --- ANIMATION VARIANTS (Typed correctly) ---
+// --- ANIMATION VARIANTS ---
 
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 40 },
@@ -18,7 +17,7 @@ const staggerContainer: Variants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.2 // Delay between each child animation
+      staggerChildren: 0.2
     }
   }
 };
@@ -32,12 +31,13 @@ export default function LandingOne() {
   return (
     <div className="flex flex-col gap-20 pb-20 overflow-hidden">
       
-      {/* --- SECTION 1: HERO TEXT (Animated Entrance) --- */}
+      {/* --- SECTION 1: HERO TEXT --- */}
       <section className="px-5 pt-10">
         <motion.div 
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
+          // CHANGE: once: false allows animation to replay when scrolling up/down
+          viewport={{ once: false, margin: "-100px" }}
           variants={staggerContainer}
           className="max-w-5xl mx-auto text-center"
         >
@@ -55,13 +55,14 @@ export default function LandingOne() {
         </motion.div>
       </section>
 
-      {/* --- SECTION 2: HERO IMAGE (Floating Animation) --- */}
+      {/* --- SECTION 2: HERO IMAGE --- */}
       <section className="w-full px-5">
         <motion.div 
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
+          // CHANGE: once: false
+          viewport={{ once: false, amount: 0.2 }}
           className="max-w-6xl mx-auto relative group"
         >
           {/* Glowing Background Pulse */}
@@ -69,7 +70,7 @@ export default function LandingOne() {
           
           {/* Continuous Floating Motion */}
           <motion.div
-            animate={{ y: [0, -15, 0] }} // Moves up and down
+            animate={{ y: [0, -15, 0] }} 
             transition={{ 
               duration: 6, 
               repeat: Infinity, 
@@ -85,13 +86,14 @@ export default function LandingOne() {
         </motion.div>
       </section>
 
-      {/* --- SECTION 3: CORE FEATURES (Staggered Scroll) --- */}
+      {/* --- SECTION 3: CORE FEATURES --- */}
       <section className="px-5">
         <div className="max-w-7xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            // CHANGE: once: false
+            viewport={{ once: false, amount: 0.5 }}
             className="text-center mb-12"
           >
             <h3 className="text-3xl font-bold text-gray-900">Everything You Need to Stay Safe</h3>
@@ -102,7 +104,8 @@ export default function LandingOne() {
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
+            // CHANGE: once: false
+            viewport={{ once: false, margin: "-50px" }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
             <FeatureCard title="Secure Vault" desc="Store unlimited passwords, credit cards, and secure notes with AES-256 bit encryption." />
@@ -115,17 +118,18 @@ export default function LandingOne() {
         </div>
       </section>
 
-      {/* --- SECTION 4: HOW IT WORKS (Slide In) --- */}
+      {/* --- SECTION 4: HOW IT WORKS --- */}
       <section className="bg-gray-50 py-20 px-5">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             
-            {/* Steps Text - Slides from Left */}
+            {/* Steps Text */}
             <motion.div 
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
+              // CHANGE: once: false
+              viewport={{ once: false, amount: 0.3 }}
             >
               <p className="text-blue-600 font-bold uppercase text-sm mb-2">Simplicity First</p>
               <h3 className="text-3xl md:text-4xl font-black text-gray-900 mb-6">
@@ -138,12 +142,13 @@ export default function LandingOne() {
               </div>
             </motion.div>
             
-            {/* Illustration - Zooms In */}
+            {/* Illustration */}
             <motion.div 
               variants={scaleIn}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true }}
+              // CHANGE: once: false
+              viewport={{ once: false, amount: 0.5 }}
               className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex items-center justify-center min-h-[400px]"
             >
                <div className="text-center">
@@ -166,7 +171,8 @@ export default function LandingOne() {
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          // CHANGE: once: false
+          viewport={{ once: false, amount: 0.5 }}
           transition={{ duration: 0.6 }}
           className="max-w-4xl mx-auto text-center mb-16"
         >
@@ -183,7 +189,8 @@ export default function LandingOne() {
              variants={staggerContainer}
              initial="hidden"
              whileInView="visible"
-             viewport={{ once: true }}
+             // CHANGE: once: false
+             viewport={{ once: false, amount: 0.2 }}
              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
           >
             <MiniFeature title="Offline Mode" />
@@ -194,12 +201,13 @@ export default function LandingOne() {
         </div>
       </section>
 
-      {/* --- SECTION 6: CTA BANNER (Scale Up) --- */}
+      {/* --- SECTION 6: CTA BANNER --- */}
       <section className="w-full px-5">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
+          // CHANGE: once: false
+          viewport={{ once: false, amount: 0.5 }}
           transition={{ duration: 0.5 }}
           className="bottom-banner w-full max-w-7xl mx-auto rounded-3xl overflow-hidden px-8 py-20 md:px-20 relative bg-gray-900 text-white shadow-2xl"
         >
@@ -266,7 +274,8 @@ function Step({ number, title, desc, delay }: { number: string, title: string, d
     <motion.div 
       initial={{ opacity: 0, x: -20 }}
       whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true }}
+      // CHANGE: once: false
+      viewport={{ once: false }}
       transition={{ delay: delay, duration: 0.5 }}
       className="flex gap-5"
     >

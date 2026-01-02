@@ -36,7 +36,7 @@ export default function RegisterPage() {
       </div>
 
       <div className="grid grid-cols-2 ">
-        <div className="text-start font-bold">&copy; Nockslock 2025</div>
+        <div className="text-start font-bold">&copy; Nokslock 2025</div>
         <div className="text-end">
           <p className="text-blue-400">Privacy Policy</p>
         </div>

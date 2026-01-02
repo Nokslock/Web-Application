@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createPortal } from "react-dom"; // 1. Import createPortal
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import AuthButton from "@/components/AuthButton";
 import { AnimatePresence, motion } from "framer-motion";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client"; // <--- 1. Import Supabase
+import { User } from "@supabase/supabase-js"; // Optional: Type import
 
 const links = [
   { name: "About", href: "#" },
@@ -19,10 +21,20 @@ export default function NavLinks() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  
+  // 2. Add User State
+  const [user, setUser] = useState<User | null>(null);
+  const supabase = getSupabaseBrowserClient();
 
-  // 2. Prevent Hydration Errors: Only render portal on the client
   useEffect(() => {
     setMounted(true);
+
+    // 3. Fetch User on Mount
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
   }, []);
 
   return (
@@ -68,10 +80,7 @@ export default function NavLinks() {
         )}
       </div>
 
-      {/* 3. THE PORTAL
-          We teleport this overlay outside of the Navbar and attached it to document.body.
-          This ensures it is ALWAYS full screen and on top of everything.
-      */}
+      {/* THE PORTAL */}
       {mounted &&
         createPortal(
           <AnimatePresence>
@@ -81,7 +90,6 @@ export default function NavLinks() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                // z-[9999] ensures it is higher than the Navbar (which is usually z-50)
                 className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white"
               >
                 <button
@@ -104,7 +112,7 @@ export default function NavLinks() {
                   </svg>
                 </button>
 
-                <div className="flex flex-col gap-8 text-center">
+                <div className="flex flex-col gap-8 text-center w-full max-w-xs">
                   {links.map((link) => (
                     <Link
                       key={link.name}
@@ -119,29 +127,48 @@ export default function NavLinks() {
                     </Link>
                   ))}
 
-                  <Link href="/login" className="w-full">
-                    <AuthButton
-                      variant="primary"
-                      type="button"
-                      className="w-full flex justify-center"
-                    >
-                      Login
-                    </AuthButton>
-                  </Link>
-                  <Link href="/register" className="w-full">
-                    <AuthButton
-                      variant="outline"
-                      type="button"
-                      className="w-full flex justify-center"
-                    >
-                      Create Account
-                    </AuthButton>
-                  </Link>
+                  {/* 4. CONDITIONAL RENDERING: Dashboard vs Login/Register */}
+                  <div className="pt-4 border-t border-gray-100 w-full flex flex-col gap-4">
+                    {user ? (
+                      // IF LOGGED IN: Show Dashboard
+                      <Link href="/dashboard" className="w-full">
+                        <AuthButton
+                          variant="primary"
+                          type="button"
+                          className="w-full flex justify-center py-4 text-lg shadow-xl shadow-blue-200"
+                        >
+                          Go to Dashboard
+                        </AuthButton>
+                      </Link>
+                    ) : (
+                      // IF LOGGED OUT: Show Login/Register
+                      <>
+                        <Link href="/login" className="w-full">
+                          <AuthButton
+                            variant="primary"
+                            type="button"
+                            className="w-full flex justify-center"
+                          >
+                            Login
+                          </AuthButton>
+                        </Link>
+                        <Link href="/register" className="w-full">
+                          <AuthButton
+                            variant="outline"
+                            type="button"
+                            className="w-full flex justify-center"
+                          >
+                            Create Account
+                          </AuthButton>
+                        </Link>
+                      </>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>,
-          document.body // Target container
+          document.body
         )}
     </>
   );

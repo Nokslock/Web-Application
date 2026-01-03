@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import AuthButton from "@/components/AuthButton";
+import ThemeToggle from "@/components/ThemeToggle";
 import { AnimatePresence, motion } from "framer-motion";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client"; // <--- 1. Import Supabase
 import { User } from "@supabase/supabase-js"; // Optional: Type import
@@ -59,7 +60,7 @@ export default function NavLinks() {
         {/* Hamburger Button */}
         {!isOpen && (
           <button
-            className="ml-auto block md:hidden p-2 text-gray-700"
+            className="ml-auto block md:hidden p-2 text-gray-700 dark:text-white"
             onClick={() => setIsOpen(true)}
           >
             <svg
@@ -90,10 +91,10 @@ export default function NavLinks() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white"
+                className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white dark:bg-gray-950"
               >
                 <button
-                  className="absolute top-5 right-0 p-2 text-gray-700"
+                  className="absolute top-5 right-5 p-2 text-gray-700 dark:text-white"
                   onClick={() => setIsOpen(false)}
                 >
                   <svg
@@ -112,15 +113,20 @@ export default function NavLinks() {
                   </svg>
                 </button>
 
-                <div className="flex flex-col gap-8 text-center w-full max-w-xs">
+                <div className="flex flex-col gap-8 text-center w-full max-w-xs relative">
+                  {/* Theme Toggle in Mobile Menu */}
+                  <div className="absolute -top-20 left-1/2 -translate-x-1/2">
+                    <ThemeToggle />
+                  </div>
+
                   {links.map((link) => (
                     <Link
                       key={link.name}
                       href={link.href}
                       onClick={() => setIsOpen(false)}
                       className={clsx(
-                        "text-2xl font-medium text-gray-600 hover:text-blue-600 transition-colors",
-                        { "text-blue-600 font-bold": pathname === link.href }
+                        "text-2xl font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors",
+                        { "text-blue-600 dark:text-blue-400 font-bold": pathname === link.href }
                       )}
                     >
                       {link.name}
@@ -128,14 +134,14 @@ export default function NavLinks() {
                   ))}
 
                   {/* 4. CONDITIONAL RENDERING: Dashboard vs Login/Register */}
-                  <div className="pt-4 border-t border-gray-100 w-full flex flex-col gap-4">
+                  <div className="pt-4 border-t border-gray-100 dark:border-gray-800 w-full flex flex-col gap-4">
                     {user ? (
                       // IF LOGGED IN: Show Dashboard
                       <Link href="/dashboard" className="w-full">
                         <AuthButton
                           variant="primary"
                           type="button"
-                          className="w-full flex justify-center py-4 text-lg shadow-xl shadow-blue-200"
+                          className="w-full flex justify-center py-4 text-lg shadow-xl shadow-blue-200 dark:shadow-none"
                         >
                           Go to Dashboard
                         </AuthButton>

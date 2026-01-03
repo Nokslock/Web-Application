@@ -42,46 +42,41 @@ export default function RegisterLayoutClient({
 }) {
   return (
     // 1. Outer Container: Matches LoginLayout style (padding, centering)
-    <div className="min-h-screen w-full flex items-center lg:items-start justify-center p-4 md:p-8 lg:p-12 bg-white dark:bg-gray-950 transition-colors duration-300">
+    // Full-Screen Split Layout
+    <div className="w-full min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white dark:bg-gray-950 transition-colors duration-300">
+      
+      {/* --- LEFT COLUMN: SCROLLABLE FORM --- */}
       <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        // 2. Grid: items-start allows columns to be different heights
-        className="container max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start"
+        variants={itemVariants}
+        // h-screen + overflow-y-auto ensures the form scrolls independently
+        // flex-col + justify-center centers it vertically if short, but scrolls if long
+        className="col-span-1 h-screen overflow-y-auto flex flex-col justify-center px-4 py-12 sm:px-12 lg:px-24 xl:px-32 bg-white dark:bg-gray-950"
       >
-        {/* --- LEFT COLUMN (Long Form) --- */}
-        <motion.div
-          variants={itemVariants}
-          // No sticky here. We want the form to scroll naturally.
-          className="col-span-1 w-full max-w-md mx-auto lg:max-w-full lg:mx-0"
-        >
-          <div className="mb-8 flex justify-center lg:justify-start">
+        <div className="w-full max-w-md mx-auto">
+          <div className="mb-10">
             <HomeLogo />
           </div>
           {children}
-        </motion.div>
+        </div>
+      </motion.div>
 
-        {/* --- RIGHT COLUMN (Image) --- */}
-        <motion.div
-          variants={imageVariants}
-          // 3. STICKY FIX: 
-          // 'lg:sticky lg:top-12' keeps the image pinned to the top of the viewport 
-          // while you scroll down the long form.
-          className="col-span-1 hidden lg:block w-full rounded-2xl shadow-sm lg:sticky lg:top-12"
-        >
+      {/* --- RIGHT COLUMN: FIXED IMAGE --- */}
+      <motion.div
+        variants={imageVariants}
+        className="col-span-1 hidden lg:flex items-center justify-center relative h-screen sticky top-0 overflow-hidden bg-gray-50 dark:bg-gray-900"
+      >
+        <div className="relative w-full h-full p-12">
           <Image
             src={BgImg}
             alt="Join Nockslock"
-            // 4. Sizing: Matches LoginLayout (No crop, natural aspect ratio)
-            width={800}
-            height={1000}
-            className="w-full h-auto rounded-2xl"
+            fill
+            className="object-contain"
             priority
             placeholder="blur"
           />
-        </motion.div>
+        </div>
       </motion.div>
+
     </div>
   );
 }

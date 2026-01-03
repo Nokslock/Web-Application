@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { FaUserLock, FaArrowRight, FaHouse } from "react-icons/fa6";
+import { FaUserLock, FaArrowLeft, FaHouse } from "react-icons/fa6";
 
-export default function AccessDenied() {
+export default function NotFound() {
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-950 transition-colors duration-300 overflow-hidden relative">
       
@@ -34,7 +34,7 @@ export default function AccessDenied() {
 
         {/* Typography */}
         <h1 className="text-8xl font-black text-gray-900 dark:text-white mb-2 tracking-tighter">
-          403
+          404
         </h1>
         
         <h2 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4">
@@ -42,14 +42,14 @@ export default function AccessDenied() {
         </h2>
         
         <p className="text-gray-500 dark:text-gray-400 mb-10 text-lg leading-relaxed px-4">
-          It looks like you don't have permission to access this page. Please log in with the appropriate credentials.
+          We checked the vault, but this page seems to be missing or restricted. Let's get you back to safety.
         </p>
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <Link href="/login" className="w-full sm:w-auto">
+          <Link href="/dashboard" className="w-full sm:w-auto">
             <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-200 dark:shadow-none hover:shadow-xl hover:-translate-y-0.5">
-              Go to Login <FaArrowRight />
+              <FaArrowLeft /> Return to Dashboard
             </button>
           </Link>
           
@@ -63,7 +63,7 @@ export default function AccessDenied() {
 
       {/* Footer / Copyright */}
       <div className="absolute bottom-6 text-xs text-gray-400 dark:text-gray-600 font-medium">
-        Error Code: 403_FORBIDDEN
+        Error Code: 404_NOT_FOUND
       </div>
     </div>
   );

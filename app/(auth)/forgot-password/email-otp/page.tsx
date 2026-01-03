@@ -152,22 +152,22 @@ function OtpVerificationForm() {
             <form>
               <div className="flex pb-10 pt-6 gap-2 md:gap-4 justify-center">
                 {otp.map((digit, index) => (
-                  <div key={index} className="w-10 h-12 md:w-14 md:h-16 relative rounded-lg shadow-sm">
-                    <input
-                      ref={(el) => { inputRefs.current[index] = el }}
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={1}
-                      value={digit}
-                      onChange={(e) => handleOtpChange(index, e.target.value)}
-                      onKeyDown={(e) => handleKeyDown(index, e)}
-                      onPaste={handlePaste}
-                      className={`w-full h-full text-center text-2xl font-bold rounded-lg border 
-                        focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all
-                        ${digit ? "border-blue-500 bg-blue-50 text-blue-600" : "border-gray-300 bg-white text-gray-800"}
-                      `}
-                    />
-                  </div>
+                  <input
+                    key={index}
+                    ref={(el) => { inputRefs.current[index] = el }}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(index, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(index, e)}
+                    onPaste={handlePaste}
+                    className={`w-12 h-14 md:w-14 md:h-16 text-center text-xl md:text-2xl font-bold rounded-lg border outline-none transition-all
+                      ${digit 
+                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400" 
+                        : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30"
+                      }`}
+                  />
                 ))}
               </div>
               <div className="flex justify-center">

@@ -1,9 +1,8 @@
 "use client";
 
-import Image from "next/image";
-import BgImg from "@/public/hero-img.png";
 import HomeLogo from "@/components/HomeLogo";
 import { motion, Variants } from "framer-motion";
+import { FaShieldHalved, FaLock, FaKey } from "react-icons/fa6";
 
 // --- ANIMATION VARIANTS ---
 const containerVariants: Variants = {
@@ -11,27 +10,30 @@ const containerVariants: Variants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.2,
+      staggerChildren: 0.1,
       delayChildren: 0.1,
     },
   },
 };
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 30 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: "easeOut" },
+    transition: { type: "spring", stiffness: 50, damping: 15 },
   },
 };
 
-const imageVariants: Variants = {
-  hidden: { opacity: 0, x: 20 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.6, ease: "easeOut" },
+const floatingIconVariants: Variants = {
+  float: {
+    y: [-15, 15, -15],
+    rotate: [0, 5, -5, 0],
+    transition: {
+      duration: 6,
+      ease: "easeInOut",
+      repeat: Infinity,
+    },
   },
 };
 
@@ -41,41 +43,72 @@ export default function RegisterLayoutClient({
   children: React.ReactNode;
 }) {
   return (
-    // 1. Outer Container: Matches LoginLayout style (padding, centering)
-    // Full-Screen Split Layout
-    <div className="w-full min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white dark:bg-gray-950 transition-colors duration-300">
+    <div className="w-full min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white dark:bg-gray-950 transition-colors duration-300 relative overflow-hidden">
       
-      {/* --- LEFT COLUMN: SCROLLABLE FORM --- */}
+      {/* --- LEFT COLUMN: FORM AREA --- */}
       <motion.div
-        variants={itemVariants}
-        // h-screen + overflow-y-auto ensures the form scrolls independently
-        // flex-col + justify-center centers it vertically if short, but scrolls if long
-        className="col-span-1 h-screen overflow-y-auto flex flex-col justify-center px-4 py-12 sm:px-12 lg:px-24 xl:px-32 bg-white dark:bg-gray-950"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+        className="col-span-1 h-screen flex flex-col bg-white dark:bg-gray-950 z-20 relative shadow-2xl lg:shadow-none overflow-hidden"
       >
-        <div className="w-full max-w-md mx-auto">
-          <div className="mb-10">
+        {/* Fixed Header / Logo Area */}
+        <div className="flex-none px-6 pt-12 pb-6 sm:px-12 lg:px-20 xl:px-24 w-full max-w-[580px] mx-auto z-10 bg-white dark:bg-gray-950">
+           <motion.div variants={itemVariants}>
             <HomeLogo />
-          </div>
-          {children}
+          </motion.div>
+        </div>
+
+        {/* Scrollable Content Area */}
+        <div className="flex-1 min-h-0 w-full max-w-[580px] mx-auto px-6 sm:px-12 lg:px-20 xl:px-24 relative flex flex-col">
+          <motion.div variants={itemVariants} className="flex flex-col h-full">
+            {children}
+          </motion.div>
         </div>
       </motion.div>
 
-      {/* --- RIGHT COLUMN: FIXED IMAGE --- */}
-      <motion.div
-        variants={imageVariants}
-        className="col-span-1 hidden lg:flex items-center justify-center relative h-screen sticky top-0 overflow-hidden bg-gray-50 dark:bg-gray-900"
-      >
-        <div className="relative w-full h-full p-12">
-          <Image
-            src={BgImg}
-            alt="Join Nockslock"
-            fill
-            className="object-contain"
-            priority
-            placeholder="blur"
-          />
+      {/* --- RIGHT COLUMN: DYNAMIC VISUALS --- */}
+      <div className="col-span-1 hidden lg:flex items-center justify-center relative h-screen sticky top-0 overflow-hidden bg-gray-900">
+        
+        {/* Dynamic Grid Background */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+        <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/20 via-gray-900/50 to-gray-900 z-10"></div>
+
+        {/* Floating 3D Elements */}
+        <div className="relative z-20 w-full h-full flex items-center justify-center perspective-[1000px]">
+          
+          {/* Main Shield */}
+          <motion.div
+            variants={floatingIconVariants}
+            animate="float"
+            className="relative"
+          >
+            {/* Glow Behind */}
+            <div className="absolute inset-0 bg-blue-500/30 blur-[100px] rounded-full transform scale-150"></div>
+            
+            <div className="w-64 h-64 bg-gradient-to-br from-blue-600/20 to-indigo-900/20 backdrop-blur-3xl rounded-[3rem] border border-white/10 flex items-center justify-center shadow-2xl relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-[3rem] pointer-events-none"></div>
+              <FaShieldHalved className="text-9xl text-blue-500 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+              
+              {/* Floating Key Badge (Different from Login's Lock) */}
+              <motion.div 
+                animate={{ y: [10, -10, 10], transition: { duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 } }}
+                className="absolute -bottom-6 -left-6 w-24 h-24 bg-gray-900/90 backdrop-blur-xl border border-gray-700 rounded-2xl flex items-center justify-center shadow-xl"
+              >
+                <FaKey className="text-4xl text-amber-400" />
+              </motion.div>
+            </div>
+          </motion.div>
+
         </div>
-      </motion.div>
+
+        {/* Decorative Text */}
+        <div className="absolute bottom-12 left-12 z-20">
+          <h3 className="text-white/80 font-bold text-lg tracking-widest uppercase">New Vault Creation</h3>
+          <p className="text-white/40 text-sm mt-1 font-mono">INITIALIZING SECURE PROTOCOL...</p>
+        </div>
+
+      </div>
 
     </div>
   );

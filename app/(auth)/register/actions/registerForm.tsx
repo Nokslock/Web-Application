@@ -39,24 +39,23 @@ export default function RegisterForm() {
 
   return (
     <>
-      <form onSubmit={handleContinue} className="pb-10">
-        <div className="pb-5">
-          <label className="block text-sm font-bold text-gray-500">Email</label>
+      <form onSubmit={handleContinue} className="pb-8">
+        <div className="pb-6">
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-1">Email Address</label>
           <input
             type="email"
-            placeholder="Your Email"
+            placeholder="name@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            // Updated styles to match LoginForm
-            className="mt-1 w-full px-4 p-2 h-13 rounded-md border border-gray-200 bg-white text-sm text-gray-700 focus:border-blue-500 focus:outline-none"
+            className="w-full px-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white dark:focus:bg-gray-950 transition-all outline-none"
           />
         </div>
 
         <AuthButton
           variant="primary"
-          type="submit" // Changed to submit so "Enter" key works
+          type="submit"
           loading={isLoading}
-          className="w-full flex justify-center"
+          className="w-full flex justify-center py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all text-base tracking-wide"
         >
           Create Account
         </AuthButton>

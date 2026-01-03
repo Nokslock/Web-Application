@@ -48,38 +48,41 @@ export default function LoginForm() {
 
   return (
     <>
-      <form onSubmit={handleLogin} className="lg:pb-10 md:pb-5 pb-5">
+      <form onSubmit={handleLogin} className="pb-4">
         
-        <div className="pb-5">
-          <label className="block text-sm font-bold text-gray-500">Email</label>
+        <div className="pb-6">
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-1">Email Address</label>
           <input
             type="email"
-            placeholder="Your Email"
+            placeholder="name@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="mt-1 w-full px-4 p-2 h-13 rounded-md border border-gray-200 bg-white text-sm text-gray-700 focus:border-blue-500 focus:outline-none"
+            className="w-full px-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white dark:focus:bg-gray-950 transition-all outline-none"
           />
         </div>
 
-        <div className="pb-5">
-          <label className="block text-sm font-bold text-gray-500">
+        <div className="pb-6">
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-1">
             Password
           </label>
           <PasswordInput
             type="password"
-            placeholder="Your Password"
+            placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="mt-1 w-full px-4 p-2 h-13 rounded-md border border-gray-200 bg-white text-sm text-gray-700 focus:border-blue-500 focus:outline-none"
+            className="w-full px-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white dark:focus:bg-gray-950 transition-all outline-none"
           />
         </div>
 
-        <div className="pb-5">
-          <p className="text-md text-end text-blue-400">
-            <Link href="/forgot-password">Forgot Password?</Link>
-          </p>
+        <div className="flex justify-end pb-8">
+          <Link 
+            href="/forgot-password" 
+            className="text-sm font-medium text-blue-600 dark:text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 hover:underline transition-colors"
+          >
+            Forgot Password?
+          </Link>
         </div>
 
         <div>
@@ -87,9 +90,9 @@ export default function LoginForm() {
             variant="primary"
             type="submit"
             loading={loading} 
-            className="w-full flex justify-center"
+            className="w-full flex justify-center py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all text-base tracking-wide"
           >
-            Login
+            Access Vault
           </AuthButton>
         </div>
       </form>

@@ -15,9 +15,9 @@ const LoginApple = () => {
   };
   return (
     <div onClick={handleAppleLogin}>
-      <button className="text-black flex items-center justify-center w-full px-4 py-2 mt-4 border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-        <FaApple className="text-black" />&nbsp;
-        {isPending ? "Redirecting" : " Apple"}
+      <button className="flex items-center justify-center w-full px-4 h-12 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-all group shadow-sm hover:shadow-md">
+        <FaApple className="text-xl text-gray-900 dark:text-white group-hover:scale-110 transition-transform" />
+        <span className="ml-3 font-semibold text-gray-700 dark:text-gray-200">{isPending ? "Connecting..." : "Apple"}</span>
       </button>
     </div>
   );

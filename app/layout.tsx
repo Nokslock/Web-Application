@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from 'sonner';
+import { Toaster } from "sonner";
+import { ThemeProvider } from "@/components/theme-provider"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,8 +18,9 @@ export const metadata: Metadata = {
   icons: {
     icon: "@/public/logo.svg",
   },
-  title: 'Nockslock - Home',
-  description: 'Secure your digital assets with Nockslock, the ultimate cold storage solution for cryptocurrencies.',
+  title: "Nockslock - Home",
+  description:
+    "Secure your digital assets with Nockslock, the ultimate cold storage solution for cryptocurrencies.",
 };
 
 export default function RootLayout({
@@ -32,7 +34,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable}relative antialiased`}
       >
         <Toaster position="top-center" richColors />
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -58,10 +58,25 @@ export default function DashboardContent({ user, items }: DashboardContentProps)
   const userName = user.user_metadata?.first_name || user.email?.split("@")[0] || "User";
 
   // Filter items for search
-  const filteredItems = items?.filter(item => 
-    item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    item.type.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredItems = items?.filter(item => {
+    const q = searchQuery.toLowerCase();
+    
+    // 1. Match Name or Type
+    if (item.name.toLowerCase().includes(q) || item.type.toLowerCase().includes(q)) {
+      return true;
+    }
+
+    // 2. Match "Next of Kin" / "Family" if the item is shared
+    if (item.share_with_nok) {
+       const nokTerms = ["next of kin", "nok", "family", "shared"];
+       // If the search query matches any of these terms (partial match)
+       if (nokTerms.some(term => term.includes(q) || q.includes(term))) {
+         return true;
+       }
+    }
+
+    return false;
+  });
 
   return (
     <motion.div 
@@ -96,7 +111,11 @@ export default function DashboardContent({ user, items }: DashboardContentProps)
 
       {/* --- CATEGORY SELECTOR (Hidden when searching) --- */}
       {!searchQuery && (
-        <motion.div variants={itemVariants}>
+        <motion.div 
+          variants={itemVariants}
+          initial="hidden"
+          animate="visible"
+        >
           <DashboardCategorySelector 
             items={items || []} 
             selectedCategory={selectedCategory} 

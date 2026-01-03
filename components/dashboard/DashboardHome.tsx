@@ -64,7 +64,7 @@ export default function DashboardHome({ items = [] }: DashboardHomeProps) {
           variants={boxVariants}
           initial="hidden"
           animate="visible"
-          className="h-96 col-span-1 lg:col-span-4 p-6 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col"
+          className="h-[26rem] lg:h-96 col-span-1 lg:col-span-4 p-4 sm:p-6 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col"
         >
           <div className="flex justify-between items-center mb-5 shrink-0">
             <h2 className="font-bold text-lg text-gray-800 dark:text-white flex items-center gap-2">
@@ -212,9 +212,10 @@ function ActivityItem({ item }: { item: any }) {
      }
   };
 
+ 
   return (
-    <div className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-2xl transition-colors group cursor-default border border-transparent hover:border-gray-100 dark:hover:border-gray-700">
-      <div className={`h-12 w-12 rounded-xl flex items-center justify-center text-lg shadow-sm ${getColors(item.type)}`}>
+    <div className="flex items-center gap-3 sm:gap-4 p-2.5 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-2xl transition-colors group cursor-default border border-transparent hover:border-gray-100 dark:hover:border-gray-700">
+      <div className={`h-10 w-10 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center text-base sm:text-lg shadow-sm shrink-0 ${getColors(item.type)}`}>
          {getIcon(item.type)}
       </div>
       
@@ -222,14 +223,14 @@ function ActivityItem({ item }: { item: any }) {
          <div className="flex justify-between items-start">
             <h4 className="font-bold text-gray-800 dark:text-white truncate pr-2 text-sm">{item.name}</h4>
          </div>
-         <p className="text-xs text-gray-400 flex items-center gap-1.5 mt-0.5">
+         <p className="text-[10px] sm:text-xs text-gray-400 flex items-center gap-1.5 mt-0.5">
             {isModified ? (
                <span className="text-amber-500 font-bold flex items-center gap-1">
-                 <IoCreateOutline /> Modified
+                 <IoCreateOutline /> <span className="hidden xs:inline">Modified</span>
                </span>
             ) : (
                <span className="text-emerald-500 font-bold flex items-center gap-1">
-                 <IoAddCircleOutline /> Added
+                 <IoAddCircleOutline /> <span className="hidden xs:inline">Added</span>
                </span>
             )}
             <span className="w-1 h-1 rounded-full bg-gray-300"></span>
@@ -237,11 +238,13 @@ function ActivityItem({ item }: { item: any }) {
          </p>
       </div>
       
-      <div className="text-[10px] font-bold uppercase tracking-wider text-gray-300 group-hover:text-gray-400 transition-colors">
+      {/* Hide Type Label on Mobile/Tablet to save space, relies on Icon + Color */}
+      <div className="hidden sm:block text-[10px] font-bold uppercase tracking-wider text-gray-300 group-hover:text-gray-400 transition-colors">
          {item.type}
       </div>
     </div>
   )
+  
 }
 
 function AnimatedChartBar({ customHeight, color, label }: { customHeight: string; color: string; label: string }) {

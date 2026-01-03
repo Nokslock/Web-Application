@@ -2,7 +2,8 @@ import {
   FaIdCard, 
   FaWallet, 
   FaFile, 
-  FaUserShield, 
+  FaUserShield,
+  FaFolder, 
 } from "react-icons/fa6";
 import { IoKey, IoApps } from "react-icons/io5";
 
@@ -12,6 +13,7 @@ export const getIcon = (type: string) => {
     case "crypto": return <FaWallet />;
     case "password": return <IoKey />;
     case "file": return <FaFile />;
+    case "vault": return <FaFolder />; // Added Vault support
     case "nok": return <FaUserShield />;
     default: return <IoApps />;
   }
@@ -93,6 +95,21 @@ export const getColorClasses = (type: string | undefined) => {
            badgeBg: "bg-violet-50 dark:bg-violet-900/30",
            badgeText: "text-violet-700 dark:text-violet-300",
            highlight: "bg-violet-600 border-violet-600 text-violet-100"
+        };
+    case "vault":
+        return {
+           bg: "bg-indigo-50 dark:bg-indigo-900/20",
+           text: "text-indigo-600 dark:text-indigo-400",
+           border: "border-indigo-100 dark:border-indigo-800",
+           hoverBorder: "hover:border-indigo-300 dark:hover:border-indigo-500",
+           groupHoverBg: "group-hover:bg-indigo-600",
+           groupHoverText: "group-hover:text-white",
+           modalHeader: "bg-indigo-600 text-white",
+           modalIconBg: "bg-indigo-50 dark:bg-indigo-900/30",
+           modalIconText: "text-indigo-600 dark:text-indigo-400",
+           badgeBg: "bg-indigo-50 dark:bg-indigo-900/30",
+           badgeText: "text-indigo-700 dark:text-indigo-300",
+           highlight: "bg-indigo-600 border-indigo-600 text-indigo-100"
         };
     default:
        return {

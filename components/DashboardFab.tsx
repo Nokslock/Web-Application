@@ -22,11 +22,23 @@ import { toast } from "sonner";
 
 type VaultType = "password" | "card" | "crypto" | "file";
 
-export default function DashboardFab() {
+interface DashboardFabProps {
+  vaultId?: string;
+  defaultShareWithNok?: boolean; // New prop to inherit vault status
+}
+
+export default function DashboardFab({ vaultId, defaultShareWithNok = false }: DashboardFabProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<VaultType>("password");
   const [loading, setLoading] = useState(false);
-  const [shareWithNok, setShareWithNok] = useState(false);
+  const [shareWithNok, setShareWithNok] = useState(defaultShareWithNok);
+
+  // Reset state when opening (respecting defaults)
+  useEffect(() => {
+    if (isOpen) {
+      setShareWithNok(defaultShareWithNok);
+    }
+  }, [isOpen, defaultShareWithNok]);
 
   // --- CHANGED: Added 'pendingFile' to fix the double-add bug ---
   const [stagedFiles, setStagedFiles] = useState<File[]>([]);
@@ -130,6 +142,7 @@ export default function DashboardFab() {
 
           const { error } = await (supabase.from("vault_items") as any).insert({
             user_id: user.id,
+            vault_id: vaultId || null, // Add to specific vault if provided
             type: "file",
             name: stagedFiles.length === 1 ? name : file.name,
             ciphertext: encryptedBlob,
@@ -142,6 +155,7 @@ export default function DashboardFab() {
         const encryptedBlob = encryptData(details);
         const { error } = await (supabase.from("vault_items") as any).insert({
           user_id: user.id,
+          vault_id: vaultId || null, // Add to specific vault if provided
           type: activeTab,
           name: name,
           ciphertext: encryptedBlob,

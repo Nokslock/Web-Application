@@ -37,7 +37,7 @@ export default function CategoryItemGrid({
   
   // Filter items based on category OR use customItems (for search)
   const categoryItems = customItems || (selectedCategory === "nok" 
-    ? items.filter((i) => i.share_with_nok)
+    ? items.filter((i) => i.share_with_nok && (i.type === 'vault' || !i.vault_id)) // Show shared vaults OR shared items that are NOT in a vault
     : items.filter((i) => i.type === selectedCategory));
 
   const colors = getColorClasses(selectedCategory === "search" ? "file" : selectedCategory);
@@ -67,7 +67,13 @@ export default function CategoryItemGrid({
         <motion.div
           key={item.id}
           variants={cardVariants}
-          onClick={() => onSelectItem(item)}
+          onClick={() => {
+            if (item.type === "vault") {
+              window.location.href = `/dashboard/vault/${item.id}`; // Simple navigation for now
+            } else {
+              onSelectItem(item);
+            }
+          }}
           className={`group relative bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 hover:shadow-xl dark:hover:shadow-lg dark:hover:shadow-blue-900/10 hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden ${colors.hoverBorder}`}
         >
           {/* Top Decorative Line */}

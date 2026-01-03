@@ -35,7 +35,7 @@ export default async function RootLayout({
   const email = user?.email || "Please sign in";
 
   return (
-    <div className="flex h-screen overflow-hidden bg-neutral-100">
+    <div className="flex h-screen overflow-hidden bg-neutral-100 dark:bg-gray-950 transition-colors duration-300">
       
       {/* SIDEBAR COMPONENT */}
       <Sidebar user={user} fullName={fullName} email={email} />

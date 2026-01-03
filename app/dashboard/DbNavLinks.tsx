@@ -45,8 +45,8 @@ export default function NavLinks({ isExpanded }: NavLinksProps) {
 
               // ACTIVE STATES
               {
-                'bg-blue-600 text-white shadow-md shadow-blue-200': isActive,
-                'text-gray-500 hover:bg-gray-100 hover:text-blue-600': !isActive,
+                'bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-blue-900/50': isActive,
+                'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400': !isActive,
               },
             )}
           >

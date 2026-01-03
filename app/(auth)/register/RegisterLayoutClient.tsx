@@ -42,7 +42,7 @@ export default function RegisterLayoutClient({
 }) {
   return (
     // 1. Outer Container: Matches LoginLayout style (padding, centering)
-    <div className="min-h-screen w-full flex items-center lg:items-start justify-center p-4 md:p-8 lg:p-12 bg-white">
+    <div className="min-h-screen w-full flex items-center lg:items-start justify-center p-4 md:p-8 lg:p-12 bg-white dark:bg-gray-950 transition-colors duration-300">
       <motion.div
         variants={containerVariants}
         initial="hidden"

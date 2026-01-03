@@ -7,6 +7,7 @@ import AuthButton from "@/components/AuthButton";
 import Link from "next/link";
 import clsx from "clsx";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client"; // <--- 1. Import your client helper
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -36,7 +37,7 @@ export default function NavBar() {
         "fixed inset-x-0 top-0 w-full z-50 transition-all duration-300 ease-in-out",
         {
           "bg-transparent py-5": !isScrolled,
-          "bg-white/80 backdrop-filter backdrop-blur-sm shadow-md py-3": isScrolled,
+          "bg-white/80 dark:bg-gray-900/80 backdrop-filter backdrop-blur-sm shadow-md py-3": isScrolled,
         }
       )}
     >
@@ -53,7 +54,8 @@ export default function NavBar() {
             <NavLinks />
           </div>
 
-          <div className="hidden h-full items-center md:flex lg:col-span-1 md:col-span-2 w-full">
+          <div className="hidden h-full items-center gap-3 md:flex lg:col-span-1 md:col-span-2 w-full">
+            <ThemeToggle />
             {/* 3. DYNAMIC LINK: Changes based on 'user' state */}
             <Link 
               href={user ? "/dashboard" : "/login"} 

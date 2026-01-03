@@ -116,7 +116,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         {/* IMAGE UPLOAD */}
         <div className="flex items-center gap-6">
           <div className="relative group">
-            <div className="w-24 h-24 rounded-full overflow-hidden border border-neutral-200 relative bg-neutral-50">
+            <div className="w-24 h-24 rounded-full overflow-hidden border border-neutral-200 dark:border-gray-700 relative bg-neutral-50 dark:bg-gray-800">
               <Image
                 src={avatarUrl}
                 alt="Profile"
@@ -141,8 +141,8 @@ export default function ProfileForm({ user }: ProfileFormProps) {
             <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
           </div>
           <div className="flex flex-col gap-1">
-             <p className="font-medium text-neutral-900">Profile Photo</p>
-             <p className="text-xs text-neutral-500 max-w-[200px] leading-relaxed">
+             <p className="font-medium text-neutral-900 dark:text-white">Profile Photo</p>
+             <p className="text-xs text-neutral-500 dark:text-gray-400 max-w-[200px] leading-relaxed">
                Click the camera icon to upload a new photo.
              </p>
           </div>
@@ -154,14 +154,14 @@ export default function ProfileForm({ user }: ProfileFormProps) {
           {/* NAMES SECTION (Split Inputs) */}
           <div className="flex flex-col gap-3">
              <div className="flex justify-between items-center">
-                <label className="text-sm font-bold text-neutral-700">Name</label>
+                <label className="text-sm font-bold text-neutral-700 dark:text-gray-300">Name</label>
                 {isEditingNames ? (
                    <div className="flex gap-2">
                       <button onClick={() => setIsEditingNames(false)} className="text-xs text-red-500 font-medium hover:underline">Cancel</button>
                       <button onClick={handleUpdateNames} disabled={loading} className="text-xs text-blue-600 font-bold hover:underline">Save</button>
                    </div>
                 ) : (
-                  <button onClick={() => setIsEditingNames(true)} className="text-xs text-blue-600 font-medium flex items-center gap-1 hover:underline">
+                  <button onClick={() => setIsEditingNames(true)} className="text-xs text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1 hover:underline">
                     <FaPen className="text-[10px]" /> Edit Name
                   </button>
                 )}
@@ -178,8 +178,8 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                    disabled={!isEditingNames || loading}
                    className={`w-full p-3 border rounded-lg focus:outline-none transition-colors ${
                      isEditingNames 
-                       ? "bg-white border-blue-500 text-neutral-900 shadow-sm" 
-                       : "bg-neutral-50 border-neutral-200 text-neutral-600 cursor-not-allowed"
+                       ? "bg-white dark:bg-gray-700 border-blue-500 text-neutral-900 dark:text-white shadow-sm" 
+                       : "bg-neutral-50 dark:bg-gray-800/50 border-neutral-200 dark:border-gray-700 text-neutral-600 dark:text-gray-400 cursor-not-allowed"
                    }`}
                  />
                  {isEditingNames && <span className="text-[10px] text-neutral-400 pl-1">First Name</span>}
@@ -195,8 +195,8 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                    disabled={!isEditingNames || loading}
                    className={`w-full p-3 border rounded-lg focus:outline-none transition-colors ${
                      isEditingNames 
-                       ? "bg-white border-blue-500 text-neutral-900 shadow-sm" 
-                       : "bg-neutral-50 border-neutral-200 text-neutral-600 cursor-not-allowed"
+                       ? "bg-white dark:bg-gray-700 border-blue-500 text-neutral-900 dark:text-white shadow-sm" 
+                       : "bg-neutral-50 dark:bg-gray-800/50 border-neutral-200 dark:border-gray-700 text-neutral-600 dark:text-gray-400 cursor-not-allowed"
                    }`}
                  />
                  {isEditingNames && <span className="text-[10px] text-neutral-400 pl-1">Last Name</span>}
@@ -207,10 +207,10 @@ export default function ProfileForm({ user }: ProfileFormProps) {
           {/* EMAIL ADDRESS */}
           <div className="flex flex-col gap-2">
             <div className="flex justify-between items-center">
-              <label className="text-sm font-bold text-neutral-700">Email Address</label>
+              <label className="text-sm font-bold text-neutral-700 dark:text-gray-300">Email Address</label>
               <button 
                 onClick={() => setModalType("EMAIL")} 
-                className="text-xs text-blue-600 font-medium flex items-center gap-1 hover:underline"
+                className="text-xs text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1 hover:underline"
               >
                 <FaPen className="text-[10px]" /> Change Email
               </button>
@@ -219,21 +219,21 @@ export default function ProfileForm({ user }: ProfileFormProps) {
               type="email"
               defaultValue={user?.email || ""}
               disabled
-              className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-600 cursor-not-allowed focus:outline-none"
+              className="w-full p-3 bg-neutral-50 dark:bg-gray-800/50 border border-neutral-200 dark:border-gray-700 rounded-lg text-neutral-600 dark:text-gray-400 cursor-not-allowed focus:outline-none"
             />
           </div>
 
           {/* PASSWORD */}
-          <div className="flex flex-col gap-2 border-t border-neutral-100 pt-4 mt-2">
+          <div className="flex flex-col gap-2 border-t border-neutral-100 dark:border-gray-700 pt-4 mt-2">
             <div className="flex justify-between items-center">
-              <label className="text-sm font-bold text-neutral-700">Security</label>
+              <label className="text-sm font-bold text-neutral-700 dark:text-gray-300">Security</label>
             </div>
             <button 
               onClick={() => setModalType("PASSWORD")}
-              className="w-full p-3 border border-neutral-300 rounded-lg text-neutral-700 font-medium hover:bg-neutral-50 transition-colors text-left flex justify-between items-center"
+              className="w-full p-3 border border-neutral-300 dark:border-gray-600 rounded-lg text-neutral-700 dark:text-gray-200 font-medium hover:bg-neutral-50 dark:hover:bg-gray-700/50 transition-colors text-left flex justify-between items-center"
             >
               <span>Reset Password via OTP</span>
-              <span className="text-xs bg-neutral-200 px-2 py-1 rounded">Secure</span>
+              <span className="text-xs bg-neutral-200 dark:bg-gray-700 dark:text-gray-300 px-2 py-1 rounded">Secure</span>
             </button>
           </div>
 
@@ -312,16 +312,16 @@ function EmailUpdateModal({ user, supabase, onClose }: { user: any, supabase: an
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-xl">
-      <div className="bg-white p-6 rounded-xl shadow-2xl border border-neutral-200 w-full max-w-sm relative animate-in fade-in zoom-in duration-200">
-        <button onClick={onClose} className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-900"><FaXmark/></button>
-        <h3 className="text-lg font-bold mb-4">Update Email</h3>
+      <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-2xl border border-neutral-200 dark:border-gray-700 w-full max-w-sm relative animate-in fade-in zoom-in duration-200">
+        <button onClick={onClose} className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-900 dark:hover:text-white"><FaXmark/></button>
+        <h3 className="text-lg font-bold mb-4 dark:text-white">Update Email</h3>
         {step === 1 ? (
           <div className="space-y-4">
-            <p className="text-sm text-neutral-500">Enter your new email address.</p>
+            <p className="text-sm text-neutral-500 dark:text-gray-400">Enter your new email address.</p>
             <input 
               type="email" 
               placeholder="New Email Address"
-              className="w-full p-3 border rounded-lg focus:outline-blue-600"
+              className="w-full p-3 border rounded-lg focus:outline-blue-600 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
             />
@@ -329,8 +329,8 @@ function EmailUpdateModal({ user, supabase, onClose }: { user: any, supabase: an
           </div>
         ) : (
           <div className="space-y-4">
-            <p className="text-sm text-neutral-500">Enter the 6-digit code sent to <b>{newEmail}</b></p>
-            <input type="text" placeholder="000000" maxLength={6} className="w-full p-3 border rounded-lg text-center tracking-widest text-xl font-bold" value={otp} onChange={(e) => setOtp(e.target.value)} />
+            <p className="text-sm text-neutral-500 dark:text-gray-400">Enter the 6-digit code sent to <b>{newEmail}</b></p>
+            <input type="text" placeholder="000000" maxLength={6} className="w-full p-3 border rounded-lg text-center tracking-widest text-xl font-bold dark:bg-gray-800 dark:border-gray-700 dark:text-white" value={otp} onChange={(e) => setOtp(e.target.value)} />
             <button onClick={verifyEmailOtp} disabled={loading || otp.length < 6} className="w-full bg-green-600 text-white p-3 rounded-lg font-bold hover:bg-green-700 disabled:opacity-50">{loading ? "Verifying..." : "Verify & Change"}</button>
           </div>
         )}
@@ -377,20 +377,20 @@ function PasswordResetModal({ user, supabase, onClose }: { user: any, supabase: 
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-xl">
-      <div className="bg-white p-6 rounded-xl shadow-2xl border border-neutral-200 w-full max-w-sm relative animate-in fade-in zoom-in duration-200">
-        <button onClick={onClose} className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-900"><FaXmark/></button>
-        <h3 className="text-lg font-bold mb-4">Reset Password</h3>
+      <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-2xl border border-neutral-200 dark:border-gray-700 w-full max-w-sm relative animate-in fade-in zoom-in duration-200">
+        <button onClick={onClose} className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-900 dark:hover:text-white"><FaXmark/></button>
+        <h3 className="text-lg font-bold mb-4 dark:text-white">Reset Password</h3>
         {step === 1 && (
           <div className="space-y-4">
-             <p className="text-sm text-neutral-500">We will send a 6-digit code to <b>{user.email}</b>.</p>
+             <p className="text-sm text-neutral-500 dark:text-gray-400">We will send a 6-digit code to <b>{user.email}</b>.</p>
              <button onClick={sendResetOtp} disabled={loading} className="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700 disabled:opacity-50">{loading ? "Sending..." : "Send Code"}</button>
           </div>
         )}
         {step === 2 && (
            <div className="space-y-4">
-            <p className="text-sm text-neutral-500">Enter code & new password.</p>
-            <input type="text" placeholder="Enter 6-digit OTP" className="w-full p-3 border rounded-lg text-center tracking-widest font-bold" value={otp} onChange={(e) => setOtp(e.target.value)} />
-            <input type="password" placeholder="New Password" className="w-full p-3 border rounded-lg" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+            <p className="text-sm text-neutral-500 dark:text-gray-400">Enter code & new password.</p>
+            <input type="text" placeholder="Enter 6-digit OTP" className="w-full p-3 border rounded-lg text-center tracking-widest font-bold dark:bg-gray-800 dark:border-gray-700 dark:text-white" value={otp} onChange={(e) => setOtp(e.target.value)} />
+            <input type="password" placeholder="New Password" className="w-full p-3 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
             <button onClick={verifyOtpAndSetPassword} disabled={loading || otp.length < 6 || newPassword.length < 6} className="w-full bg-green-600 text-white p-3 rounded-lg font-bold hover:bg-green-700 disabled:opacity-50">{loading ? "Updating..." : "Update Password"}</button>
            </div>
         )}

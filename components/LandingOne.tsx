@@ -44,11 +44,11 @@ export default function LandingOne() {
           <motion.p variants={fadeInUp} className="text-blue-600 font-bold tracking-widest uppercase text-xs md:text-sm mb-4">
             Total Privacy, Zero Compromise
           </motion.p>
-          <motion.h2 variants={fadeInUp} className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-6 tracking-tight leading-tight">
+          <motion.h2 variants={fadeInUp} className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 dark:text-white mb-6 tracking-tight leading-tight">
             The Fort Knox for Your <br className="hidden md:block" />
             <span className="text-blue-600">Digital Life</span>
           </motion.h2>
-          <motion.p variants={fadeInUp} className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <motion.p variants={fadeInUp} className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
             Stop relying on browser autofill and sticky notes. Nockslock secures your passwords, 
             files, and crypto assets with bank-grade encryption that only you hold the keys to.
           </motion.p>
@@ -80,7 +80,7 @@ export default function LandingOne() {
             <Image
               src={landingOneImage}
               alt="Nockslock Dashboard Interface"
-              className="relative w-full h-auto rounded-2xl shadow-2xl border border-gray-100"
+              className="relative w-full h-auto rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800"
             />
           </motion.div>
         </motion.div>
@@ -96,8 +96,8 @@ export default function LandingOne() {
             viewport={{ once: false, amount: 0.5 }}
             className="text-center mb-12"
           >
-            <h3 className="text-3xl font-bold text-gray-900">Everything You Need to Stay Safe</h3>
-            <p className="text-gray-500 mt-2">More than just a password manager.</p>
+            <h3 className="text-3xl font-bold text-gray-900 dark:text-white">Everything You Need to Stay Safe</h3>
+            <p className="text-gray-500 dark:text-gray-400 mt-2">More than just a password manager.</p>
           </motion.div>
 
           <motion.div 
@@ -119,7 +119,7 @@ export default function LandingOne() {
       </section>
 
       {/* --- SECTION 4: HOW IT WORKS --- */}
-      <section className="bg-gray-50 py-20 px-5">
+      <section className="bg-gray-50 dark:bg-gray-900 py-20 px-5">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             
@@ -132,7 +132,7 @@ export default function LandingOne() {
               viewport={{ once: false, amount: 0.3 }}
             >
               <p className="text-blue-600 font-bold uppercase text-sm mb-2">Simplicity First</p>
-              <h3 className="text-3xl md:text-4xl font-black text-gray-900 mb-6">
+              <h3 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white mb-6">
                 Security made simple <br /> in <span className="text-blue-600">3 Easy Steps</span>
               </h3>
               <div className="space-y-8">
@@ -149,7 +149,7 @@ export default function LandingOne() {
               whileInView="visible"
               // CHANGE: once: false
               viewport={{ once: false, amount: 0.5 }}
-              className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex items-center justify-center min-h-[400px]"
+              className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 flex items-center justify-center min-h-[400px]"
             >
                <div className="text-center">
                  <motion.div 
@@ -176,10 +176,10 @@ export default function LandingOne() {
           transition={{ duration: 0.6 }}
           className="max-w-4xl mx-auto text-center mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-6 tracking-tight">
+          <h2 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 tracking-tight">
             Designed for <span className="text-blue-600">Privacy Obsessives</span>
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             We built Nockslock because existing solutions weren't secure enough for our own families.
           </p>
         </motion.div>
@@ -245,13 +245,13 @@ function FeatureCard({ title, desc }: { title: string, desc: string }) {
     <motion.div 
       variants={fadeInUp}
       whileHover={{ y: -8, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)" }}
-      className="flex flex-col items-center text-center p-8 bg-white rounded-2xl border border-gray-100 shadow-sm transition-shadow duration-300 cursor-default"
+      className="flex flex-col items-center text-center p-8 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm transition-shadow duration-300 cursor-default"
     >
-      <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-6">
+      <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-6">
         <Image src={Block} alt={title} className="w-8 h-8 object-contain" />
       </div>
-      <h4 className="text-xl font-bold text-gray-900 mb-3">{title}</h4>
-      <p className="text-gray-600 leading-relaxed">{desc}</p>
+      <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{title}</h4>
+      <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{desc}</p>
     </motion.div>
   );
 }
@@ -260,11 +260,11 @@ function MiniFeature({ title }: { title: string }) {
   return (
     <motion.div 
       variants={fadeInUp}
-      whileHover={{ scale: 1.05, backgroundColor: "#ffffff", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
-      className="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-2xl border border-transparent hover:border-gray-200 cursor-default transition-colors"
+      whileHover={{ scale: 1.05, boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
+      className="flex flex-col items-center justify-center p-6 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-transparent hover:border-gray-200 dark:hover:border-gray-700 cursor-default transition-colors"
     >
       <Image src={Block} alt={title} className="w-10 h-10 mb-3 object-contain opacity-80" />
-      <h5 className="font-bold text-gray-800">{title}</h5>
+      <h5 className="font-bold text-gray-800 dark:text-gray-200">{title}</h5>
     </motion.div>
   );
 }
@@ -280,11 +280,11 @@ function Step({ number, title, desc, delay }: { number: string, title: string, d
       className="flex gap-5"
     >
       <div className="flex-shrink-0">
-        <span className="text-4xl font-black text-gray-200">{number}</span>
+        <span className="text-4xl font-black text-gray-200 dark:text-gray-700">{number}</span>
       </div>
       <div>
-        <h4 className="text-lg font-bold text-gray-900 mb-1">{title}</h4>
-        <p className="text-gray-600 text-sm leading-relaxed">{desc}</p>
+        <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{title}</h4>
+        <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{desc}</p>
       </div>
     </motion.div>
   );

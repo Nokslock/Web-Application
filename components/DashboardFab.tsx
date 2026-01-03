@@ -40,7 +40,7 @@ export default function DashboardFab() {
   const supabase = getSupabaseBrowserClient();
   const router = useRouter();
 
-  const inputClass = "w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl outline-none text-sm text-gray-700 transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 focus:bg-white placeholder:text-gray-400";
+  const inputClass = "w-full p-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none text-sm text-gray-700 dark:text-gray-200 transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 focus:bg-white dark:focus:bg-gray-900 placeholder:text-gray-400 dark:placeholder:text-gray-500";
 
   // --- 1. HANDLE FILE SELECTION (Start Staging) ---
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -177,7 +177,7 @@ export default function DashboardFab() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-xl shadow-blue-500/30 flex items-center justify-center z-50"
+        className="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-xl shadow-blue-500/30 dark:shadow-none flex items-center justify-center z-50"
       >
         <FaPlus size={24} />
       </motion.button>
@@ -197,12 +197,12 @@ export default function DashboardFab() {
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 100, opacity: 0, scale: 0.95 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+              className="relative bg-white dark:bg-gray-900 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
-              <div className="bg-gray-50 border-b border-gray-100 p-4 shrink-0">
+              <div className="bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 p-4 shrink-0">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-bold text-gray-800">Add to Vault</h2>
-                  <button onClick={() => setIsOpen(false)} className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition text-gray-600">
+                  <h2 className="text-lg font-bold text-gray-800 dark:text-white">Add to Vault</h2>
+                  <button onClick={() => setIsOpen(false)} className="p-2 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition text-gray-600 dark:text-gray-300">
                     <FaXmark />
                   </button>
                 </div>
@@ -265,21 +265,21 @@ export default function DashboardFab() {
                                     key={idx}
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-xl"
+                                    className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl"
                                 >
                                     <div className="flex items-center gap-3 overflow-hidden">
-                                        <div className="h-8 w-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
+                                        <div className="h-8 w-8 bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-300 rounded-lg flex items-center justify-center shrink-0">
                                             <FaFile size={14} />
                                         </div>
                                         <div className="min-w-0">
-                                            <p className="text-xs font-bold text-gray-800 truncate">{file.name}</p>
+                                            <p className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate">{file.name}</p>
                                             <p className="text-[10px] text-blue-500 font-medium">Ready</p>
                                         </div>
                                     </div>
                                     <button 
                                         type="button"
                                         onClick={() => removeStagedFile(idx)}
-                                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition"
                                     >
                                         <FaTrash size={12} />
                                     </button>
@@ -290,7 +290,7 @@ export default function DashboardFab() {
 
                     {/* --- UPLOAD AREA (ADD MORE) --- */}
                     {pendingFile ? (
-                        <div className="border-2 border-solid border-gray-200 bg-gray-50 rounded-xl p-6 text-center relative overflow-hidden">
+                        <div className="border-2 border-solid border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-xl p-6 text-center relative overflow-hidden">
                              <motion.div 
                                 className="absolute bottom-0 left-0 h-1 bg-blue-500"
                                 initial={{ width: "0%" }}
@@ -298,17 +298,17 @@ export default function DashboardFab() {
                                 transition={{ ease: "linear" }}
                              />
                              <div className="flex flex-col items-center justify-center gap-1">
-                                <p className="text-xs font-bold text-gray-600">Staging...</p>
+                                <p className="text-xs font-bold text-gray-600 dark:text-gray-300">Staging...</p>
                              </div>
                         </div>
                     ) : (
-                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center relative hover:bg-gray-50 transition cursor-pointer bg-gray-50 group">
+                        <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center relative hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer bg-gray-50 dark:bg-gray-800/50 group">
                             <input type="file" ref={fileInputRef} onChange={handleFileSelect} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
                             
-                            <div className="h-10 w-10 bg-white rounded-full shadow-sm flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
+                            <div className="h-10 w-10 bg-white dark:bg-gray-700 rounded-full shadow-sm flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
                                 <FaPlus className="text-blue-500" size={16} />
                             </div>
-                            <p className="text-sm font-bold text-gray-700">
+                            <p className="text-sm font-bold text-gray-700 dark:text-gray-300">
                                 {stagedFiles.length > 0 ? "Add another file" : "Tap to upload file"}
                             </p>
                         </div>
@@ -321,19 +321,19 @@ export default function DashboardFab() {
                   onClick={() => setShareWithNok(!shareWithNok)}
                   className={`mt-6 cursor-pointer flex items-start gap-3 p-4 rounded-xl border transition-all duration-200 ${
                     shareWithNok 
-                      ? "bg-blue-50 border-blue-200" 
-                      : "bg-gray-50 border-gray-100 hover:bg-gray-100"
+                      ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800" 
+                      : "bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
                   }`}
                 >
                   <div className={`mt-0.5 shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-colors ${
-                    shareWithNok ? "bg-blue-600 border-blue-600" : "bg-white border-gray-300"
+                    shareWithNok ? "bg-blue-600 border-blue-600" : "bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
                   }`}>
                     {shareWithNok && <FaCheck size={12} className="text-white" />}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <FaUserShield className={`text-sm ${shareWithNok ? "text-blue-600" : "text-gray-400"}`} />
-                      <h4 className={`text-sm font-bold ${shareWithNok ? "text-blue-800" : "text-gray-700"}`}>
+                      <h4 className={`text-sm font-bold ${shareWithNok ? "text-blue-800 dark:text-blue-300" : "text-gray-700 dark:text-gray-300"}`}>
                         Pass to Next of Kin
                       </h4>
                     </div>
@@ -344,7 +344,7 @@ export default function DashboardFab() {
                   whileTap={{ scale: 0.98 }}
                   disabled={loading || (activeTab === "file" && stagedFiles.length === 0)}
                   type="submit"
-                  className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition mt-4 shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition mt-4 shadow-lg shadow-blue-200 dark:shadow-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {loading && <FaSpinner className="animate-spin" />}
                   {loading 
@@ -368,8 +368,8 @@ function TabButton({ active, onClick, icon, label }: { active: boolean, onClick:
       onClick={onClick}
       className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-medium transition-all whitespace-nowrap border ${
         active
-          ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200"
-          : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50 hover:text-gray-700"
+          ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200 dark:shadow-none"
+          : "bg-white dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200"
       }`}
     >
       <span className="text-lg">{icon}</span>

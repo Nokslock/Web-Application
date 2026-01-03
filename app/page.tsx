@@ -27,14 +27,14 @@ const staggerContainer: Variants = {
 
 export default function Home() {
   return (
-    <div className="bg-white min-h-screen flex flex-col overflow-x-hidden">
+    <div className="bg-white dark:bg-gray-950 min-h-screen flex flex-col overflow-x-hidden transition-colors duration-300">
       <NavBar />
       
       {/* Hero Section */}
       <div className="w-full px-5 pt-32 pb-20 lg:px-8 lg:pt-40 lg:pb-32 hero-section relative">
         
         {/* Optional: Subtle Background Element */}
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-blue-50/50 to-transparent -z-10 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-blue-50/50 dark:from-blue-950/30 to-transparent -z-10 pointer-events-none" />
 
         <div className="max-w-7xl mx-auto">
           
@@ -49,19 +49,19 @@ export default function Home() {
             >
               
               <motion.div variants={fadeInUp} className="mb-4">
-                 <span className="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                 <span className="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
                     v1.0 Released
                  </span>
               </motion.div>
 
-              <motion.h1 variants={fadeInUp} className="text-4xl font-black tracking-tight text-gray-900 sm:text-5xl lg:text-6xl mb-6 leading-tight">
+              <motion.h1 variants={fadeInUp} className="text-4xl font-black tracking-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl mb-6 leading-tight">
                 Secure your digital life <br className="hidden lg:block" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
                   without the complexity.
                 </span>
               </motion.h1>
               
-              <motion.p variants={fadeInUp} className="text-lg leading-8 text-gray-600 mb-8 max-w-lg">
+              <motion.p variants={fadeInUp} className="text-lg leading-8 text-gray-600 dark:text-gray-300 mb-8 max-w-lg">
                 Nockslock is the all-in-one vault for your passwords, crypto keys, and digital inheritance. 
                 Bank-grade encryption meets beautiful design.
               </motion.p>
@@ -76,13 +76,13 @@ export default function Home() {
                    </Link>
                 </div>
                 <div className="w-full sm:w-auto">
-                   <button className="w-full px-6 py-3 rounded-xl border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors">
+                   <button className="w-full px-6 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                       View Demo
                    </button>
                 </div>
               </motion.div>
 
-              <motion.p variants={fadeInUp} className="mt-6 text-sm text-gray-400">
+              <motion.p variants={fadeInUp} className="mt-6 text-sm text-gray-400 dark:text-gray-500">
                 Trusted by 10,000+ users • No credit card required
               </motion.p>
 

@@ -7,6 +7,7 @@ import { FaCrown } from "react-icons/fa6";
 import HomeLogo from "@/components/HomeLogo";
 import NavLinks from "@/app/dashboard/DbNavLinks";
 import SignOutButton from "@/components/SignOutButton";
+import ThemeToggle from "@/components/ThemeToggle"; // <--- Imported
 import Pfp from "@/public/pfp-default.jpg";
 
 interface SidebarProps {
@@ -70,7 +71,7 @@ export default function Sidebar({ user, fullName, email }: SidebarProps) {
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        className={`flex flex-col justify-between h-full bg-white border-r border-gray-200 transition-all duration-300 ease-in-out p-4 ${isExpanded ? "w-72 absolute z-50 shadow-2xl" : "w-20"} lg:static lg:w-72 lg:shadow-none`}
+        className={`flex flex-col justify-between h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 ease-in-out p-4 ${isExpanded ? "w-72 absolute z-50 shadow-2xl" : "w-20"} lg:static lg:w-72 lg:shadow-none`}
       >
         
         {/* Top Section: Logo + Nav */}
@@ -87,7 +88,7 @@ export default function Sidebar({ user, fullName, email }: SidebarProps) {
           {/* PROMO BUTTON */}
           <Link 
             href="/pricing" 
-            className="group relative flex items-center gap-3 p-3 w-full rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white shadow-lg shadow-purple-200 transition-all duration-300 hover:scale-[1.02] hover:shadow-purple-300 cursor-pointer justify-center lg:justify-start"
+            className="group relative flex items-center gap-3 p-3 w-full rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white shadow-lg shadow-purple-200 dark:shadow-none transition-all duration-300 hover:scale-[1.02] hover:shadow-purple-300 dark:hover:shadow-none cursor-pointer justify-center lg:justify-start"
           >
             <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
             <FaCrown className="text-xl animate-pulse shrink-0" />
@@ -100,11 +101,23 @@ export default function Sidebar({ user, fullName, email }: SidebarProps) {
             </div>
           </Link>
 
+          {/* THEME TOGGLE */}
+          <div className={`flex items-center gap-3 p-2 justify-center lg:justify-start`}>
+            <div className={`shrink-0 ${isExpanded ? "" : "scale-75"} lg:scale-100 origin-center lg:origin-left`}>
+              <ThemeToggle />
+            </div>
+             <div className={`${isExpanded ? "block" : "hidden"} lg:block ml-1`}>
+                <p className="font-bold text-sm text-gray-600 dark:text-gray-300">
+                   Appearance
+                </p>
+             </div>
+          </div>
+
           {/* PROFILE CARD */}
           {user && (
             <div 
               onClick={() => setIsExpanded(!isExpanded)} 
-              className="flex items-center gap-3 p-2 rounded-xl bg-neutral-50 border border-neutral-200 cursor-pointer transition-all hover:bg-neutral-100 justify-center lg:justify-start"
+              className="flex items-center gap-3 p-2 rounded-xl bg-neutral-50 dark:bg-gray-800 border border-neutral-200 dark:border-gray-700 cursor-pointer transition-all hover:bg-neutral-100 dark:hover:bg-gray-700 justify-center lg:justify-start"
             >
               <div className="shrink-0 relative w-10 h-10">
                 <Image 
@@ -117,13 +130,13 @@ export default function Sidebar({ user, fullName, email }: SidebarProps) {
 
               <div className={`${isExpanded ? "block" : "hidden"} lg:block overflow-hidden`}>
                 {/* 👇 UPDATED: Uses displayName derived from first/last name */}
-                <p className="font-medium text-sm truncate capitalize">{displayName}</p>
+                <p className="font-medium text-sm truncate capitalize dark:text-white">{displayName}</p>
                 <p className="font-thin text-gray-400 text-xs truncate max-w-[120px]">
                   {email}
                 </p>
               </div>
 
-              <div className={`${isExpanded ? "block" : "hidden"} lg:block ml-auto bg-red-100 p-2 rounded-full cursor-pointer hover:bg-red-200`}>
+              <div className={`${isExpanded ? "block" : "hidden"} lg:block ml-auto bg-red-100 dark:bg-red-900/30 p-2 rounded-full cursor-pointer hover:bg-red-200 dark:hover:bg-red-900/50`}>
                 <SignOutButton />
               </div>
             </div>

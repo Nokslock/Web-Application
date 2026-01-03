@@ -62,20 +62,20 @@ export default function NextOfKinForm({ initialData, userId }: NextOfKinProps) {
 
   return (
     // Added h-full and flex logic to match your other cards
-    <div className="card bg-white pb-6 h-full rounded-lg shadow-sm border border-gray-100 flex flex-col justify-between">
+    <div className="card bg-white dark:bg-gray-800 pb-6 h-full rounded-lg shadow-sm dark:shadow-none border border-gray-100 dark:border-gray-700 flex flex-col justify-between">
       {/* HEADER */}
       <div>
-        <div className="grid grid-cols-3 items-center border-b border-gray-100 bg-gray-50/50 px-6">
+        <div className="grid grid-cols-3 items-center border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 px-6">
           <div className="py-4 col-span-2">
-            <h2 className="text-lg font-bold text-neutral-900">Next of Kin</h2>
-            <p className="text-sm text-neutral-500">Manage your NOK details.</p>
+            <h2 className="text-lg font-bold text-neutral-900 dark:text-white">Next of Kin</h2>
+            <p className="text-sm text-neutral-500 dark:text-gray-400">Manage your NOK details.</p>
           </div>
           <div className="text-end col-span-1">
             {isEditing ? (
               <div className="flex justify-end gap-3 text-sm">
                 <button
                   onClick={() => setIsEditing(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                   disabled={loading}
                 >
                   Cancel
@@ -91,7 +91,7 @@ export default function NextOfKinForm({ initialData, userId }: NextOfKinProps) {
             ) : (
               <span
                 onClick={() => setIsEditing(true)}
-                className="text-blue-500 cursor-pointer hover:underline"
+                className="text-blue-500 dark:text-blue-400 cursor-pointer hover:underline"
               >
                 edit
               </span>
@@ -102,7 +102,7 @@ export default function NextOfKinForm({ initialData, userId }: NextOfKinProps) {
         {/* INPUTS */}
         <div className="space-y-5 px-6 pt-5">
           <div>
-            <label className="block text-sm font-bold text-gray-500">
+            <label className="block text-sm font-bold text-gray-500 dark:text-gray-400">
               Full Name
             </label>
             <input
@@ -112,16 +112,16 @@ export default function NextOfKinForm({ initialData, userId }: NextOfKinProps) {
               onChange={handleChange}
               type="text"
               placeholder="Add next of kin name"
-              className={`mt-1 w-full px-4 p-2 rounded-md border text-sm text-gray-700 transition-colors ${
+              className={`mt-1 w-full px-4 p-2 rounded-md border text-sm text-gray-700 dark:text-gray-200 transition-colors ${
                 isEditing
-                  ? "border-blue-300 bg-white focus:ring-2 focus:ring-blue-100 focus:outline-none"
-                  : "border-gray-200 bg-gray-50 cursor-not-allowed"
+                  ? "border-blue-300 dark:border-blue-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:outline-none"
+                  : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 cursor-not-allowed"
               }`}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-gray-500">
+            <label className="block text-sm font-bold text-gray-500 dark:text-gray-400">
               Email
             </label>
             <input
@@ -131,16 +131,16 @@ export default function NextOfKinForm({ initialData, userId }: NextOfKinProps) {
               onChange={handleChange}
               type="email"
               placeholder="Add email"
-              className={`mt-1 w-full px-4 p-2 rounded-md border text-sm text-gray-700 transition-colors ${
+              className={`mt-1 w-full px-4 p-2 rounded-md border text-sm text-gray-700 dark:text-gray-200 transition-colors ${
                 isEditing
-                  ? "border-blue-300 bg-white focus:ring-2 focus:ring-blue-100 focus:outline-none"
-                  : "border-gray-200 bg-gray-50 cursor-not-allowed"
+                  ? "border-blue-300 dark:border-blue-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:outline-none"
+                  : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 cursor-not-allowed"
               }`}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-gray-500">
+            <label className="block text-sm font-bold text-gray-500 dark:text-gray-400">
               Alternative Email
             </label>
             <input
@@ -150,16 +150,16 @@ export default function NextOfKinForm({ initialData, userId }: NextOfKinProps) {
               onChange={handleChange}
               type="email"
               placeholder="Add alternative email"
-              className={`mt-1 w-full px-4 p-2 rounded-md border text-sm text-gray-700 transition-colors ${
+              className={`mt-1 w-full px-4 p-2 rounded-md border text-sm text-gray-700 dark:text-gray-200 transition-colors ${
                 isEditing
-                  ? "border-blue-300 bg-white focus:ring-2 focus:ring-blue-100 focus:outline-none"
-                  : "border-gray-200 bg-gray-50 cursor-not-allowed"
+                  ? "border-blue-300 dark:border-blue-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:outline-none"
+                  : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 cursor-not-allowed"
               }`}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-gray-500">
+            <label className="block text-sm font-bold text-gray-500 dark:text-gray-400">
               Phone Number
             </label>
             <input
@@ -169,16 +169,16 @@ export default function NextOfKinForm({ initialData, userId }: NextOfKinProps) {
               onChange={handleChange}
               type="tel"
               placeholder="Add phone number"
-              className={`mt-1 w-full px-4 p-2 rounded-md border text-sm text-gray-700 transition-colors ${
+              className={`mt-1 w-full px-4 p-2 rounded-md border text-sm text-gray-700 dark:text-gray-200 transition-colors ${
                 isEditing
-                  ? "border-blue-300 bg-white focus:ring-2 focus:ring-blue-100 focus:outline-none"
-                  : "border-gray-200 bg-gray-50 cursor-not-allowed"
+                  ? "border-blue-300 dark:border-blue-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:outline-none"
+                  : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 cursor-not-allowed"
               }`}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-gray-500">
+            <label className="block text-sm font-bold text-gray-500 dark:text-gray-400">
               National Identification Number (NIN)
             </label>
             <input
@@ -188,10 +188,10 @@ export default function NextOfKinForm({ initialData, userId }: NextOfKinProps) {
               onChange={handleChange}
               type="text"
               placeholder="Add NIN"
-              className={`mt-1 w-full px-4 p-2 rounded-md border text-sm text-gray-700 transition-colors ${
+              className={`mt-1 w-full px-4 p-2 rounded-md border text-sm text-gray-700 dark:text-gray-200 transition-colors ${
                 isEditing
-                  ? "border-blue-300 bg-white focus:ring-2 focus:ring-blue-100 focus:outline-none"
-                  : "border-gray-200 bg-gray-50 cursor-not-allowed"
+                  ? "border-blue-300 dark:border-blue-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:outline-none"
+                  : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 cursor-not-allowed"
               }`}
             />
           </div>

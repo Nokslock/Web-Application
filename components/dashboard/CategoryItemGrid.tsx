@@ -6,8 +6,10 @@ import { getIcon, getColorClasses } from "./utils";
 
 interface CategoryItemGridProps {
   items: any[];
-  selectedCategory: string; // Guaranteed to be set here
+  selectedCategory: string;
   onSelectItem: (item: any) => void;
+  customItems?: any[];
+  emptyMessage?: string;
 }
 
 const containerVariants: Variants = {
@@ -29,14 +31,16 @@ export default function CategoryItemGrid({
   items,
   selectedCategory,
   onSelectItem,
+  customItems,
+  emptyMessage
 }: CategoryItemGridProps) {
   
-  // Filter items based on category
-  const categoryItems = selectedCategory === "nok" 
+  // Filter items based on category OR use customItems (for search)
+  const categoryItems = customItems || (selectedCategory === "nok" 
     ? items.filter((i) => i.share_with_nok)
-    : items.filter((i) => i.type === selectedCategory);
+    : items.filter((i) => i.type === selectedCategory));
 
-  const colors = getColorClasses(selectedCategory);
+  const colors = getColorClasses(selectedCategory === "search" ? "file" : selectedCategory);
 
   if (categoryItems.length === 0) {
     return (
@@ -46,7 +50,7 @@ export default function CategoryItemGrid({
         </div>
         <h3 className="text-lg font-bold text-gray-700 dark:text-white">No items found</h3>
         <p className="text-sm text-gray-500 max-w-xs text-center mt-2">
-          You haven't added any {selectedCategory === 'nok' ? 'Next of Kin items' : selectedCategory + 's'} yet.
+          {emptyMessage || `You haven't added any ${selectedCategory === 'nok' ? 'Next of Kin items' : selectedCategory + 's'} yet.`}
         </p>
       </div>
     );

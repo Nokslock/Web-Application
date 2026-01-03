@@ -15,10 +15,15 @@ export default async function DashboardPage() {
 
   // --- THE FIX IS HERE ---
   // Added "share_with_nok" to the select list
-  const { data: items } = await supabase
+  // Removed "updated_at" to fix query failure if column is missing
+  const { data: items, error } = await supabase
     .from("vault_items")
     .select("id, type, name, ciphertext, created_at, share_with_nok") 
     .order("created_at", { ascending: false });
+    
+  if (error) {
+    console.error("Error fetching vault items:", error);
+  }
 
   const serializedUser = {
     id: user.id,

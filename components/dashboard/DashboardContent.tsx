@@ -45,6 +45,7 @@ export default function DashboardContent({ user, items }: DashboardContentProps)
   const [greeting, setGreeting] = useState("Welcome back");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Dynamic Greeting based on time
   useEffect(() => {
@@ -55,6 +56,12 @@ export default function DashboardContent({ user, items }: DashboardContentProps)
   }, []);
 
   const userName = user.user_metadata?.first_name || user.email?.split("@")[0] || "User";
+
+  // Filter items for search
+  const filteredItems = items?.filter(item => 
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    item.type.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <motion.div 
@@ -76,6 +83,8 @@ export default function DashboardContent({ user, items }: DashboardContentProps)
           <div className="relative w-full md:w-64 group">
             <IoSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
             <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="rounded-xl h-11 border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white pl-10 pr-4 w-full focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm text-sm"
               placeholder="Search assets..."
               type="search"
@@ -85,24 +94,34 @@ export default function DashboardContent({ user, items }: DashboardContentProps)
         </div>
       </motion.div>
 
-      {/* --- CATEGORY SELECTOR (TOP GRID) --- */}
-      <motion.div variants={itemVariants}>
-        <DashboardCategorySelector 
-          items={items || []} 
-          selectedCategory={selectedCategory} 
-          onSelectCategory={setSelectedCategory} 
-        />
-      </motion.div>
+      {/* --- CATEGORY SELECTOR (Hidden when searching) --- */}
+      {!searchQuery && (
+        <motion.div variants={itemVariants}>
+          <DashboardCategorySelector 
+            items={items || []} 
+            selectedCategory={selectedCategory} 
+            onSelectCategory={setSelectedCategory} 
+          />
+        </motion.div>
+      )}
 
-      {/* --- DYNAMIC CONTENT (Home or Category Grid) --- */}
-      {selectedCategory ? (
+      {/* --- DYNAMIC CONTENT (Home, Search, or Category Grid) --- */}
+      {searchQuery ? (
+         <CategoryItemGrid 
+            items={items || []}
+            selectedCategory="search"
+            customItems={filteredItems}
+            onSelectItem={setSelectedItem}
+            emptyMessage={`No results found for "${searchQuery}"`}
+         />
+      ) : selectedCategory ? (
         <CategoryItemGrid 
           items={items || []} 
           selectedCategory={selectedCategory} 
           onSelectItem={setSelectedItem} 
         />
       ) : (
-        <DashboardHome />
+        <DashboardHome items={items || []} />
       )}
 
       {/* --- DETAIL MODAL --- */}

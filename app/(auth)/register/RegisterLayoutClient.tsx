@@ -1,6 +1,6 @@
 "use client";
 
-import HomeLogo from "@/components/HomeLogo";
+import AuthNavbar from "@/components/AuthNavbar";
 import { motion, Variants } from "framer-motion";
 import { FaShieldHalved, FaLock, FaKey } from "react-icons/fa6";
 
@@ -53,14 +53,12 @@ export default function RegisterLayoutClient({
         className="col-span-1 h-screen flex flex-col bg-white dark:bg-gray-950 z-20 relative shadow-2xl lg:shadow-none overflow-hidden"
       >
         {/* Fixed Header / Logo Area */}
-        <div className="flex-none px-6 pt-12 pb-6 sm:px-12 lg:px-20 xl:px-24 w-full max-w-[580px] mx-auto z-10 bg-white dark:bg-gray-950">
-           <motion.div variants={itemVariants}>
-            <HomeLogo />
-          </motion.div>
-        </div>
+        <motion.div variants={itemVariants}>
+           <AuthNavbar />
+        </motion.div>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 min-h-0 w-full max-w-[580px] mx-auto px-6 sm:px-12 lg:px-20 xl:px-24 relative flex flex-col">
+        <div className="flex-1 min-h-0 w-full max-w-[480px] mx-auto px-6 sm:px-0 relative flex flex-col">
           <motion.div variants={itemVariants} className="flex flex-col h-full">
             {children}
           </motion.div>

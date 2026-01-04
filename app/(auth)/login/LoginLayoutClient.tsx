@@ -1,6 +1,6 @@
 "use client";
 
-import HomeLogo from "@/components/HomeLogo";
+import AuthNavbar from "@/components/AuthNavbar";
 import { motion, Variants } from "framer-motion"; 
 import { FaShieldHalved, FaLock } from "react-icons/fa6";
 
@@ -50,13 +50,15 @@ export default function LoginLayoutClient({
         initial="hidden"
         animate="visible"
         variants={containerVariants}
-        className="col-span-1 h-full min-h-screen overflow-y-auto flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-20 xl:px-24 bg-white dark:bg-gray-950 z-20 relative shadow-2xl lg:shadow-none"
+        className="col-span-1 h-screen flex flex-col bg-white dark:bg-gray-950 z-20 relative shadow-2xl lg:shadow-none overflow-hidden"
       >
-        <div className="w-full max-w-[480px] mx-auto">
-          <motion.div variants={itemVariants} className="mb-12">
-            <HomeLogo />
-          </motion.div>
-          
+        {/* Navbar */}
+        <motion.div variants={itemVariants}>
+            <AuthNavbar />
+        </motion.div>
+
+        {/* Centered Form Content */}
+        <div className="flex-1 flex flex-col justify-center w-full max-w-[480px] mx-auto px-6 sm:px-0 pb-12">
           <motion.div variants={itemVariants}>
             {children}
           </motion.div>

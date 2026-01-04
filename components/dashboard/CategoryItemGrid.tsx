@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, Variants } from "framer-motion";
-import { FaArrowRight } from "react-icons/fa6";
+import { FaArrowRight, FaLock } from "react-icons/fa6";
 import { getIcon, getColorClasses } from "./utils";
 
 interface CategoryItemGridProps {
@@ -83,8 +83,15 @@ export default function CategoryItemGrid({
             <div className={`h-12 w-12 rounded-xl flex items-center justify-center text-xl shadow-sm ${colors.modalIconBg} ${colors.modalIconText}`}>
               {selectedCategory === 'nok' ? getIcon(item.type) : item.name.substring(0, 2).toUpperCase()}
             </div>
-            <div className={`h-8 w-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300 bg-gray-50 dark:bg-gray-700`}>
-               <FaArrowRight className="text-gray-400 dark:text-gray-300 text-xs" />
+            <div className="flex gap-2">
+               {item.is_locked && (
+                 <div className="h-8 w-8 rounded-full flex items-center justify-center bg-amber-50 dark:bg-amber-900/30 text-amber-500 shadow-sm" title="Locked">
+                    <FaLock size={12} />
+                 </div>
+               )}
+               <div className={`h-8 w-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300 bg-gray-50 dark:bg-gray-700`}>
+                  <FaArrowRight className="text-gray-400 dark:text-gray-300 text-xs" />
+               </div>
             </div>
           </div>
           

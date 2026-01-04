@@ -33,6 +33,7 @@ function OtpVerificationForm() {
 
   // Password State
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   
   // Password Strength State
@@ -112,6 +113,12 @@ function OtpVerificationForm() {
       toast.warning("Please meet all password requirements");
       return;
     }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase.auth.updateUser({
@@ -129,10 +136,10 @@ function OtpVerificationForm() {
 
   return (
     <>
-      <div className="pb-3">
+      <div className="pb-8">
         <Link href="/forgot-password/">
-          <div className="px-5 flex items-center gap-2 text-blue-400 text-lg font-medium hover:text-blue-500 transition-colors">
-            <FaAngleLeft /> Back
+          <div className="inline-flex items-center gap-2 text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors font-medium text-sm group">
+            <FaAngleLeft className="group-hover:-translate-x-1 transition-transform" /> Back
           </div>
         </Link>
       </div>
@@ -140,17 +147,18 @@ function OtpVerificationForm() {
       {step === "OTP" ? (
         // --- STEP 1: OTP FORM ---
         <>
-          <h2 className="lg:text-5xl md:text-4xl font-bold mb-8 text-center text-gray-800">
-            Enter Verification Code
-          </h2>
-          <p className="text-center text-lg pb-5 text-gray-600">
-            We've sent a verification code to <br />
-            <span className="font-bold text-gray-900">{email}</span>
-          </p>
+          <div className="text-center px-5 mb-8">
+            <h1 className="text-3xl font-black text-gray-900 dark:text-white md:text-4xl lg:text-5xl tracking-tighter mb-4">
+              Verification Code
+            </h1>
+            <p className="text-base text-gray-500 dark:text-gray-400 md:text-lg">
+              We've sent a 6-digit code to <span className="font-bold text-gray-900 dark:text-gray-200">{email}</span>
+            </p>
+          </div>
           
-          <div className="px-4 md:px-20">
+          <div className="w-full px-4">
             <form>
-              <div className="flex pb-10 pt-6 gap-2 md:gap-4 justify-center">
+              <div className="flex pb-10 pt-4 gap-2 md:gap-3 justify-center">
                 {otp.map((digit, index) => (
                   <input
                     key={index}
@@ -162,10 +170,10 @@ function OtpVerificationForm() {
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
                     onPaste={handlePaste}
-                    className={`w-12 h-14 md:w-14 md:h-16 text-center text-xl md:text-2xl font-bold rounded-lg border outline-none transition-all
+                    className={`w-12 h-14 md:w-14 md:h-16 text-center text-xl md:text-2xl font-bold rounded-xl border outline-none transition-all
                       ${digit 
                         ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400" 
-                        : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30"
+                        : "border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white dark:focus:bg-gray-950"
                       }`}
                   />
                 ))}
@@ -175,7 +183,7 @@ function OtpVerificationForm() {
                     <AuthButton 
                         variant={loading ? "disabled" : "primary"} 
                         type="button"
-                        className="w-full flex justify-center"
+                        className="w-full justify-center py-4 rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 text-lg font-bold"
                         disabled={loading}
                     >
                         {loading ? "Verifying..." : "Verify Code"}
@@ -188,41 +196,62 @@ function OtpVerificationForm() {
       ) : (
         // --- STEP 2: NEW PASSWORD FORM (UPDATED) ---
         <>
-          <h2 className="lg:text-4xl md:text-3xl font-bold mb-4 text-center text-gray-800">
-            Reset Password
-          </h2>
-          <p className="text-center text-gray-600 mb-8">
-            Please enter your new password below.
-          </p>
+          <div className="text-center px-5 mb-8">
+            <h1 className="text-3xl font-black text-gray-900 dark:text-white md:text-4xl lg:text-5xl tracking-tighter mb-4">
+              Reset Password
+            </h1>
+            <p className="text-base text-gray-500 dark:text-gray-400 md:text-lg">
+              Secure your account with a new, strong password.
+            </p>
+          </div>
 
-          <div className="px-4 md:px-20 max-w-md mx-auto">
-             <div className="relative mb-6">
-                <label className="block text-sm font-bold text-gray-500 mb-1">New Password</label>
+          <div className="w-full">
+             {/* NEW PASSWORD */}
+             <div className="relative mb-5">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-1">New Password</label>
                 <div className="relative">
                     <PasswordInput 
-                        type={showPassword ? "text" : "password"}
+                        type="password"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="••••••••"
-                        className="w-full px-4 py-3 rounded-md border border-gray-200 bg-white text-gray-800 focus:outline-blue-500"
+                        className="w-full px-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white dark:focus:bg-gray-950 transition-all outline-none"
+                    />
+                </div>
+             </div>
+
+             {/* CONFIRM PASSWORD */}
+             <div className="relative mb-6">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-1">Confirm Password</label>
+                <div className="relative">
+                    <PasswordInput 
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className={`w-full px-4 py-3.5 rounded-xl border bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-4 transition-all outline-none ${
+                             confirmPassword && newPassword !== confirmPassword 
+                             ? "!border-red-500 !focus:border-red-500 !bg-red-50 dark:!bg-red-900/10 focus:ring-red-500/10" 
+                             : "border-gray-200 dark:border-gray-800 focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white dark:focus:bg-gray-950"
+                        }`}
                     />
                 </div>
              </div>
 
              {/* PASSWORD CHECKER LIST */}
-             <div className="grid grid-cols-2 gap-2 mb-8 bg-gray-50 p-4 rounded-lg border border-gray-100">
+             <div className="grid grid-cols-2 gap-2 mb-8 bg-gray-50 dark:bg-gray-900/30 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
                <PasswordRequirement label="8+ Characters" met={validations.minLength} />
-               <PasswordRequirement label="Lowercase Letter" met={validations.hasLower} />
-               <PasswordRequirement label="Uppercase Letter" met={validations.hasUpper} />
+               <PasswordRequirement label="Lowercase" met={validations.hasLower} />
+               <PasswordRequirement label="Uppercase" met={validations.hasUpper} />
                <PasswordRequirement label="Number (0-9)" met={validations.hasNumber} />
              </div>
 
-             <div onClick={isPasswordValid ? handleUpdatePassword : undefined} className="w-full">
+             <div onClick={isPasswordValid && newPassword === confirmPassword ? handleUpdatePassword : undefined} className="w-full">
                 <AuthButton 
-                    variant={isPasswordValid ? "primary" : "disabled"} 
+                    variant={isPasswordValid && newPassword === confirmPassword ? "primary" : "disabled"} 
                     type="button"
-                    className="w-full flex justify-center transition-colors duration-300"
-                    disabled={loading || !isPasswordValid}
+                    className="w-full flex justify-center py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all text-base tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={loading || !isPasswordValid || newPassword !== confirmPassword}
                 >
                     {loading ? "Updating..." : "Update Password"}
                 </AuthButton>
@@ -230,6 +259,14 @@ function OtpVerificationForm() {
           </div>
         </>
       )}
+
+      {/* FOOTER */}
+      <div className="mt-12 pt-6 border-t border-gray-100 dark:border-gray-900 flex justify-between items-center text-xs text-gray-400">
+          <div className="font-medium">&copy; Nokslock 2025</div>
+          <Link href="#" className="hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+            Privacy & Security
+          </Link>
+      </div>
     </>
   );
 }

@@ -12,7 +12,8 @@ import {
   FaCheck,
   FaCloudArrowUp,
   FaSpinner,
-  FaTrash
+  FaTrash,
+  FaLock
 } from "react-icons/fa6";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { encryptData } from "@/lib/crypto";
@@ -32,6 +33,7 @@ export default function DashboardFab({ vaultId, defaultShareWithNok = false }: D
   const [activeTab, setActiveTab] = useState<VaultType>("password");
   const [loading, setLoading] = useState(false);
   const [shareWithNok, setShareWithNok] = useState(defaultShareWithNok);
+  const [isLocked, setIsLocked] = useState(false);
 
   // Reset state when opening (respecting defaults)
   useEffect(() => {
@@ -160,6 +162,7 @@ export default function DashboardFab({ vaultId, defaultShareWithNok = false }: D
           name: name,
           ciphertext: encryptedBlob,
           share_with_nok: shareWithNok,
+          is_locked: isLocked, // Handle db lock column
         });
         if (error) throw error;
       }
@@ -170,6 +173,7 @@ export default function DashboardFab({ vaultId, defaultShareWithNok = false }: D
       setName("");
       setDetails({});
       setShareWithNok(false);
+      setIsLocked(false);
       setStagedFiles([]);
       router.refresh();
       
@@ -330,10 +334,39 @@ export default function DashboardFab({ vaultId, defaultShareWithNok = false }: D
                   </>
                 )}
 
+                {/* LOCK TOGGLE (Card & Wallet Only) */}
+                {(activeTab === "card" || activeTab === "crypto") && (
+                  <div 
+                    onClick={() => setIsLocked(!isLocked)}
+                    className={`mt-4 cursor-pointer flex items-start gap-3 p-4 rounded-xl border transition-all duration-200 ${
+                      isLocked 
+                        ? "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800" 
+                        : "bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    <div className={`mt-0.5 shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-colors ${
+                      isLocked ? "bg-amber-500 border-amber-500" : "bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                    }`}>
+                      {isLocked && <FaCheck size={12} className="text-white" />}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <FaLock className={`text-sm ${isLocked ? "text-amber-600" : "text-gray-400"}`} />
+                        <h4 className={`text-sm font-bold ${isLocked ? "text-amber-800 dark:text-amber-300" : "text-gray-700 dark:text-gray-300"}`}>
+                          Lock with Password
+                        </h4>
+                      </div>
+                      <p className={`text-xs mt-0.5 ${isLocked ? "text-amber-600/80 dark:text-amber-400/70" : "text-gray-500"}`}>
+                        Require account password to view details.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* NOK TOGGLE */}
                 <div 
                   onClick={() => setShareWithNok(!shareWithNok)}
-                  className={`mt-6 cursor-pointer flex items-start gap-3 p-4 rounded-xl border transition-all duration-200 ${
+                  className={`mt-3 cursor-pointer flex items-start gap-3 p-4 rounded-xl border transition-all duration-200 ${
                     shareWithNok 
                       ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800" 
                       : "bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"

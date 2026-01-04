@@ -94,7 +94,7 @@ export default function Sidebar({ user, fullName, email }: SidebarProps) {
             <FaCrown className="text-xl animate-pulse shrink-0" />
 
             <div className={`${isExpanded ? "block" : "hidden"} lg:block text-left overflow-hidden whitespace-nowrap`}>
-              <p className="font-bold text-sm leading-none">Nockslock Plus</p>
+              <p className="font-bold text-sm leading-none">Nokslock Plus</p>
               <p className="text-[10px] text-purple-100 font-medium opacity-90 mt-1">
                 Upgrade for Vault access
               </p>

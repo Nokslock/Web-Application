@@ -8,7 +8,8 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   FaXmark, FaUserShield, FaCheck, FaCopy, FaEye, FaEyeSlash, 
-  FaFile, FaDownload, FaTrash, FaFloppyDisk, FaTriangleExclamation 
+  FaFile, FaDownload, FaTrash, FaFloppyDisk, FaTriangleExclamation,
+  FaLock, FaUnlock
 } from "react-icons/fa6";
 import { getIcon, getColorClasses } from "./utils";
 
@@ -29,9 +30,24 @@ export default function ItemDetailModal({ item, onClose }: ItemDetailModalProps)
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  
+  // LOCK STATE
+  const [isLocked, setIsLocked] = useState(item.is_locked);
+  const [unlockPassword, setUnlockPassword] = useState("");
+  const [isUnlocking, setIsUnlocking] = useState(false);
 
-  // Decrypt on mount
+  // SAVE AUTH STATE
+  const [showSaveAuth, setShowSaveAuth] = useState(false);
+  const [savePassword, setSavePassword] = useState("");
+  const [isSavingAuth, setIsSavingAuth] = useState(false);
+  
+  // TOGGLE STATE for editing
+  const [targetLockState, setTargetLockState] = useState(item.is_locked);
+
+  // Decrypt on mount (ONLY IF NOT LOCKED)
   useEffect(() => {
+     if (isLocked) return;
+
      try {
        const details = decryptData(item.ciphertext);
        setDecryptedDetails(details);
@@ -40,7 +56,39 @@ export default function ItemDetailModal({ item, onClose }: ItemDetailModalProps)
        toast.error("Failed to decrypt item.");
        onClose();
      }
-  }, [item, onClose]);
+  }, [item, onClose, isLocked]);
+
+  /* --- UNLOCK HANDLER --- */
+  const handleUnlock = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!unlockPassword) return;
+    
+    setIsUnlocking(true);
+    try {
+      // 1. Get User Email
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) throw new Error("User email not found");
+
+      // 2. Verify Password (re-auth)
+      const { error } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: unlockPassword,
+      });
+
+      if (error) {
+        throw new Error("Incorrect password");
+      }
+
+      // 3. Success -> Unlock
+      toast.success("Identity verified");
+      setIsLocked(false);
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsUnlocking(false);
+    }
+  };
+
 
   // Actions
   const handleInputChange = (key: string, value: string) => {
@@ -57,13 +105,16 @@ export default function ItemDetailModal({ item, onClose }: ItemDetailModalProps)
     toast.success("Copied to clipboard");
   };
 
-  const handleSave = async () => {
-    if (!editedDetails) return;
+  // ACTUAL SAVE LOGIC (Extracted)
+  const executeSave = async () => {
     setIsLoading(true);
     try {
       const newCiphertext = encryptData(editedDetails);
       const { error } = await (supabase.from("vault_items") as any)
-        .update({ ciphertext: newCiphertext })
+        .update({ 
+          ciphertext: newCiphertext,
+          is_locked: targetLockState
+        })
         .eq("id", item.id);
 
       if (error) throw error;
@@ -74,6 +125,46 @@ export default function ItemDetailModal({ item, onClose }: ItemDetailModalProps)
       toast.error(error.message || "Failed to update item");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!editedDetails) return;
+    
+    // IF LOCKED ITEM -> Require Password to Save
+    if (item.is_locked) {
+      setShowSaveAuth(true);
+      return;
+    }
+
+    // Otherwise save directly
+    executeSave();
+  };
+
+  const handleConfirmSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!savePassword) return;
+
+    setIsSavingAuth(true);
+    try {
+       const { data: { user } } = await supabase.auth.getUser();
+       if (!user?.email) throw new Error("User unknown");
+
+       const { error } = await supabase.auth.signInWithPassword({
+          email: user.email,
+          password: savePassword
+       });
+
+       if (error) throw new Error("Incorrect password");
+
+       // Success
+       setShowSaveAuth(false);
+       await executeSave();
+       
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsSavingAuth(false);
     }
   };
 
@@ -126,9 +217,120 @@ export default function ItemDetailModal({ item, onClose }: ItemDetailModalProps)
     }
   };
 
-  if (!editedDetails) return null;
-
   const colors = getColorClasses(item.type);
+
+  // --- SAVE AUTH OVERLAY (LOCKED ITEM EDIT) ---
+  if (showSaveAuth) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <motion.div 
+          initial={{ opacity: 0 }} 
+          animate={{ opacity: 1 }} 
+          exit={{ opacity: 0 }}
+          onClick={() => setShowSaveAuth(false)}
+          className="absolute inset-0 bg-black/60 backdrop-blur-md"
+        />
+        <motion.div 
+           initial={{ scale: 0.9, opacity: 0 }}
+           animate={{ scale: 1, opacity: 1 }}
+           className="relative z-10 bg-white dark:bg-gray-900 w-full max-w-sm rounded-3xl p-8 shadow-2xl flex flex-col items-center text-center"
+        >
+          <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-500 h-20 w-20 rounded-full flex items-center justify-center mb-6 shadow-sm">
+             <FaUserShield size={32} />
+          </div>
+          <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2">Confirm Save</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
+             This is a locked item. Please confirm your password to save changes.
+          </p>
+          
+          <form onSubmit={handleConfirmSave} className="w-full space-y-4">
+            <input 
+              type="password"
+              autoFocus
+              value={savePassword}
+              onChange={(e) => setSavePassword(e.target.value)}
+              placeholder="Enter password"
+              className="w-full px-5 py-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all text-center font-bold"
+            />
+            <div className="flex gap-3">
+               <button 
+                 type="button" 
+                 onClick={() => setShowSaveAuth(false)}
+                 className="flex-1 py-3.5 rounded-xl text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold text-sm bg-gray-100 dark:bg-gray-800 transition"
+               >
+                 Cancel
+               </button>
+               <button 
+                 type="submit"
+                 disabled={isSavingAuth || !savePassword}
+                 className="flex-1 py-3.5 rounded-xl text-white font-bold text-sm bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 shadow-lg shadow-amber-500/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+               >
+                 {isSavingAuth ? "Verifying..." : <><FaCheck /> Confirm</>}
+               </button>
+            </div>
+          </form>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // --- LOCKED STATE VIEW ---
+  if (isLocked) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <motion.div 
+          initial={{ opacity: 0 }} 
+          animate={{ opacity: 1 }} 
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="absolute inset-0 bg-black/60 backdrop-blur-md"
+        />
+        <motion.div 
+           initial={{ scale: 0.9, opacity: 0 }}
+           animate={{ scale: 1, opacity: 1 }}
+           className="relative z-10 bg-white dark:bg-gray-900 w-full max-w-sm rounded-3xl p-8 shadow-2xl flex flex-col items-center text-center"
+        >
+          <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-500 h-20 w-20 rounded-full flex items-center justify-center mb-6 shadow-sm">
+             <FaLock size={32} />
+          </div>
+          <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2">Item Locked</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
+            This item is protected. Please enter your account password to verify your identity.
+          </p>
+          
+          <form onSubmit={handleUnlock} className="w-full space-y-4">
+            <input 
+              type="password"
+              autoFocus
+              value={unlockPassword}
+              onChange={(e) => setUnlockPassword(e.target.value)}
+              placeholder="Enter password"
+              className="w-full px-5 py-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all text-center font-bold"
+            />
+            <div className="flex gap-3">
+               <button 
+                 type="button" 
+                 onClick={onClose}
+                 className="flex-1 py-3.5 rounded-xl text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold text-sm bg-gray-100 dark:bg-gray-800 transition"
+               >
+                 Cancel
+               </button>
+               <button 
+                 type="submit"
+                 disabled={isUnlocking || !unlockPassword}
+                 className="flex-1 py-3.5 rounded-xl text-white font-bold text-sm bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 shadow-lg shadow-amber-500/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+               >
+                 {isUnlocking ? "Verifying..." : <><FaUnlock /> Unlock</>}
+               </button>
+            </div>
+          </form>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Ensure details are loaded before showing normal modal
+  if (!editedDetails) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 sm:p-6">
@@ -190,6 +392,28 @@ export default function ItemDetailModal({ item, onClose }: ItemDetailModalProps)
 
         {/* --- SCROLLABLE CONTENT --- */}
         <div className="flex-1 overflow-y-auto px-8 py-2 custom-scrollbar space-y-6">
+           
+           {/* LOCK STATUS TOGGLE */}
+           {(item.type === 'card' || item.type === 'crypto') && (
+             <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                   <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${targetLockState ? "bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400" : "bg-gray-200 dark:bg-gray-700 text-gray-500"}`}>
+                      {targetLockState ? <FaLock size={14} /> : <FaUnlock size={14} />}
+                   </div>
+                   <div>
+                      <h4 className="text-sm font-bold text-gray-900 dark:text-white">Password Protection</h4>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{targetLockState ? "Item is locked" : "Item is unlocked"}</p>
+                   </div>
+                </div>
+                <button
+                   onClick={() => setTargetLockState(!targetLockState)}
+                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 border-2 border-transparent shrink-0 cursor-pointer ${targetLockState ? 'bg-amber-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                >
+                   <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${targetLockState ? 'translate-x-5' : 'translate-x-0'}`} />
+                </button>
+             </div>
+           )}
+
            {Object.entries(editedDetails).map(([key, value]: any, index) => {
             if (key === "storagePath" || key === "fileSize" || key === "fileName") return null;
             const isSecret = key.includes("password") || key.includes("pin") || key.includes("cvv") || key.includes("phrase");

@@ -7,7 +7,7 @@ import {
   IoTimeOutline, IoAddCircleOutline, IoCreateOutline 
 } from "react-icons/io5";
 import { formatDistanceToNow } from "date-fns";
-import { FaXmark } from "react-icons/fa6";
+import { FaXmark, FaLock } from "react-icons/fa6";
 
 const boxVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
@@ -64,20 +64,12 @@ export default function DashboardHome({ items = [] }: DashboardHomeProps) {
           variants={boxVariants}
           initial="hidden"
           animate="visible"
-          className="h-[26rem] lg:h-96 col-span-1 lg:col-span-4 p-4 sm:p-6 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col"
+          className="h-[36rem] col-span-1 lg:col-span-4 p-4 sm:p-6 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col"
         >
           <div className="flex justify-between items-center mb-5 shrink-0">
             <h2 className="font-bold text-lg text-gray-800 dark:text-white flex items-center gap-2">
               <IoTimeOutline className="text-blue-500" /> Recent Activity
             </h2>
-            {recentActivity.length > 0 && (
-              <button 
-                onClick={() => setIsViewAllOpen(true)}
-                className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-full transition-all"
-              >
-                View All
-              </button>
-            )}
           </div>
           
           {/* Content Area */}
@@ -103,6 +95,16 @@ export default function DashboardHome({ items = [] }: DashboardHomeProps) {
                 </div>
              )}
           </div>
+
+          {/* View All Button (Bottom) */}
+          {recentActivity.length > 0 && (
+            <button 
+              onClick={() => setIsViewAllOpen(true)}
+              className="w-full py-3 mt-4 rounded-xl font-bold text-sm bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 dark:text-blue-400 transition-colors"
+            >
+              View All Activity
+            </button>
+          )}
         </motion.div>
 
         {/* Security Score & Chart Card */}
@@ -224,6 +226,11 @@ function ActivityItem({ item }: { item: any }) {
             <h4 className="font-bold text-gray-800 dark:text-white truncate pr-2 text-sm">{item.name}</h4>
          </div>
          <p className="text-[10px] sm:text-xs text-gray-400 flex items-center gap-1.5 mt-0.5">
+            {item.is_locked && (
+              <span className="text-amber-500 font-bold flex items-center gap-1 mr-1">
+                 <FaLock size={10} /> <span className="hidden xs:inline">Locked</span>
+              </span>
+            )}
             {isModified ? (
                <span className="text-amber-500 font-bold flex items-center gap-1">
                  <IoCreateOutline /> <span className="hidden xs:inline">Modified</span>

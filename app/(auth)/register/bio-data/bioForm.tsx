@@ -117,6 +117,10 @@ export default function BioForm() {
     }
   };
 
+  // Standard input class to match other forms
+  const inputClass = "w-full px-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white dark:focus:bg-gray-950 transition-all outline-none";
+  const labelClass = "block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-1";
+
   if (!email) return null;
 
   return (
@@ -124,71 +128,67 @@ export default function BioForm() {
       <form className="pb-10">
         {/* EMAIL (Read-Only) */}
         <div className="pb-5">
-          <label className="block text-sm font-bold text-gray-500">Email Address</label>
+          <label className={labelClass}>Email Address</label>
           <input
             type="email"
             value={email}
             disabled
-            className="mt-1 w-full h-13 rounded-md border border-gray-200 bg-gray-100 p-2 px-4 text-sm text-gray-500 cursor-not-allowed"
+            className={`${inputClass} opacity-60 cursor-not-allowed`}
           />
         </div>
 
-        {/* NAMES */}
-        <div className="flex gap-4 pb-5">
-          <div className="w-1/2">
-            <label className="block text-sm font-bold text-gray-500">First Name</label>
+        {/* NAMES - Stacked for full width consistency */}
+        <div className="pb-5">
+            <label className={labelClass}>First Name</label>
             <input
               name="firstName"
               type="text"
               value={formData.firstName}
               onChange={handleChange}
               placeholder="First Name"
-              className="mt-1 w-full h-13 rounded-md border border-gray-200 bg-white p-2 px-4 text-sm text-gray-700 focus:border-emerald-500 focus:outline-none"
+              className={inputClass}
             />
-          </div>
-          <div className="w-1/2">
-            <label className="block text-sm font-bold text-gray-500">Last Name</label>
+        </div>
+        <div className="pb-5">
+            <label className={labelClass}>Last Name</label>
             <input
               name="lastName"
               type="text"
               value={formData.lastName}
               onChange={handleChange}
               placeholder="Last Name"
-              className="mt-1 w-full h-13 rounded-md border border-gray-200 bg-white p-2 px-4 text-sm text-gray-700 focus:border-emerald-500 focus:outline-none"
+              className={inputClass}
             />
-          </div>
         </div>
 
         {/* PHONE */}
         <div className="pb-5"> 
-          <label className="block text-sm font-bold text-gray-500">Phone Number</label>
+          <label className={labelClass}>Phone Number</label>
           <PhoneInput
               country={'ng'}
               value={formData.phoneNumber}
               onChange={handlePhoneChange}
-              inputStyle={{
-                width: '100%',
-                height: '52px', // Matches h-13 (approx 52px)
-                borderRadius: '0.375rem',
-                borderColor: '#e5e7eb',
-              }}
+              containerClass="!w-full"
+              inputClass="!w-full !h-[54px] !rounded-xl !border !border-gray-200 dark:!border-gray-800 !bg-gray-50 dark:!bg-gray-900/50 !text-gray-900 dark:!text-gray-100 !pl-[48px] !text-base focus:!border-blue-500 focus:!ring-4 focus:!ring-blue-500/10 !transition-all outline-none"
+              buttonClass="!bg-transparent !border-0 !border-r !border-gray-200 dark:!border-gray-800 !rounded-l-xl"
+              dropdownClass="!bg-white dark:!bg-gray-950 !border-gray-200 dark:!border-gray-800 !rounded-xl !shadow-xl !text-gray-900 dark:!text-gray-100"
             />
         </div>
 
         {/* PASSWORD FIELD */}
         <div className="pb-5">
-          <label className="block text-sm font-bold text-gray-500">Password</label>
+          <label className={labelClass}>Password</label>
           <PasswordInput
             name="password"
             type="password"
             value={formData.password}
             onChange={handleChange}
             placeholder="Password"
-            className="mt-1 w-full h-13 rounded-md border border-gray-200 bg-white p-2 px-4 text-sm text-gray-700 focus:border-emerald-500 focus:outline-none"
+            className={inputClass}
           />
           
-          {/* VISUAL CHECKLIST (Pill Style) */}
-          <div className="grid grid-cols-2 gap-2 mt-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+          {/* VISUAL CHECKLIST */}
+          <div className="grid grid-cols-2 gap-2 mt-4 bg-gray-50 dark:bg-gray-900/30 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
              <PasswordRequirement label="8+ Characters" met={validations.minLength} />
              <PasswordRequirement label="Lowercase Letter" met={validations.hasLower} />
              <PasswordRequirement label="Uppercase Letter" met={validations.hasUpper} />
@@ -198,17 +198,17 @@ export default function BioForm() {
 
         {/* VERIFY PASSWORD */}
         <div className="pb-8">
-          <label className="block text-sm font-bold text-gray-500">Verify Password</label>
+          <label className={labelClass}>Verify Password</label>
           <PasswordInput
             name="verifyPassword"
             type="password"
             value={formData.verifyPassword}
             onChange={handleChange}
             placeholder="Verify Password"
-            className={`mt-1 w-full h-13 rounded-md border p-2 px-4 text-sm text-gray-700 focus:outline-none transition-colors ${
+            className={`${inputClass} ${
               formData.verifyPassword && formData.password !== formData.verifyPassword
-                ? "border-red-500 focus:border-red-500 bg-red-50"
-                : "border-gray-200 focus:border-emerald-500 bg-white"
+                ? "!border-red-500 !focus:border-red-500 !bg-red-50 dark:!bg-red-900/10"
+                : ""
             }`}
           />
         </div>
@@ -219,6 +219,7 @@ export default function BioForm() {
           type="submit"
           loading={loading}
           disabled={loading}
+          className="w-full flex justify-center py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all text-base tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Create Account
         </AuthButton>
@@ -230,9 +231,9 @@ export default function BioForm() {
 // --- REUSABLE CHECKLIST ITEM COMPONENT ---
 function PasswordRequirement({ label, met }: { label: string; met: boolean }) {
   return (
-    <div className={`flex items-center gap-2 text-xs font-medium transition-colors duration-300 ${met ? "text-emerald-700" : "text-gray-400"}`}>
-      <span className={`flex items-center justify-center w-4 h-4 rounded-full transition-colors duration-300 ${met ? "bg-emerald-100" : "bg-gray-200"}`}>
-         {met ? <FaCheck className="text-[8px] text-emerald-600" /> : <FaXmark className="text-[8px] text-gray-400" />}
+    <div className={`flex items-center gap-2 text-xs font-medium transition-colors duration-300 ${met ? "text-emerald-700 dark:text-emerald-400" : "text-gray-400"}`}>
+      <span className={`flex items-center justify-center w-4 h-4 rounded-full transition-colors duration-300 ${met ? "bg-emerald-100 dark:bg-emerald-900/30" : "bg-gray-200 dark:bg-gray-800"}`}>
+         {met ? <FaCheck className="text-[8px] text-emerald-600 dark:text-emerald-400" /> : <FaXmark className="text-[8px] text-gray-400" />}
       </span>
       {label}
     </div>

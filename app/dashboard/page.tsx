@@ -18,7 +18,7 @@ export default async function DashboardPage() {
   // Removed "updated_at" to fix query failure if column is missing
   const { data: items, error } = await supabase
     .from("vault_items")
-    .select("id, type, name, ciphertext, created_at, share_with_nok, vault_id") 
+    .select("id, type, name, ciphertext, created_at, share_with_nok, vault_id, is_locked") 
     .order("created_at", { ascending: false });
 
   // Fetch Vaults as well
@@ -32,7 +32,7 @@ export default async function DashboardPage() {
   }
 
   // Normalize vaults to look like items
-  const vaultItems = (vaults || []).map(v => ({
+  const vaultItems = (vaults || []).map((v: any) => ({
     ...v,
     type: "vault", // meaningful type
     ciphertext: null, // vaults don't have ciphertext themselves in this view
@@ -40,13 +40,13 @@ export default async function DashboardPage() {
 
   // Identify Locked Vault IDs
   const lockedVaultIds = new Set(
-    (vaults || []).filter(v => v.is_locked).map(v => v.id)
+    (vaults || []).filter((v: any) => v.is_locked).map((v: any) => v.id)
   );
 
   // Filter Items:
   // 1. Exclude items that are inside LOCKED vaults (they should be invisible globally)
   // 2. We keep items in UNLOCKED vaults visible globally (as requested "items in unlocked vaults would show")
-  const visibleItems = (items || []).filter(item => {
+  const visibleItems = (items || []).filter((item: any) => {
     if (item.vault_id && lockedVaultIds.has(item.vault_id)) {
       return false; 
     }

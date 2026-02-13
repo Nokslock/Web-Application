@@ -6,7 +6,6 @@ import { revalidatePath } from "next/cache";
 
 /**
  * Checks if the current user is a super_admin.
- * We do this with the standard client to verify the session exists and has the role metadata.
  */
 async function checkAdminAccess() {
   const supabase = await createSupabaseServerClient();
@@ -30,17 +29,6 @@ export async function getAdminStats() {
   await checkAdminAccess();
   const adminClient = createSupabaseAdminClient();
 
-  // 1. Total Users
-  // listUsers defaults to 50 users per page. We need to paginate or trust the total count if available?
-  // listUsers returns "total" if we ask? No, the library method returns { data: { users }, error }.
-  // There isn't a direct "count" method on auth.users without raw SQL or listing all.
-  // We can try to get a reasonable estimate or just list the first page and say "50+".
-  // Actually, 'listUsers' is for managing users. It doesn't give a total count easily without iterating.
-  // HOWEVER, for a small app, we can fetch page 1 and see.
-  // Better approach: Use the Service Role to query a public 'profiles' table if it existed, but it doesn't.
-  // We will stick to `listUsers` and maybe just count the first 1000?
-  // Let's just list page 1 with a large limit.
-
   const {
     data: { users },
     error,
@@ -48,32 +36,84 @@ export async function getAdminStats() {
 
   if (error) throw error;
 
+  const now = new Date();
   const totalUsers = users.length;
 
-  // 2. Active Users (last sign in within 30 days)
-  const thirtyDaysAgo = new Date();
+  // Active Users (last sign in within 30 days)
+  const thirtyDaysAgo = new Date(now);
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
   const activeUsers = users.filter(
     (u) => u.last_sign_in_at && new Date(u.last_sign_in_at) > thirtyDaysAgo,
   ).length;
 
-  // 3. New Signups (last 7 days)
-  const sevenDaysAgo = new Date();
+  // New Signups (last 7 days)
+  const sevenDaysAgo = new Date(now);
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
   const newSignups = users.filter(
     (u) => u.created_at && new Date(u.created_at) > sevenDaysAgo,
   ).length;
+
+  // Previous 7-day signups (for growth comparison)
+  const fourteenDaysAgo = new Date(now);
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+  const prevWeekSignups = users.filter(
+    (u) =>
+      u.created_at &&
+      new Date(u.created_at) > fourteenDaysAgo &&
+      new Date(u.created_at) <= sevenDaysAgo,
+  ).length;
+
+  const signupGrowth =
+    prevWeekSignups === 0
+      ? newSignups > 0
+        ? 100
+        : 0
+      : Math.round(((newSignups - prevWeekSignups) / prevWeekSignups) * 100);
+
+  // Verified emails
+  const verifiedUsers = users.filter((u) => u.email_confirmed_at).length;
+
+  // Role Distribution
+  const admins = users.filter(
+    (u) => u.user_metadata?.role === "super_admin",
+  ).length;
+  const regularUsers = totalUsers - admins;
+
+  // Auth Provider Breakdown
+  const providerCounts: Record<string, number> = {};
+  users.forEach((u) => {
+    const provider = u.app_metadata?.provider || "email";
+    providerCounts[provider] = (providerCounts[provider] || 0) + 1;
+  });
+
+  // Signup Timeline (last 30 days, grouped by day)
+  const signupTimeline: { date: string; count: number }[] = [];
+  for (let i = 29; i >= 0; i--) {
+    const day = new Date(now);
+    day.setDate(day.getDate() - i);
+    const dayStr = day.toISOString().split("T")[0];
+
+    const count = users.filter((u) => {
+      if (!u.created_at) return false;
+      return u.created_at.startsWith(dayStr);
+    }).length;
+
+    signupTimeline.push({ date: dayStr, count });
+  }
 
   return {
     totalUsers,
     activeUsers,
     newSignups,
+    signupGrowth,
+    verifiedUsers,
+    roleDistribution: { admins, users: regularUsers },
+    providerBreakdown: providerCounts,
+    signupTimeline,
   };
 }
 
-export async function getUsersList(page = 1, limit = 10) {
+export async function getUsersList(page = 1, limit = 100) {
   await checkAdminAccess();
   const adminClient = createSupabaseAdminClient();
 
@@ -87,12 +127,13 @@ export async function getUsersList(page = 1, limit = 10) {
 
   if (error) throw error;
 
-  // Map to a cleaner format for the UI
   return users.map((u) => ({
     id: u.id,
     email: u.email,
-    full_name: u.user_metadata?.full_name || "N/A", // Fallback
+    full_name: u.user_metadata?.full_name || "N/A",
     role: u.user_metadata?.role || "user",
+    provider: u.app_metadata?.provider || "email",
+    email_confirmed: !!u.email_confirmed_at,
     created_at: u.created_at,
     last_sign_in_at: u.last_sign_in_at,
   }));

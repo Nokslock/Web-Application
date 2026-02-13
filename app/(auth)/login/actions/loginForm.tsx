@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client"; 
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import AuthButton from "@/components/AuthButton";
 import Link from "next/link";
 import PasswordInput from "@/components/PasswordInput";
@@ -20,7 +20,7 @@ export default function LoginForm() {
     e.preventDefault();
     setLoading(true);
 
-    const cleanEmail = email.trim(); 
+    const cleanEmail = email.trim();
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -37,9 +37,8 @@ export default function LoginForm() {
 
       // Success
       toast.success("Welcome back! Redirecting...");
-      router.push("/dashboard"); 
+      router.push("/dashboard");
       router.refresh();
-      
     } catch (err: any) {
       toast.error("An unexpected error occurred.");
       setLoading(false);
@@ -49,9 +48,10 @@ export default function LoginForm() {
   return (
     <>
       <form onSubmit={handleLogin} className="pb-4">
-        
         <div className="pb-6">
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-1">Email Address</label>
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-1">
+            Email Address
+          </label>
           <input
             type="email"
             placeholder="name@example.com"
@@ -77,8 +77,8 @@ export default function LoginForm() {
         </div>
 
         <div className="flex justify-end pb-8">
-          <Link 
-            href="/forgot-password" 
+          <Link
+            href="/forgot-password"
             className="text-sm font-medium text-blue-600 dark:text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 hover:underline transition-colors"
           >
             Forgot Password?
@@ -89,7 +89,7 @@ export default function LoginForm() {
           <AuthButton
             variant="primary"
             type="submit"
-            loading={loading} 
+            loading={loading}
             className="w-full flex justify-center py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all text-base tracking-wide"
           >
             Access Vault

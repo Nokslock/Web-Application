@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { useRouter } from "next/navigation";
+import { createAutoNotification } from "@/app/actions/notifications";
 import {
   FaAddressBook,
   FaPen,
@@ -62,6 +63,14 @@ export default function NextOfKinForm({ initialData, userId }: NextOfKinProps) {
       setIsEditing(false);
       router.refresh();
       toast.success("Next of Kin saved successfully!");
+      createAutoNotification({
+        title: "Next of Kin Updated",
+        message:
+          "Your digital inheritance contact was updated to " +
+          formData.full_name +
+          ".",
+        type: "success",
+      });
     } catch (error: any) {
       console.error(error);
       toast.error("Error updating profile: " + error.message);

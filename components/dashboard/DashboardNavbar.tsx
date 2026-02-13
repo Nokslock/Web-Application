@@ -49,14 +49,14 @@ export default function DashboardNavbar({
   return (
     <nav className="sticky top-0 z-50 w-full bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6">
-        <div className="flex justify-between md:grid md:grid-cols-3 items-center h-16">
+        <div className="flex justify-between lg:grid lg:grid-cols-3 items-center h-16">
           {/* LEFT: Logo */}
           <div className="flex justify-start">
             <HomeLogo />
           </div>
 
           {/* CENTER: Desktop Nav Links (Redesigned) */}
-          <div className="hidden md:flex justify-center">
+          <div className="hidden lg:flex justify-center">
             <div className="flex items-center gap-1 bg-neutral-100/50 dark:bg-neutral-900/50 p-1.5 rounded-full border border-neutral-200/50 dark:border-neutral-800/50 backdrop-blur-sm">
               {links.map((link) => {
                 const isActive = pathname === link.href;
@@ -116,8 +116,8 @@ export default function DashboardNavbar({
             <ThemeToggle />
 
             {/* User Dropdown / Profile (Desktop) */}
-            <div className="hidden md:flex items-center gap-3 pl-2 border-l border-gray-200 dark:border-gray-800">
-              <div className="text-right hidden lg:block">
+            <div className="hidden lg:flex items-center gap-3 pl-2 border-l border-gray-200 dark:border-gray-800">
+              <div className="text-right hidden xl:block">
                 <p className="text-xs font-bold text-gray-900 dark:text-white truncate max-w-[100px]">
                   {displayName}
                 </p>
@@ -138,7 +138,7 @@ export default function DashboardNavbar({
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+              className="lg:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
             >
               {isMobileMenuOpen ? <FaXmark size={20} /> : <FaBars size={20} />}
             </button>
@@ -153,7 +153,7 @@ export default function DashboardNavbar({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden border-t border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-950"
+            className="lg:hidden border-t border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-950"
           >
             <div className="px-4 py-4 space-y-4">
               {/* Mobile Links */}

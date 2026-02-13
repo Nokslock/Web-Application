@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import Image, { StaticImageData } from "next/image";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import { createAutoNotification } from "@/app/actions/notifications";
 import {
   FaCamera,
   FaSpinner,
@@ -92,6 +93,11 @@ export default function ProfileForm({ user }: ProfileFormProps) {
       setAvatarUrl(publicUrl);
       router.refresh();
       toast.success("Profile photo updated!", { id: toastId });
+      createAutoNotification({
+        title: "Profile Photo Updated",
+        message: "Your profile picture was changed successfully.",
+        type: "info",
+      });
     } catch (error) {
       console.error(error);
       toast.error("Failed to upload image", { id: toastId });
@@ -120,6 +126,12 @@ export default function ProfileForm({ user }: ProfileFormProps) {
       setIsEditingNames(false);
       router.refresh();
       toast.success("Profile details updated successfully");
+      createAutoNotification({
+        title: "Profile Updated",
+        message:
+          "Your name was changed to " + `${firstName} ${lastName}`.trim() + ".",
+        type: "info",
+      });
     } catch (error) {
       toast.error("Failed to update profile");
     } finally {
@@ -394,6 +406,14 @@ function EmailUpdateModal({
       if (error) throw error;
       toast.success("Email updated successfully!");
       router.refresh();
+      createAutoNotification({
+        title: "Email Address Changed",
+        message:
+          "Your email was updated to " +
+          newEmail +
+          ". If this wasn't you, contact support immediately.",
+        type: "security",
+      });
       onClose();
     } catch (err: any) {
       toast.error("Invalid OTP or expired.");
@@ -513,6 +533,12 @@ function PasswordResetModal({
       });
       if (updateError) throw updateError;
       toast.success("Password updated!");
+      createAutoNotification({
+        title: "Password Changed",
+        message:
+          "Your account password was changed successfully. If this wasn't you, reset your password immediately.",
+        type: "security",
+      });
       onClose();
     } catch (err: any) {
       toast.error(err.message || "Invalid Code");

@@ -1,8 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client"; // Checked your import path
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { useRouter } from "next/navigation";
+import {
+  FaAddressBook,
+  FaPen,
+  FaCheck,
+  FaXmark,
+  FaPhone,
+  FaEnvelope,
+  FaIdCard,
+} from "react-icons/fa6";
+import clsx from "clsx";
+import { toast } from "sonner";
 
 interface NextOfKinProps {
   initialData: {
@@ -37,166 +48,184 @@ export default function NextOfKinForm({ initialData, userId }: NextOfKinProps) {
   const handleSave = async () => {
     setLoading(true);
     try {
-      // 👇 THE FIX: Added the second argument { onConflict: 'user_id' }
       const { error } = await (supabase.from("next_of_kin") as any).upsert(
         {
           user_id: userId,
           ...formData,
-          updated_at: new Date().toISOString(), // This now works since you added the column
+          updated_at: new Date().toISOString(),
         },
-        { onConflict: "user_id" } // <--- CRITICAL: Tells DB "If this user_id exists, update it. If not, create it."
+        { onConflict: "user_id" },
       );
 
       if (error) throw error;
 
       setIsEditing(false);
       router.refresh();
-      alert("Next of Kin saved successfully!");
+      toast.success("Next of Kin saved successfully!");
     } catch (error: any) {
       console.error(error);
-      alert("Error updating profile: " + error.message);
+      toast.error("Error updating profile: " + error.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    // Added h-full and flex logic to match your other cards
-    <div className="card bg-white dark:bg-gray-800 pb-6 h-full rounded-lg shadow-sm dark:shadow-none border border-gray-100 dark:border-gray-700 flex flex-col justify-between">
-      {/* HEADER */}
-      <div>
-        <div className="grid grid-cols-3 items-center border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 px-6">
-          <div className="py-4 col-span-2">
-            <h2 className="text-lg font-bold text-neutral-900 dark:text-white">Next of Kin</h2>
-            <p className="text-sm text-neutral-500 dark:text-gray-400">Manage your NOK details.</p>
+    <div className="p-6">
+      <section className="space-y-6">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-green-50 dark:bg-green-900/10 rounded-lg text-green-600 dark:text-green-400">
+              <FaAddressBook size={16} />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+                Next of Kin
+              </h4>
+              <p className="text-xs text-gray-400 font-medium">
+                Emergency contact details
+              </p>
+            </div>
           </div>
-          <div className="text-end col-span-1">
-            {isEditing ? (
-              <div className="flex justify-end gap-3 text-sm">
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                  disabled={loading}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="text-blue-600 font-bold hover:text-blue-800"
-                  disabled={loading}
-                >
-                  {loading ? "Saving..." : "Save"}
-                </button>
-              </div>
-            ) : (
-              <span
-                onClick={() => setIsEditing(true)}
-                className="text-blue-500 dark:text-blue-400 cursor-pointer hover:underline"
+
+          {isEditing ? (
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsEditing(false)}
+                className="px-3 py-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+                disabled={loading}
               >
-                edit
-              </span>
-            )}
-          </div>
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="px-3 py-1.5 text-xs font-semibold text-white bg-black dark:bg-white dark:text-black rounded-md hover:opacity-80 transition-opacity flex items-center gap-1.5"
+                disabled={loading}
+              >
+                {loading ? (
+                  "Saving..."
+                ) : (
+                  <>
+                    <FaCheck size={10} /> Save
+                  </>
+                )}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            >
+              <FaPen size={10} /> Edit
+            </button>
+          )}
         </div>
 
-        {/* INPUTS */}
-        <div className="space-y-5 px-6 pt-5">
-          <div>
-            <label className="block text-sm font-bold text-gray-500 dark:text-gray-400">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Full Name */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
               Full Name
             </label>
             <input
               name="full_name"
-              disabled={!isEditing}
               value={formData.full_name}
               onChange={handleChange}
-              type="text"
-              placeholder="Add next of kin name"
-              className={`mt-1 w-full px-4 p-2 rounded-md border text-sm text-gray-700 dark:text-gray-200 transition-colors ${
+              disabled={!isEditing}
+              className={clsx(
+                "w-full p-3 rounded-lg border transition-all text-sm outline-none",
                 isEditing
-                  ? "border-blue-300 dark:border-blue-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:outline-none"
-                  : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 cursor-not-allowed"
-              }`}
+                  ? "bg-white dark:bg-gray-900 border-blue-500 ring-4 ring-blue-500/10 text-gray-900 dark:text-white"
+                  : "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-500 cursor-not-allowed",
+              )}
+              placeholder="Full Name"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-gray-500 dark:text-gray-400">
+          {/* NIN */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              NIN (ID Number)
+            </label>
+            <input
+              name="nin"
+              value={formData.nin}
+              onChange={handleChange}
+              disabled={!isEditing}
+              className={clsx(
+                "w-full p-3 rounded-lg border transition-all text-sm outline-none",
+                isEditing
+                  ? "bg-white dark:bg-gray-900 border-blue-500 ring-4 ring-blue-500/10 text-gray-900 dark:text-white"
+                  : "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-500 cursor-not-allowed",
+              )}
+              placeholder="National ID Number"
+            />
+          </div>
+
+          {/* Email */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
               Email
             </label>
             <input
               name="email"
-              disabled={!isEditing}
+              type="email"
               value={formData.email}
               onChange={handleChange}
-              type="email"
-              placeholder="Add email"
-              className={`mt-1 w-full px-4 p-2 rounded-md border text-sm text-gray-700 dark:text-gray-200 transition-colors ${
+              disabled={!isEditing}
+              className={clsx(
+                "w-full p-3 rounded-lg border transition-all text-sm outline-none",
                 isEditing
-                  ? "border-blue-300 dark:border-blue-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:outline-none"
-                  : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 cursor-not-allowed"
-              }`}
+                  ? "bg-white dark:bg-gray-900 border-blue-500 ring-4 ring-blue-500/10 text-gray-900 dark:text-white"
+                  : "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-500 cursor-not-allowed",
+              )}
+              placeholder="Email Address"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-gray-500 dark:text-gray-400">
+          {/* Alt Email */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
               Alternative Email
             </label>
             <input
               name="alt_email"
-              disabled={!isEditing}
+              type="email"
               value={formData.alt_email}
               onChange={handleChange}
-              type="email"
-              placeholder="Add alternative email"
-              className={`mt-1 w-full px-4 p-2 rounded-md border text-sm text-gray-700 dark:text-gray-200 transition-colors ${
+              disabled={!isEditing}
+              className={clsx(
+                "w-full p-3 rounded-lg border transition-all text-sm outline-none",
                 isEditing
-                  ? "border-blue-300 dark:border-blue-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:outline-none"
-                  : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 cursor-not-allowed"
-              }`}
+                  ? "bg-white dark:bg-gray-900 border-blue-500 ring-4 ring-blue-500/10 text-gray-900 dark:text-white"
+                  : "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-500 cursor-not-allowed",
+              )}
+              placeholder="Alt. Email Address"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-gray-500 dark:text-gray-400">
+          {/* Phone */}
+          <div className="space-y-1.5 md:col-span-2">
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
               Phone Number
             </label>
             <input
               name="phone"
-              disabled={!isEditing}
+              type="tel"
               value={formData.phone}
               onChange={handleChange}
-              type="tel"
-              placeholder="Add phone number"
-              className={`mt-1 w-full px-4 p-2 rounded-md border text-sm text-gray-700 dark:text-gray-200 transition-colors ${
-                isEditing
-                  ? "border-blue-300 dark:border-blue-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:outline-none"
-                  : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 cursor-not-allowed"
-              }`}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-gray-500 dark:text-gray-400">
-              National Identification Number (NIN)
-            </label>
-            <input
-              name="nin"
               disabled={!isEditing}
-              value={formData.nin}
-              onChange={handleChange}
-              type="text"
-              placeholder="Add NIN"
-              className={`mt-1 w-full px-4 p-2 rounded-md border text-sm text-gray-700 dark:text-gray-200 transition-colors ${
+              className={clsx(
+                "w-full p-3 rounded-lg border transition-all text-sm outline-none",
                 isEditing
-                  ? "border-blue-300 dark:border-blue-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:outline-none"
-                  : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 cursor-not-allowed"
-              }`}
+                  ? "bg-white dark:bg-gray-900 border-blue-500 ring-4 ring-blue-500/10 text-gray-900 dark:text-white"
+                  : "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-500 cursor-not-allowed",
+              )}
+              placeholder="Phone Number"
             />
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

@@ -27,7 +27,7 @@ function DeleteAccountSection({ email }: { email: string }) {
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [timer, setTimer] = useState(0);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  
+
   const router = useRouter();
   const supabase = getSupabaseBrowserClient();
 
@@ -47,9 +47,9 @@ function DeleteAccountSection({ email }: { email: string }) {
         email,
         options: { shouldCreateUser: false },
       });
-      
+
       if (error) throw error;
-      
+
       setStep("otp");
       setTimer(60); // 60s cooldown
       toast.success(`Verification code sent to ${email}`);
@@ -69,14 +69,14 @@ function DeleteAccountSection({ email }: { email: string }) {
 
     setLoading(true);
     try {
-       // 1. Verify OTP
-       const { error: verifyError } = await supabase.auth.verifyOtp({
-         email,
-         token,
-         type: "email",
-       });
+      // 1. Verify OTP
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: "email",
+      });
 
-       if (verifyError) throw verifyError;
+      if (verifyError) throw verifyError;
 
       // 2. Call the Postgres function to delete
       const { error: deleteError } = await supabase.rpc("delete_own_account");
@@ -96,17 +96,20 @@ function DeleteAccountSection({ email }: { email: string }) {
   };
 
   const handleOtpChange = (index: number, value: string) => {
-      if (isNaN(Number(value))) return;
-      const newOtp = [...otp];
-      newOtp[index] = value.substring(value.length - 1);
-      setOtp(newOtp);
-      if (value && index < 5) inputRefs.current[index + 1]?.focus();
+    if (isNaN(Number(value))) return;
+    const newOtp = [...otp];
+    newOtp[index] = value.substring(value.length - 1);
+    setOtp(newOtp);
+    if (value && index < 5) inputRefs.current[index + 1]?.focus();
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Backspace" && !otp[index] && index > 0) {
-          inputRefs.current[index - 1]?.focus();
-      }
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
   };
 
   return (
@@ -149,7 +152,7 @@ function DeleteAccountSection({ email }: { email: string }) {
               </div>
 
               {step === "warning" ? (
-                 <>
+                <>
                   <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-2">
                     Delete Account?
                   </h3>
@@ -179,33 +182,39 @@ function DeleteAccountSection({ email }: { email: string }) {
                       Cancel
                     </button>
                   </div>
-                 </>
+                </>
               ) : (
                 <>
                   <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-2">
                     Verify Deletion
                   </h3>
-                   <p className="text-sm text-neutral-500 dark:text-gray-400 mb-6">
-                    Enter the 6-digit code sent to <span className="font-bold text-gray-800 dark:text-gray-200">{email}</span>
+                  <p className="text-sm text-neutral-500 dark:text-gray-400 mb-6">
+                    Enter the 6-digit code sent to{" "}
+                    <span className="font-bold text-gray-800 dark:text-gray-200">
+                      {email}
+                    </span>
                   </p>
 
                   <div className="flex justify-center gap-2 mb-8">
-                     {otp.map((digit, index) => (
-                        <input
-                          key={index}
-                          ref={(el) => { inputRefs.current[index] = el }}
-                          type="text"
-                          maxLength={1}
-                          value={digit}
-                          onChange={(e) => handleOtpChange(index, e.target.value)}
-                          onKeyDown={(e) => handleKeyDown(index, e)}
-                          className={`w-10 h-12 text-center text-xl font-bold rounded-lg border outline-none transition-all
-                            ${digit 
-                              ? "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400" 
-                              : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:border-red-400 focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30"
+                    {otp.map((digit, index) => (
+                      <input
+                        key={index}
+                        ref={(el) => {
+                          inputRefs.current[index] = el;
+                        }}
+                        type="text"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                        onKeyDown={(e) => handleKeyDown(index, e)}
+                        className={`w-10 h-12 text-center text-xl font-bold rounded-lg border outline-none transition-all
+                            ${
+                              digit
+                                ? "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"
+                                : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:border-red-400 focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30"
                             }`}
-                        />
-                     ))}
+                      />
+                    ))}
                   </div>
 
                   <div className="flex flex-col gap-3 w-full">
@@ -216,16 +225,18 @@ function DeleteAccountSection({ email }: { email: string }) {
                     >
                       {loading ? "Verifying..." : "Verify & Delete Account"}
                     </button>
-                    
+
                     {timer > 0 ? (
-                      <p className="text-xs text-gray-400">Resend code in {timer}s</p>
+                      <p className="text-xs text-gray-400">
+                        Resend code in {timer}s
+                      </p>
                     ) : (
-                      <button 
+                      <button
                         onClick={handleSendOtp}
                         className="text-xs text-blue-500 font-bold hover:underline"
                         disabled={loading}
                       >
-                         Resend Code
+                        Resend Code
                       </button>
                     )}
 
@@ -281,7 +292,9 @@ export default function SettingsContent({
       className="pb-20"
     >
       <motion.div variants={itemVariants} className="mb-8">
-        <h1 className="text-3xl font-black text-gray-800 dark:text-white">Account Settings</h1>
+        <h1 className="text-3xl font-black text-gray-800 dark:text-white">
+          Account Settings
+        </h1>
         <p className="text-gray-500 dark:text-gray-400 mt-1">
           Manage your identity, security, and legacy.
         </p>
@@ -394,7 +407,8 @@ export default function SettingsContent({
 
                 <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                   <div className="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-200">
-                    <FaApple className="text-black dark:text-white text-lg" /> Apple
+                    <FaApple className="text-black dark:text-white text-lg" />{" "}
+                    Apple
                   </div>
                   <button className="text-xs font-bold text-gray-400 hover:text-red-500">
                     Unlink

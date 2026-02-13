@@ -1,11 +1,13 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 import { redirect } from "next/navigation";
-import SettingsContent from "@/components/dashboard/SettingsContent"; 
+import SettingsContent from "@/components/dashboard/SettingsContent";
 
 export default async function Settings() {
   const supabase = await createSupabaseServerClient();
-  
-  const { data: { user } } = await supabase.auth.getUser();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     redirect("/login");

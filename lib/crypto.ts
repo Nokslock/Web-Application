@@ -67,7 +67,7 @@ export const encryptData = async (data: any): Promise<string> => {
 
   // Return formatted JSON string
   return JSON.stringify({
-    iv: ab2str(iv),
+    iv: ab2str(iv.buffer),
     ciphertext: ab2str(ciphertext),
     v: 1, // versioning for future proofing
   });

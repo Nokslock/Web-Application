@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, Variants } from "framer-motion";
+import { motion, Variants, AnimatePresence } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
@@ -15,9 +15,24 @@ import {
   FaTrash,
   FaTriangleExclamation,
   FaXmark,
+  FaUser,
+  FaPeopleArrows,
+  FaLink,
+  FaScaleBalanced,
 } from "react-icons/fa6";
 import NextOfKinForm from "@/app/dashboard/settings/NextOfKinForm";
 import ProfileForm from "@/app/dashboard/settings/profileForm";
+
+// --- TAB CONFIG ---
+const tabs = [
+  { id: "profile", label: "Profile", icon: FaUser },
+  { id: "next-of-kin", label: "Next of Kin", icon: FaPeopleArrows },
+  { id: "verification", label: "Verification", icon: FaUserShield },
+  { id: "connections", label: "Connections", icon: FaLink },
+  { id: "legal", label: "Legal & Account", icon: FaScaleBalanced },
+] as const;
+
+type TabId = (typeof tabs)[number]["id"];
 
 // --- SUB-COMPONENT: DELETE ACCOUNT SECTION ---
 function DeleteAccountSection({ email }: { email: string }) {
@@ -114,13 +129,13 @@ function DeleteAccountSection({ email }: { email: string }) {
 
   return (
     <>
-      <div className="p-4 rounded-xl border border-red-100 dark:border-red-900/30 bg-red-50/50 dark:bg-red-900/10">
-        <h4 className="text-xs font-bold text-red-400 dark:text-red-300 uppercase tracking-wider mb-2">
+      <div className="p-5 rounded-xl border border-red-100 dark:border-red-900/30 bg-red-50/50 dark:bg-red-900/10">
+        <h4 className="text-sm font-bold text-red-600 dark:text-red-400 mb-2">
           Danger Zone
         </h4>
-        <p className="text-[10px] text-red-600/70 dark:text-red-400/70 mb-4">
-          Permanently delete your account and all encrypted data. This cannot be
-          undone.
+        <p className="text-sm text-red-600/70 dark:text-red-400/70 mb-4 leading-relaxed">
+          Permanently delete your account and all encrypted data. This action
+          cannot be undone.
         </p>
         <button
           onClick={() => {
@@ -128,9 +143,9 @@ function DeleteAccountSection({ email }: { email: string }) {
             setStep("warning");
             setOtp(new Array(6).fill(""));
           }}
-          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-xs font-bold hover:bg-red-100 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-700 transition-colors"
+          className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm font-bold hover:bg-red-100 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-700 transition-colors"
         >
-          <FaTrash size={12} /> Delete Account
+          <FaTrash size={14} /> Delete Account
         </button>
       </div>
 
@@ -257,22 +272,29 @@ function DeleteAccountSection({ email }: { email: string }) {
     </>
   );
 }
+
 // --- ANIMATION VARIANTS ---
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.1 },
+    transition: { staggerChildren: 0.08 },
   },
 };
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 15 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: "easeOut" },
+    transition: { duration: 0.4, ease: "easeOut" },
   },
+};
+
+const panelVariants: Variants = {
+  enter: { opacity: 0, x: 20 },
+  center: { opacity: 1, x: 0, transition: { duration: 0.3, ease: "easeOut" } },
+  exit: { opacity: 0, x: -20, transition: { duration: 0.15 } },
 };
 
 interface SettingsContentProps {
@@ -284,6 +306,8 @@ export default function SettingsContent({
   user,
   nokData,
 }: SettingsContentProps) {
+  const [activeTab, setActiveTab] = useState<TabId>("profile");
+
   return (
     <motion.div
       variants={containerVariants}
@@ -291,6 +315,7 @@ export default function SettingsContent({
       animate="visible"
       className="pb-20"
     >
+      {/* Header */}
       <motion.div variants={itemVariants} className="mb-8">
         <h1 className="text-3xl font-black text-gray-800 dark:text-white">
           Account Settings
@@ -300,153 +325,260 @@ export default function SettingsContent({
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
-        {/* --- LEFT COLUMN: MAIN FORMS (Wide) --- */}
-        <div className="xl:col-span-2 space-y-8">
-          {/* 1. PROFILE FORM */}
-          <motion.section variants={itemVariants}>
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
-                <h2 className="text-base font-bold text-neutral-900 dark:text-white">
-                  Personal Information
-                </h2>
-                <p className="text-sm text-neutral-500 dark:text-gray-400 mt-1">
-                  Manage your profile details and preferences.
-                </p>
-              </div>
-              <div className="p-0">
-                <ProfileForm user={user} />
-              </div>
-            </div>
-          </motion.section>
-
-          {/* 2. NEXT OF KIN FORM */}
-          <motion.section variants={itemVariants}>
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="p-0">
-                <NextOfKinForm initialData={nokData} userId={user.id} />
-              </div>
-            </div>
-          </motion.section>
-        </div>
-
-        {/* --- RIGHT COLUMN: STATUS & ACTIONS (Narrower) --- */}
-        <div className="xl:col-span-1 space-y-8">
-          {/* 3. IDENTITY VERIFICATION (KYC) */}
-          <motion.section variants={itemVariants}>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm dark:shadow-none border border-blue-100 dark:border-gray-700 relative overflow-hidden">
-              {/* Decorative Background */}
-              <div className="absolute top-0 right-0 w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-bl-full -z-0"></div>
-
-              <div className="flex items-center gap-3 mb-4 relative z-10">
-                <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                  <FaUserShield size={18} />
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-900 dark:text-white">
-                    Identity Verification
-                  </h3>
-                  <span className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
-                    Pending
-                  </span>
-                </div>
-              </div>
-
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 leading-relaxed">
-                To unlock full vault features and higher limits, please complete
-                your KYC verification.
-              </p>
-
-              <div className="space-y-4 mb-6">
-                <div className="flex items-start gap-3">
-                  <FaPassport className="text-gray-400 mt-1" />
-                  <div>
-                    <p className="text-xs font-bold text-gray-700 dark:text-gray-300">
-                      Government ID Upload
-                    </p>
-                    <p className="text-[10px] text-gray-400 dark:text-gray-500">
-                      Passport, NIN, or Driver's License
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <FaCamera className="text-gray-400 mt-1" />
-                  <div>
-                    <p className="text-xs font-bold text-gray-700 dark:text-gray-300">
-                      Liveness Check
-                    </p>
-                    <p className="text-[10px] text-gray-400 dark:text-gray-500">
-                      Selfie verification match
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <button className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-200 dark:shadow-none transition-all">
-                Start Verification
-              </button>
-            </div>
-          </motion.section>
-
-          {/* 4. THIRD PARTY CONNECTIONS */}
-          <motion.section variants={itemVariants}>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-200 dark:border-gray-700">
-              <h3 className="font-bold text-gray-900 dark:text-white mb-4">
-                Connected Accounts
-              </h3>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <div className="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-200">
-                    <FaGoogle className="text-red-500 text-lg" /> Google
-                  </div>
-                  <button className="text-xs font-bold text-gray-400 hover:text-red-500">
-                    Unlink
+      <motion.div
+        variants={itemVariants}
+        className="flex flex-col lg:flex-row gap-8"
+      >
+        {/* --- SIDEBAR TABS --- */}
+        <nav className="lg:w-56 flex-shrink-0">
+          <div className="lg:sticky lg:top-24 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-2 shadow-sm">
+            {/* Mobile: horizontal scroll, Desktop: vertical stack */}
+            <div className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible no-scrollbar">
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`
+                      flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200
+                      ${
+                        isActive
+                          ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 shadow-sm"
+                          : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white"
+                      }
+                    `}
+                  >
+                    <tab.icon
+                      size={16}
+                      className={
+                        isActive
+                          ? "text-blue-600 dark:text-blue-400"
+                          : "text-gray-400 dark:text-gray-500"
+                      }
+                    />
+                    {tab.label}
                   </button>
-                </div>
+                );
+              })}
+            </div>
+          </div>
+        </nav>
 
-                <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <div className="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-200">
-                    <FaApple className="text-black dark:text-white text-lg" />{" "}
-                    Apple
+        {/* --- MAIN CONTENT PANEL --- */}
+        <div className="flex-1 min-w-0">
+          <AnimatePresence mode="wait">
+            {/* PROFILE TAB */}
+            {activeTab === "profile" && (
+              <motion.div
+                key="profile"
+                variants={panelVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+              >
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-700">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                      Personal Information
+                    </h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      Manage your profile details and preferences.
+                    </p>
                   </div>
-                  <button className="text-xs font-bold text-gray-400 hover:text-red-500">
-                    Unlink
-                  </button>
+                  <div className="p-0">
+                    <ProfileForm user={user} />
+                  </div>
                 </div>
-              </div>
-            </div>
-          </motion.section>
+              </motion.div>
+            )}
 
-          {/* 5. LEGAL & DANGER ZONE */}
-          <motion.section variants={itemVariants} className="space-y-6">
-            {/* Legal Links */}
-            <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
-                Legal
-              </h4>
-              <div className="space-y-2">
-                <a
-                  href="/privacy"
-                  className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  <FaFileContract className="text-gray-400" /> Privacy Policy
-                </a>
-                <a
-                  href="/terms"
-                  className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  <FaFileContract className="text-gray-400" /> Terms &
-                  Conditions
-                </a>
-              </div>
-            </div>
+            {/* NEXT OF KIN TAB */}
+            {activeTab === "next-of-kin" && (
+              <motion.div
+                key="next-of-kin"
+                variants={panelVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+              >
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  <div className="p-0">
+                    <NextOfKinForm initialData={nokData} userId={user.id} />
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
-            {/* DANGER ZONE (Functional Component) */}
-            <DeleteAccountSection email={user.email} />
-          </motion.section>
+            {/* VERIFICATION TAB */}
+            {activeTab === "verification" && (
+              <motion.div
+                key="verification"
+                variants={panelVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+              >
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  <div className="p-6 md:p-8">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="h-12 w-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                        <FaUserShield size={22} />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                          Identity Verification
+                        </h2>
+                        <span className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs font-bold px-2.5 py-0.5 rounded-full uppercase">
+                          Pending
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed max-w-lg">
+                      To unlock full vault features and higher limits, please
+                      complete your KYC verification.
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                      <div className="flex items-start gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30">
+                        <div className="h-10 w-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                          <FaPassport className="text-gray-500 dark:text-gray-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                            Government ID Upload
+                          </p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                            Passport, NIN, or Driver&apos;s License
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30">
+                        <div className="h-10 w-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                          <FaCamera className="text-gray-500 dark:text-gray-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-gray-700 dark:text-gray-200">
+                            Liveness Check
+                          </p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                            Selfie verification match
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button className="w-full sm:w-auto px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-200 dark:shadow-none transition-all">
+                      Start Verification
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* CONNECTIONS TAB */}
+            {activeTab === "connections" && (
+              <motion.div
+                key="connections"
+                variants={panelVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+              >
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-700">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                      Connected Accounts
+                    </h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      Manage third-party login providers linked to your account.
+                    </p>
+                  </div>
+                  <div className="p-6 space-y-3">
+                    <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-red-50 dark:bg-red-900/20 rounded-lg flex items-center justify-center">
+                          <FaGoogle className="text-red-500 text-lg" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                            Google
+                          </p>
+                          <p className="text-xs text-gray-400">Connected</p>
+                        </div>
+                      </div>
+                      <button className="text-xs font-bold text-gray-400 hover:text-red-500 px-3 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors">
+                        Unlink
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                          <FaApple className="text-black dark:text-white text-lg" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                            Apple
+                          </p>
+                          <p className="text-xs text-gray-400">Connected</p>
+                        </div>
+                      </div>
+                      <button className="text-xs font-bold text-gray-400 hover:text-red-500 px-3 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors">
+                        Unlink
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* LEGAL & ACCOUNT TAB */}
+            {activeTab === "legal" && (
+              <motion.div
+                key="legal"
+                variants={panelVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                className="space-y-6"
+              >
+                {/* Legal Links Card */}
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-700">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                      Legal
+                    </h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      Review our policies and terms.
+                    </p>
+                  </div>
+                  <div className="p-6 space-y-2">
+                    <a
+                      href="/privacy"
+                      className="flex items-center gap-3 p-3 rounded-xl text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    >
+                      <FaFileContract className="text-gray-400" /> Privacy
+                      Policy
+                    </a>
+                    <a
+                      href="/terms"
+                      className="flex items-center gap-3 p-3 rounded-xl text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    >
+                      <FaFileContract className="text-gray-400" /> Terms &
+                      Conditions
+                    </a>
+                  </div>
+                </div>
+
+                {/* Danger Zone Card */}
+                <DeleteAccountSection email={user.email} />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }

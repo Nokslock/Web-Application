@@ -12,10 +12,10 @@ import { User } from "@supabase/supabase-js";
 import { FaArrowRight } from "react-icons/fa6";
 
 const links = [
-  { name: "About", href: "#" },
-  { name: "Features", href: "#" },
-  { name: "Contact", href: "#" },
-  { name: "Download", href: "#" },
+  { name: "Features", href: "/#features" },
+  { name: "How It Works", href: "/#how-it-works" },
+  { name: "Security", href: "/#security" },
+  { name: "Contact", href: "/#contact" },
 ];
 
 export default function NavLinks() {

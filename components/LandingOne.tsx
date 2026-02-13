@@ -176,7 +176,7 @@ export default function LandingOne() {
       </section>
 
       {/* --- SECTION 3: CORE FEATURES --- */}
-      <section className="px-5">
+      <section id="features" className="px-5 scroll-mt-24">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -214,7 +214,10 @@ export default function LandingOne() {
       </section>
 
       {/* --- SECTION 4: HOW IT WORKS --- */}
-      <section className="bg-gray-50 dark:bg-gray-900 py-20 px-5">
+      <section
+        id="how-it-works"
+        className="bg-gray-50 dark:bg-gray-900 py-20 px-5 scroll-mt-24"
+      >
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             {/* Steps Text */}
@@ -361,7 +364,7 @@ export default function LandingOne() {
       </section>
 
       {/* --- SECTION 5: PRIVACY OBSESSIVES --- */}
-      <section className="px-5 pt-10">
+      <section id="security" className="px-5 pt-10 scroll-mt-24">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -400,7 +403,7 @@ export default function LandingOne() {
       </section>
 
       {/* --- SECTION 6: CTA BANNER --- */}
-      <section className="w-full px-5">
+      <section id="contact" className="w-full px-5 scroll-mt-24">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}

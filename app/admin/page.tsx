@@ -3,6 +3,7 @@ import AdminStats from "@/components/admin/AdminStats";
 import SignupChart from "@/components/admin/SignupChart";
 import UserBreakdown from "@/components/admin/UserBreakdown";
 import UsersTable from "@/components/admin/UsersTable";
+import NotificationComposer from "@/components/admin/NotificationComposer";
 import { Suspense } from "react";
 import { FaSpinner } from "react-icons/fa6";
 
@@ -66,10 +67,17 @@ export default async function AdminPage() {
         </div>
       </div>
 
-      {/* Users Table */}
-      <Suspense fallback={<LoadingSpinner />}>
-        <UsersTable users={users} />
-      </Suspense>
+      {/* Notification Composer + Users Table side by side on large screens */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-1">
+          <NotificationComposer users={users} />
+        </div>
+        <div className="xl:col-span-2">
+          <Suspense fallback={<LoadingSpinner />}>
+            <UsersTable users={users} />
+          </Suspense>
+        </div>
+      </div>
     </div>
   );
 }

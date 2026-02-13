@@ -1,53 +1,52 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { FaBell } from "react-icons/fa6";
 import { IoMailUnread, IoShieldCheckmark, IoWarning } from "react-icons/io5";
+import {
+  getMyNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+} from "@/app/actions/notifications";
 
-// Dummy Data
-const NOTIFICATIONS = [
-  {
-    id: 1,
-    title: "New Login Detected",
-    message: "A new login was detected from Lagos, Nigeria.",
-    time: "2 min ago",
-    type: "security",
-    unread: true,
-  },
-  {
-    id: 2,
-    title: "Vault Backup Successful",
-    message: "Your encrypted vault was successfully backed up to the cloud.",
-    time: "1 hour ago",
-    type: "success",
-    unread: true,
-  },
-  {
-    id: 3,
-    title: "Subscription Expiring",
-    message: "Your premium plan expires in 3 days. Renew now to avoid interruption.",
-    time: "5 hours ago",
-    type: "warning",
-    unread: false,
-  },
-  {
-    id: 4,
-    title: "Welcome to Nockslock",
-    message: "Thanks for joining! Here are some tips to get started.",
-    time: "1 day ago",
-    type: "info",
-    unread: false,
-  },
-];
+type Notification = {
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  is_read: boolean;
+  created_at: string;
+};
+
+function timeAgo(dateStr: string): string {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
 
 export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [initialLoaded, setInitialLoaded] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown if clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     }
@@ -55,7 +54,58 @@ export default function NotificationBell() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const unreadCount = NOTIFICATIONS.filter((n) => n.unread).length;
+  // Fetch notifications
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await getMyNotifications();
+      setNotifications(data);
+      setInitialLoaded(true);
+    } catch {
+      // Silently fail — user might not be logged in
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Fetch on mount and poll every 30 seconds
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
+
+  // Also refetch when dropdown is opened
+  useEffect(() => {
+    if (isOpen) {
+      fetchNotifications();
+    }
+  }, [isOpen, fetchNotifications]);
+
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+
+  const handleMarkRead = async (id: string) => {
+    // Optimistic update
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)),
+    );
+    try {
+      await markNotificationRead(id);
+    } catch {
+      // Revert on error
+      fetchNotifications();
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    // Optimistic update
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    try {
+      await markAllNotificationsRead();
+    } catch {
+      fetchNotifications();
+    }
+  };
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -69,16 +119,16 @@ export default function NotificationBell() {
         }`}
       >
         <FaBell className="text-lg" />
-        
+
         {/* Red Dot Counter */}
         {unreadCount > 0 && (
           <span className="absolute top-0 right-0 -mt-1 -mr-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white dark:ring-gray-900">
-            {unreadCount}
+            {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
 
-      {/* Animated Overlay */}
+      {/* Dropdown */}
       <div
         className={`absolute right-0 mt-3 w-80 md:w-96 origin-top-right transform rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl transition-all duration-200 ease-out z-50 ${
           isOpen
@@ -88,55 +138,90 @@ export default function NotificationBell() {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800">
-          <h3 className="font-semibold text-gray-800 dark:text-white">Notifications</h3>
-          <button className="text-xs text-end text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
-            Mark all as read
-          </button>
+          <h3 className="font-semibold text-gray-800 dark:text-white">
+            Notifications
+          </h3>
+          {unreadCount > 0 && (
+            <button
+              onClick={handleMarkAllRead}
+              className="text-xs text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+            >
+              Mark all as read
+            </button>
+          )}
         </div>
 
         {/* Scrollable List */}
         <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
-          {NOTIFICATIONS.map((notification) => (
-            <div
-              key={notification.id}
-              className={`group flex gap-4 border-b border-gray-50 dark:border-gray-800 px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer ${
-                notification.unread ? "bg-blue-50/30 dark:bg-blue-900/10" : "bg-transparent"
-              }`}
-            >
-              {/* Icon based on type */}
-              <div className="flex-shrink-0 mt-1">
-                <NotificationIcon type={notification.type} />
-              </div>
-
-              {/* Content */}
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <p className={`text-sm ${notification.unread ? 'font-semibold text-gray-900 dark:text-gray-100' : 'font-medium text-gray-700 dark:text-gray-400'}`}>
-                    {notification.title}
-                  </p>
-                  <span className="text-[10px] text-gray-400 dark:text-gray-500 whitespace-nowrap ml-2">
-                    {notification.time}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
-                  {notification.message}
-                </p>
-              </div>
-
-              {/* Unread Indicator Dot */}
-              {notification.unread && (
-                <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500 dark:bg-blue-400" />
-              )}
+          {loading && !initialLoaded ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
             </div>
-          ))}
+          ) : notifications.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+              <FaBell size={24} className="mb-2 opacity-30" />
+              <p className="text-sm font-medium">No notifications yet</p>
+              <p className="text-xs mt-0.5">You&apos;re all caught up!</p>
+            </div>
+          ) : (
+            notifications.map((notification) => (
+              <div
+                key={notification.id}
+                onClick={() => {
+                  if (!notification.is_read) {
+                    handleMarkRead(notification.id);
+                  }
+                }}
+                className={`group flex gap-4 border-b border-gray-50 dark:border-gray-800 px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer ${
+                  !notification.is_read
+                    ? "bg-blue-50/30 dark:bg-blue-900/10"
+                    : "bg-transparent"
+                }`}
+              >
+                {/* Icon based on type */}
+                <div className="flex-shrink-0 mt-1">
+                  <NotificationIcon type={notification.type} />
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start gap-2">
+                    <p
+                      className={`text-sm truncate ${
+                        !notification.is_read
+                          ? "font-semibold text-gray-900 dark:text-gray-100"
+                          : "font-medium text-gray-700 dark:text-gray-400"
+                      }`}
+                    >
+                      {notification.title}
+                    </p>
+                    <span className="text-[10px] text-gray-400 dark:text-gray-500 whitespace-nowrap ml-2 flex-shrink-0">
+                      {timeAgo(notification.created_at)}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
+                    {notification.message}
+                  </p>
+                </div>
+
+                {/* Unread Indicator Dot */}
+                {!notification.is_read && (
+                  <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500 dark:bg-blue-400" />
+                )}
+              </div>
+            ))
+          )}
         </div>
 
         {/* Footer */}
-        <div className="p-2 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl border-t border-gray-100 dark:border-gray-800">
-          <button className="w-full py-2 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50 rounded-lg transition-colors">
-            View all notifications
-          </button>
-        </div>
+        {notifications.length > 0 && (
+          <div className="p-2 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl border-t border-gray-100 dark:border-gray-800">
+            <p className="w-full py-2 text-xs font-medium text-gray-400 text-center">
+              {notifications.length} notification
+              {notifications.length !== 1 ? "s" : ""}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -157,16 +242,17 @@ function NotificationIcon({ type }: { type: string }) {
           <IoShieldCheckmark />
         </div>
       );
-    case "info":
-      return (
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-500 dark:bg-blue-900/30 dark:text-blue-400">
-          <IoMailUnread />
-        </div>
-      );
-    default:
+    case "warning":
       return (
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100 text-orange-500 dark:bg-orange-900/30 dark:text-orange-400">
           <IoWarning />
+        </div>
+      );
+    case "info":
+    default:
+      return (
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-500 dark:bg-blue-900/30 dark:text-blue-400">
+          <IoMailUnread />
         </div>
       );
   }

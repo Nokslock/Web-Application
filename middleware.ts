@@ -55,18 +55,35 @@ export async function middleware(request: NextRequest) {
           });
         },
       },
-    }
+    },
   );
 
   // 3. Check User Session
   // This refreshes the token if expired and gets the user safely
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // 4. Protect the Dashboard Route
   if (request.nextUrl.pathname.startsWith("/dashboard")) {
     if (!user) {
       // If no user found, redirect to Access Denied (or Login)
       return NextResponse.redirect(new URL("/access-denied", request.url));
+    }
+  }
+
+  // 5. Protect the Admin Route
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    if (!user) {
+      return NextResponse.redirect(new URL("/access-denied", request.url));
+    }
+
+    // Check for super_admin role
+    const role = user.user_metadata?.role;
+    if (role !== "super_admin") {
+      // Allow access to setup-admin for initial setup if needed, but better to lock it down.
+      // For now, redirect strictly.
+      return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
 

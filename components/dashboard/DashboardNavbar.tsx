@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaBars, FaXmark, FaCrown } from "react-icons/fa6";
+import { FaBars, FaXmark, FaCrown, FaShieldHalved } from "react-icons/fa6";
 import { TbLayoutDashboardFilled } from "react-icons/tb";
 import { IoSettingsSharp } from "react-icons/io5";
 import { BsFillShieldFill } from "react-icons/bs";
@@ -93,6 +93,17 @@ export default function DashboardNavbar({
 
           {/* RIGHT: Actions (Theme, User, Mobile Toggle) */}
           <div className="flex items-center justify-end gap-4">
+            {/* Admin Link (Only for Super Admins) */}
+            {user?.user_metadata?.role === "super_admin" && (
+              <Link
+                href="/admin"
+                className="hidden sm:flex group items-center gap-2 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 border border-red-100 dark:border-red-900/50 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all hover:scale-105"
+              >
+                <FaShieldHalved className="text-xs" />
+                <span className="text-xs font-bold">Admin</span>
+              </Link>
+            )}
+
             {/* Promo Button (Hidden on small mobile) */}
             <Link
               href="/pricing"
@@ -200,6 +211,17 @@ export default function DashboardNavbar({
                     <SignOutButton />
                   </div>
                 </div>
+
+                {/* Mobile Admin Link */}
+                {user?.user_metadata?.role === "super_admin" && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="mt-3 flex justify-center items-center gap-2 px-4 py-2 rounded-lg bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 font-bold text-sm w-full"
+                  >
+                    <FaShieldHalved size={12} /> Access Admin Portal
+                  </Link>
+                )}
               </div>
             </div>
           </motion.div>

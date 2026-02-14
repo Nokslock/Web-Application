@@ -1,5 +1,4 @@
 import LoginGoogle from "./actions/loginGoogle";
-import LoginApple from "./actions/loginApple";
 import LoginForm from "./actions/loginForm";
 import Link from "next/link";
 
@@ -14,10 +13,10 @@ export default function LoginPage() {
           Securely manage your digital assets with enterprise-grade protection.
         </p>
       </div>
-      
+
       <div className="w-full">
         <LoginForm />
-        
+
         <div className="relative my-8">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-200 dark:border-gray-800"></div>
@@ -31,16 +30,16 @@ export default function LoginPage() {
 
         <div className="flex flex-col sm:flex-row gap-4 mb-10">
           <div className="flex-1">
-            <LoginApple />
-          </div>
-          <div className="flex-1">
             <LoginGoogle />
           </div>
         </div>
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400">
           No account yet? &nbsp;
-          <Link href="/register" className="font-bold text-blue-600 dark:text-blue-500 hover:underline">
+          <Link
+            href="/register"
+            className="font-bold text-blue-600 dark:text-blue-500 hover:underline"
+          >
             Register for access
           </Link>
         </p>
@@ -48,7 +47,10 @@ export default function LoginPage() {
 
       <div className="mt-12 pt-6 border-t border-gray-100 dark:border-gray-900 flex justify-between items-center text-xs text-gray-400">
         <div className="font-medium">&copy; Nokslock 2025</div>
-        <Link href="#" className="hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+        <Link
+          href="#"
+          className="hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+        >
           Privacy & Security
         </Link>
       </div>

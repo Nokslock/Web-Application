@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import { createAutoNotification } from "@/app/actions/notifications";
 import AuthButton from "@/components/AuthButton";
 import Link from "next/link";
 import { FaAngleLeft } from "react-icons/fa6";
@@ -11,27 +12,35 @@ export default function OtpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = getSupabaseBrowserClient();
-  
+
   const email = searchParams.get("email");
 
   const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleChange = (index: number, value: string) => {
     if (isNaN(Number(value))) return;
     const newOtp = [...otp];
-    newOtp[index] = value.substring(value.length - 1); 
+    newOtp[index] = value.substring(value.length - 1);
     setOtp(newOtp);
     if (value && index < 5 && inputRefs.current[index + 1]) {
       inputRefs.current[index + 1]?.focus();
     }
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0 && inputRefs.current[index - 1]) {
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (
+      e.key === "Backspace" &&
+      !otp[index] &&
+      index > 0 &&
+      inputRefs.current[index - 1]
+    ) {
       inputRefs.current[index - 1]?.focus();
     }
   };
@@ -72,14 +81,20 @@ export default function OtpForm() {
     const { error } = await supabase.auth.verifyOtp({
       email,
       token,
-      type: "signup", 
+      type: "signup",
     });
 
     if (error) {
       setError(error.message);
       setLoading(false);
     } else {
-      router.push("/dashboard"); 
+      createAutoNotification({
+        title: "Welcome to Nokslock! \ud83c\udf89",
+        message:
+          "Your vault has been created successfully. You're now set up to securely store, organize, and protect your most important digital assets.\n\nHere are a few things to get started:\n\u2022 Visit the Vault to begin adding your first entries\n\u2022 Head to Settings to complete your profile and add a Next of Kin\n\u2022 Enable extra security measures to keep your data safe\n\nIf you have any questions, our support team is always here to help. Welcome aboard!",
+        type: "success",
+      });
+      router.push("/dashboard");
       router.refresh();
     }
   };
@@ -95,11 +110,11 @@ export default function OtpForm() {
           </div>
         </Link>
       </div>
-      
+
       <h2 className="lg:text-5xl md:text-4xl font-bold mb-8 text-center text-gray-800">
         Enter Verification Code
       </h2>
-      
+
       <p className="text-center text-lg pb-5 text-gray-600">
         We've sent a verification code to{" "}
         <span className="font-bold text-gray-900">{email || "your email"}</span>
@@ -117,7 +132,9 @@ export default function OtpForm() {
             {otp.map((digit, index) => (
               <div key={index} className="w-12 h-12 md:w-14 md:h-14 relative">
                 <input
-                  ref={(el) => { inputRefs.current[index] = el }}
+                  ref={(el) => {
+                    inputRefs.current[index] = el;
+                  }}
                   type="text"
                   maxLength={1}
                   value={digit}
@@ -126,9 +143,10 @@ export default function OtpForm() {
                   onPaste={handlePaste}
                   className={`
                     w-full h-full text-center text-2xl font-semibold rounded-lg border outline-none transition-all
-                    ${digit 
-                      ? "border-blue-500 bg-blue-50 text-blue-600" 
-                      : "border-gray-300 bg-white text-gray-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                    ${
+                      digit
+                        ? "border-blue-500 bg-blue-50 text-blue-600"
+                        : "border-gray-300 bg-white text-gray-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                     }
                   `}
                 />
@@ -136,8 +154,8 @@ export default function OtpForm() {
             ))}
           </div>
 
-          <AuthButton 
-            variant={isComplete ? "primary" : "disabled"} 
+          <AuthButton
+            variant={isComplete ? "primary" : "disabled"}
             type="submit"
             loading={loading}
             disabled={!isComplete || loading}
@@ -145,10 +163,13 @@ export default function OtpForm() {
             Verify OTP
           </AuthButton>
         </form>
-        
+
         <p className="text-center mt-6 text-gray-500">
           Didn't receive the code?{" "}
-          <button type="button" className="text-blue-500 font-semibold hover:underline">
+          <button
+            type="button"
+            className="text-blue-500 font-semibold hover:underline"
+          >
             Resend
           </button>
         </p>

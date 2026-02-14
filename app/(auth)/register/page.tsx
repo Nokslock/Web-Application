@@ -1,5 +1,4 @@
 import Link from "next/link";
-import RegisterApple from "./actions/registerApple";
 import RegisterGoogle from "./actions/registerGoogle";
 import RegisterForm from "./actions/registerForm";
 
@@ -12,13 +11,14 @@ export default function RegisterPage() {
             Create Vault Access
           </h1>
           <p className="text-base text-gray-500 dark:text-gray-400 md:text-lg">
-            Initialize your secure personal space and protect your digital assets.
+            Initialize your secure personal space and protect your digital
+            assets.
           </p>
         </div>
-        
+
         <div className="w-full">
           <RegisterForm />
-          
+
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-200 dark:border-gray-800"></div>
@@ -32,16 +32,16 @@ export default function RegisterPage() {
 
           <div className="flex flex-col sm:flex-row gap-4 mb-10">
             <div className="flex-1">
-              <RegisterApple />
-            </div>
-            <div className="flex-1">
               <RegisterGoogle />
             </div>
           </div>
 
           <p className="text-center text-sm text-gray-500 dark:text-gray-400">
             Already have an account? &nbsp;
-            <Link href="/login" className="font-bold text-blue-600 dark:text-blue-500 hover:underline">
+            <Link
+              href="/login"
+              className="font-bold text-blue-600 dark:text-blue-500 hover:underline"
+            >
               Access Vault
             </Link>
           </p>
@@ -49,7 +49,10 @@ export default function RegisterPage() {
 
         <div className="mt-12 pt-6 border-t border-gray-100 dark:border-gray-900 flex justify-between items-center text-xs text-gray-400">
           <div className="font-medium">&copy; Nokslock 2025</div>
-          <Link href="#" className="hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+          <Link
+            href="#"
+            className="hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+          >
             Privacy & Security
           </Link>
         </div>

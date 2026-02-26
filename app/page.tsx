@@ -1,137 +1,174 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-// 1. Import 'Variants' to fix TypeScript errors
-import { motion, Variants } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import BgImg from "@/public/hero-img.png";
-import "./globals.css";
 import NavBar from "@/components/NavBar";
 import AuthButton from "@/components/AuthButton";
-import LandingOne from "@/components/LandingOne";
+import LandingSections from "@/components/LandingSections";
 import Footer from "@/components/Footer";
 
-// 2. Apply ': Variants' type here 👇
-const fadeInUp: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
-};
-
-const staggerContainer: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.2 },
-  },
-};
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
+  const heroRef = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const subRef = useRef<HTMLParagraphElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const badgeRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+      tl.fromTo(
+        badgeRef.current,
+        { opacity: 0, y: 20, scale: 0.9 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.6 }
+      )
+        .fromTo(
+          headlineRef.current,
+          { opacity: 0, y: 40 },
+          { opacity: 1, y: 0, duration: 0.8 },
+          "-=0.3"
+        )
+        .fromTo(
+          subRef.current,
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 0.6 },
+          "-=0.4"
+        )
+        .fromTo(
+          ctaRef.current,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.5 },
+          "-=0.3"
+        )
+        .fromTo(
+          imageRef.current,
+          { opacity: 0, y: 60, scale: 0.95 },
+          { opacity: 1, y: 0, scale: 1, duration: 1 },
+          "-=0.6"
+        );
+
+      // Parallax on hero image
+      gsap.to(imageRef.current, {
+        y: -60,
+        ease: "none",
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: 1,
+        },
+      });
+    }, heroRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <div className="bg-white dark:bg-gray-950 min-h-screen flex flex-col overflow-x-hidden transition-colors duration-300">
       <NavBar />
 
-      {/* Hero Section */}
-      <div className="w-full px-5 pt-32 pb-20 lg:px-8 lg:pt-40 lg:pb-32 hero-section relative">
-        {/* Optional: Subtle Background Element */}
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-blue-50/50 dark:from-blue-950/30 to-transparent -z-10 pointer-events-none" />
+      {/* ===== HERO ===== */}
+      <section
+        ref={heroRef}
+        className="relative w-full min-h-screen flex items-center pt-24 pb-16 lg:pt-32 lg:pb-24 px-5 lg:px-8 overflow-hidden"
+      >
+        {/* Background accents */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-gradient-radial from-blue-500/10 via-transparent to-transparent rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-indigo-500/8 to-transparent rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            {/* LEFT COLUMN: Text (Animated) */}
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={staggerContainer}
-              className="flex flex-col items-center text-center lg:items-start lg:text-left order-1"
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="flex flex-col items-center text-center">
+            {/* Badge */}
+            <div ref={badgeRef} className="mb-6 opacity-0">
+              <span className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-bold px-4 py-2 rounded-full border border-blue-100 dark:border-blue-800/50">
+                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                Now in v1.0 — Free to get started
+              </span>
+            </div>
+
+            {/* Headline */}
+            <h1
+              ref={headlineRef}
+              className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight text-gray-900 dark:text-white mb-6 leading-[1.05] max-w-5xl opacity-0"
             >
-              <motion.div variants={fadeInUp} className="mb-4">
-                <span className="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
-                  v1.0 Released
-                </span>
-              </motion.div>
+              Your digital life,{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+                secured forever.
+              </span>
+            </h1>
 
-              <motion.h1
-                variants={fadeInUp}
-                className="text-4xl font-black tracking-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl mb-6 leading-tight"
-              >
-                Secure your digital life <br className="hidden lg:block" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                  without the complexity.
-                </span>
-              </motion.h1>
-
-              <motion.p
-                variants={fadeInUp}
-                className="text-lg leading-8 text-gray-600 dark:text-gray-300 mb-8 max-w-lg"
-              >
-                Nockslock is the all-in-one vault for your passwords, crypto
-                keys, and digital inheritance. Bank-grade encryption meets
-                beautiful design.
-              </motion.p>
-
-              {/* Button Container */}
-              <motion.div
-                variants={fadeInUp}
-                className="w-full sm:w-auto flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
-              >
-                <div className="w-full sm:w-auto">
-                  <Link href="/register">
-                    <AuthButton
-                      variant="dark"
-                      type="button"
-                      className="w-full shadow-lg shadow-blue-900/20 hover:shadow-xl transition-all"
-                    >
-                      Get Started for Free
-                    </AuthButton>
-                  </Link>
-                </div>
-                <div className="w-full sm:w-auto">
-                  <button className="w-full px-6 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                    View Demo
-                  </button>
-                </div>
-              </motion.div>
-
-              <motion.p
-                variants={fadeInUp}
-                className="mt-6 text-sm text-gray-400 dark:text-gray-500"
-              >
-                Trusted by 10,000+ users • No credit card required
-              </motion.p>
-            </motion.div>
-
-            {/* RIGHT COLUMN: Image (Floating only, no blur) */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="flex justify-center lg:justify-end order-2 relative min-w-0"
+            {/* Subheadline */}
+            <p
+              ref={subRef}
+              className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-2xl leading-relaxed opacity-0"
             >
-              {/* Floating Motion Wrapper */}
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{
-                  duration: 5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="w-full max-w-lg lg:max-w-full"
-              >
+              Nockslock is your all-in-one vault for passwords, crypto keys,
+              files, and digital inheritance. Bank-grade encryption meets
+              stunning simplicity.
+            </p>
+
+            {/* CTAs */}
+            <div
+              ref={ctaRef}
+              className="flex flex-col sm:flex-row gap-4 mb-6 opacity-0"
+            >
+              <Link href="/register">
+                <AuthButton
+                  variant="dark"
+                  type="button"
+                  className="shadow-lg shadow-blue-900/20 hover:shadow-xl transition-all px-8 py-4 text-base"
+                >
+                  Get Started — It&apos;s Free
+                </AuthButton>
+              </Link>
+              <Link href="/#how-it-works">
+                <button className="px-8 py-4 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-base">
+                  See How It Works
+                </button>
+              </Link>
+            </div>
+
+            <p className="text-sm text-gray-400 dark:text-gray-500 mb-12 opacity-0" ref={ctaRef}>
+              Trusted by 10,000+ users • No credit card required
+            </p>
+
+            {/* Hero Image */}
+            <div ref={imageRef} className="w-full max-w-6xl mx-auto opacity-0">
+              <div className="relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-2xl shadow-black/10 dark:shadow-black/30">
+                {/* Browser chrome bar */}
+                <div className="bg-gray-100 dark:bg-gray-800 px-4 py-3 flex items-center gap-2 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-red-400" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                    <div className="w-3 h-3 rounded-full bg-green-400" />
+                  </div>
+                  <div className="flex-1 flex justify-center">
+                    <div className="bg-white dark:bg-gray-900 rounded-lg px-4 py-1 text-xs text-gray-400 font-mono w-64 text-center">
+                      nockslock.com/dashboard
+                    </div>
+                  </div>
+                </div>
                 <Image
                   src={BgImg}
-                  alt="Nockslock Security Dashboard"
+                  alt="Nockslock Dashboard Preview"
                   priority
-                  width={640}
-                  height={640}
-                  className="relative w-full h-auto object-contain drop-shadow-2xl"
+                  className="w-full h-auto"
                 />
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <LandingOne />
+      <LandingSections />
       <Footer />
     </div>
   );

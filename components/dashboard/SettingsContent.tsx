@@ -223,11 +223,10 @@ function DeleteAccountSection({ email }: { email: string }) {
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                         onKeyDown={(e) => handleKeyDown(index, e)}
                         className={`w-10 h-12 text-center text-xl font-bold rounded-lg border outline-none transition-all
-                            ${
-                              digit
-                                ? "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"
-                                : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:border-red-400 focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30"
-                            }`}
+                            ${digit
+                            ? "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"
+                            : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:border-red-400 focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/30"
+                          }`}
                       />
                     ))}
                   </div>
@@ -270,6 +269,102 @@ function DeleteAccountSection({ email }: { email: string }) {
         </div>
       )}
     </>
+  );
+}
+
+// --- SUB-COMPONENT: CONNECTIONS PANEL ---
+function ConnectionsPanel({ user }: { user: any }) {
+  const [linking, setLinking] = useState(false);
+  const supabase = getSupabaseBrowserClient();
+
+  // Check if Google is linked by looking at user.identities
+  const identities = user?.identities || [];
+  const googleIdentity = identities.find(
+    (id: any) => id.provider === "google"
+  );
+  const isGoogleLinked = !!googleIdentity;
+  const googleEmail = googleIdentity?.identity_data?.email || "";
+
+  const handleLinkGoogle = async () => {
+    setLinking(true);
+    try {
+      const { error } = await supabase.auth.linkIdentity({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard/settings`,
+        },
+      });
+      if (error) throw error;
+    } catch (error: any) {
+      toast.error(error.message || "Failed to link Google account");
+      setLinking(false);
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-700">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+          Connected Accounts
+        </h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          Manage third-party login providers linked to your account.
+        </p>
+      </div>
+      <div className="p-6 space-y-3">
+        {/* Google Row */}
+        <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-red-50 dark:bg-red-900/20 rounded-lg flex items-center justify-center">
+              <FaGoogle className="text-red-500 text-lg" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                Google
+              </p>
+              {isGoogleLinked ? (
+                <p className="text-xs text-emerald-500 font-semibold">
+                  Connected{googleEmail ? ` • ${googleEmail}` : ""}
+                </p>
+              ) : (
+                <p className="text-xs text-gray-400">Not connected</p>
+              )}
+            </div>
+          </div>
+          {isGoogleLinked ? (
+            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-lg">
+              Linked
+            </span>
+          ) : (
+            <button
+              onClick={handleLinkGoogle}
+              disabled={linking}
+              className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors disabled:opacity-50"
+            >
+              {linking ? "Linking..." : "Link Account"}
+            </button>
+          )}
+        </div>
+
+        {/* Apple Row (Coming Soon) */}
+        <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 opacity-60">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+              <FaApple className="text-black dark:text-white text-lg" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                Apple
+              </p>
+              <p className="text-xs text-gray-400">Coming Soon</p>
+            </div>
+          </div>
+          <span className="text-xs font-bold text-gray-400 px-3 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+            Soon
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -342,10 +437,9 @@ export default function SettingsContent({
                     onClick={() => setActiveTab(tab.id)}
                     className={`
                       flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200
-                      ${
-                        isActive
-                          ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 shadow-sm"
-                          : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white"
+                      ${isActive
+                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 shadow-sm"
+                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white"
                       }
                     `}
                   >
@@ -486,51 +580,7 @@ export default function SettingsContent({
                 animate="center"
                 exit="exit"
               >
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                  <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-700">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                      Connected Accounts
-                    </h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      Manage third-party login providers linked to your account.
-                    </p>
-                  </div>
-                  <div className="p-6 space-y-3">
-                    <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-red-50 dark:bg-red-900/20 rounded-lg flex items-center justify-center">
-                          <FaGoogle className="text-red-500 text-lg" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
-                            Google
-                          </p>
-                          <p className="text-xs text-gray-400">Connected</p>
-                        </div>
-                      </div>
-                      <button className="text-xs font-bold text-gray-400 hover:text-red-500 px-3 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors">
-                        Unlink
-                      </button>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                          <FaApple className="text-black dark:text-white text-lg" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
-                            Apple
-                          </p>
-                          <p className="text-xs text-gray-400">Connected</p>
-                        </div>
-                      </div>
-                      <button className="text-xs font-bold text-gray-400 hover:text-red-500 px-3 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors">
-                        Unlink
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <ConnectionsPanel user={user} />
               </motion.div>
             )}
 

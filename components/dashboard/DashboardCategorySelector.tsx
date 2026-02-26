@@ -15,7 +15,7 @@ export default function DashboardCategorySelector({
   selectedCategory,
   onSelectCategory,
 }: DashboardCategorySelectorProps) {
-  
+
   // Calculate Counts
   const counts = {
     card: items.filter((i) => i.type === "card").length,
@@ -35,46 +35,46 @@ export default function DashboardCategorySelector({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 mb-10">
-      <DashboardCard 
-        icon={<FaIdCard />} 
-        label="Cards" 
-        count={counts.card} 
-        onClick={() => handleCategoryClick("card")} 
+    <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 mb-10">
+      <DashboardCard
+        icon={<FaIdCard />}
+        label="Cards"
+        count={counts.card}
+        onClick={() => handleCategoryClick("card")}
         isActive={selectedCategory === "card"}
-        colorParams={getColorClasses("card")} 
+        colorParams={getColorClasses("card")}
       />
-      <DashboardCard 
-        icon={<FaWallet />} 
-        label="Wallets" 
-        count={counts.crypto} 
-        onClick={() => handleCategoryClick("crypto")} 
+      <DashboardCard
+        icon={<FaWallet />}
+        label="Wallets"
+        count={counts.crypto}
+        onClick={() => handleCategoryClick("crypto")}
         isActive={selectedCategory === "crypto"}
-        colorParams={getColorClasses("crypto")} 
+        colorParams={getColorClasses("crypto")}
       />
-      <DashboardCard 
-        icon={<IoKey />} 
-        label="Passwords" 
-        count={counts.password} 
-        onClick={() => handleCategoryClick("password")} 
+      <DashboardCard
+        icon={<IoKey />}
+        label="Passwords"
+        count={counts.password}
+        onClick={() => handleCategoryClick("password")}
         isActive={selectedCategory === "password"}
-        colorParams={getColorClasses("password")} 
+        colorParams={getColorClasses("password")}
       />
-      <DashboardCard 
-        icon={<FaUserShield />} 
-        label="Next of Kin" 
-        count={counts.nok} 
-        onClick={() => handleCategoryClick("nok")} 
+      <DashboardCard
+        icon={<FaUserShield />}
+        label="Next of Kin"
+        count={counts.nok}
+        onClick={() => handleCategoryClick("nok")}
         isActive={selectedCategory === "nok"}
-        colorParams={getColorClasses("nok")} 
+        colorParams={getColorClasses("nok")}
       />
-      <DashboardCard 
-        icon={<IoDocumentText />} 
-        label="Files" 
-        count={counts.file} 
-        onClick={() => handleCategoryClick("file")} 
+      <DashboardCard
+        icon={<IoDocumentText />}
+        label="Files"
+        count={counts.file}
+        onClick={() => handleCategoryClick("file")}
         isActive={selectedCategory === "file"}
-        colorParams={getColorClasses("file")} 
+        colorParams={getColorClasses("file")}
       />
     </div>
   );
@@ -87,21 +87,21 @@ function DashboardCard({ icon, label, count, onClick, isActive, colorParams }: a
   return (
     <div
       onClick={onClick}
-      className={`group flex flex-row items-center gap-4 p-4 border rounded-2xl shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-none hover:-translate-y-1 transition-all duration-200 cursor-pointer h-full relative overflow-hidden
+      className={`group flex flex-col md:flex-row items-center justify-center md:justify-start gap-2 md:gap-4 p-3 md:p-4 border rounded-xl md:rounded-2xl shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-none hover:-translate-y-1 transition-all duration-200 cursor-pointer aspect-square md:aspect-auto h-full relative overflow-hidden
         ${isActive ? "bg-blue-600 border-blue-600 dark:bg-blue-600 dark:border-blue-600" : `bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 ${colors.hoverBorder}`}
       `}
     >
-      <div className={`flex flex-shrink-0 items-center justify-center h-12 w-12 rounded-full transition-colors duration-200
-         ${isActive 
-            ? "bg-white/20 text-white border border-white/30" 
-            : `${colors.bg} border ${colors.border} ${colors.text} ${colors.groupHoverBg} ${colors.groupHoverText}`
-         }
+      <div className={`flex flex-shrink-0 items-center justify-center h-10 w-10 md:h-12 md:w-12 rounded-full transition-colors duration-200
+         ${isActive
+          ? "bg-white/20 text-white border border-white/30"
+          : `${colors.bg} border ${colors.border} ${colors.text} ${colors.groupHoverBg} ${colors.groupHoverText}`
+        }
       `}>
-        <span className="text-lg">{icon}</span>
+        <span className="text-base md:text-lg">{icon}</span>
       </div>
-      <div className="flex flex-col">
-        <span className={`font-bold text-sm md:text-base ${isActive ? "text-white" : "text-gray-800 dark:text-gray-100"}`}>{label}</span>
-        <span className={`text-xs font-medium ${isActive ? "text-blue-100" : "text-gray-400 dark:text-gray-500"}`}>{count} Items</span>
+      <div className="flex flex-col items-center md:items-start">
+        <span className={`font-bold text-xs md:text-base leading-tight ${isActive ? "text-white" : "text-gray-800 dark:text-gray-100"}`}>{label}</span>
+        <span className={`text-[10px] md:text-xs font-medium ${isActive ? "text-blue-100" : "text-gray-400 dark:text-gray-500"}`}>{count} Items</span>
       </div>
     </div>
   );

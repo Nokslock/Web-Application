@@ -132,6 +132,14 @@ export function getVaultKey(): CryptoKey {
 }
 
 /**
+ * Check if the Vault Key is currently in memory (non-throwing).
+ * Used by the dashboard to decide whether to show the vault-locked overlay.
+ */
+export function isVaultUnlocked(): boolean {
+    return vaultKey !== null;
+}
+
+/**
  * Clear the in-memory Vault Key. Called on logout or session timeout.
  */
 export function clearVaultKey(): void {

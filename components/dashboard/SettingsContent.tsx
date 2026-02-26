@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { toast } from "sonner";
+import { clearVaultKey } from "@/lib/vaultKeyManager";
 import {
   FaGoogle,
   FaApple,
@@ -98,6 +99,7 @@ function DeleteAccountSection({ email }: { email: string }) {
       if (deleteError) throw deleteError;
 
       // 3. Clean up local session
+      clearVaultKey();
       await supabase.auth.signOut();
 
       toast.success("Account deleted successfully.");

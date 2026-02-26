@@ -3,7 +3,8 @@
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { useRouter } from "next/navigation";
 import { IoMdExit } from "react-icons/io";
-import { toast } from "sonner"; // <--- Import Sonner
+import { toast } from "sonner";
+import { clearVaultKey } from "@/lib/vaultKeyManager";
 
 interface SignOutButtonProps {
   className?: string;
@@ -16,6 +17,7 @@ export default function SignOutButton({ className, showLabel }: SignOutButtonPro
 
   const handleLogout = async () => {
     try {
+      clearVaultKey();
       const { error } = await supabase.auth.signOut();
 
       if (error) throw error;

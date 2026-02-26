@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { toast } from "sonner";
+import { clearVaultKey } from "@/lib/vaultKeyManager";
 
 // 4 hours in milliseconds
 const IDLE_TIMEOUT_MS = 4 * 60 * 60 * 1000;
@@ -24,6 +25,7 @@ export default function IdleTimeoutProvider({
     isLoggingOutRef.current = true;
 
     try {
+      clearVaultKey();
       const supabase = getSupabaseBrowserClient();
       await supabase.auth.signOut();
 

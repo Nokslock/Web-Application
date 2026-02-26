@@ -33,6 +33,21 @@ export default async function RootLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
+  // --- VAULT SETUP CHECK ---
+  // If user has no encryption keys, redirect to vault setup
+  if (user) {
+    const { data: keyRow } = await supabase
+      .from("user_encryption_keys")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+
+    if (!keyRow) {
+      const { redirect } = await import("next/navigation");
+      redirect("/setup-vault");
+    }
+  }
+
   const fullName = user?.user_metadata?.full_name || user?.user_metadata?.name || "Welcome User";
   const email = user?.email || "Please sign in";
 

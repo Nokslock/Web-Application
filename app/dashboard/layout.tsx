@@ -33,7 +33,7 @@ export default async function RootLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const fullName = user?.user_metadata?.full_name || "Welcome User";
+  const fullName = user?.user_metadata?.full_name || user?.user_metadata?.name || "Welcome User";
   const email = user?.email || "Please sign in";
 
   return (

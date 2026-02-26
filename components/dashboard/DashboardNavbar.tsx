@@ -116,7 +116,7 @@ export default function DashboardNavbar({
             <ThemeToggle />
 
             {/* User Dropdown / Profile (Desktop) */}
-            <div className="hidden lg:flex items-center gap-3 pl-2 border-l border-gray-200 dark:border-gray-800">
+            <div className="hidden lg:flex items-center gap-3 pl-2 border-l border-gray-200 dark:border-gray-800 relative group">
               <div className="text-right hidden xl:block">
                 <p className="text-xs font-bold text-gray-900 dark:text-white truncate max-w-[100px]">
                   {displayName}
@@ -125,13 +125,26 @@ export default function DashboardNavbar({
                   {email}
                 </p>
               </div>
-              <div className="h-9 w-9 relative rounded-full overflow-hidden border border-gray-200 dark:border-gray-700">
+              <div className="h-9 w-9 relative rounded-full overflow-hidden border border-gray-200 dark:border-gray-700 cursor-pointer">
                 <Image
                   src={avatarUrl}
                   alt="Profile"
                   fill
                   className="object-cover"
                 />
+              </div>
+
+              {/* Hover Dropdown */}
+              <div className="absolute top-full right-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg p-1 min-w-[160px]">
+                  <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-800">
+                    <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{displayName}</p>
+                    <p className="text-[10px] text-gray-400 truncate">{email}</p>
+                  </div>
+                  <div className="p-1">
+                    <SignOutButton className="flex items-center gap-2 w-full px-3 py-2 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" showLabel />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -207,8 +220,8 @@ export default function DashboardNavbar({
                   >
                     <FaCrown size={12} /> Upgrade
                   </Link>
-                  <div className="bg-red-50 dark:bg-red-900/20 rounded-lg">
-                    <SignOutButton />
+                  <div className="rounded-lg overflow-hidden">
+                    <SignOutButton className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold text-sm hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors" showLabel />
                   </div>
                 </div>
 

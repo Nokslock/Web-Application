@@ -5,10 +5,10 @@ import { motion, Variants } from "framer-motion"; // <--- Variant Fix Applied
 import { IoKey, IoSearch } from "react-icons/io5";
 import NotificationBell from "@/components/NotificationBell";
 import DashboardFab from "@/components/DashboardFab";
-import DashboardCategorySelector from "./DashboardCategorySelector"; 
+import DashboardCategorySelector from "./DashboardCategorySelector";
 import DashboardHome from "./DashboardHome";
 import CategoryItemGrid from "./CategoryItemGrid";
-import ItemDetailModal from "./ItemDetailModal"; 
+import ItemDetailModal from "./ItemDetailModal";
 
 // --- ANIMATION VARIANTS (Typed correctly) ---
 const containerVariants: Variants = {
@@ -55,12 +55,13 @@ export default function DashboardContent({ user, items }: DashboardContentProps)
     else setGreeting("Good evening");
   }, []);
 
-  const userName = user.user_metadata?.first_name || user.email?.split("@")[0] || "User";
+  const meta = user.user_metadata || {};
+  const userName = meta.first_name || (meta.full_name || meta.name || "").split(" ")[0] || user.email?.split("@")[0] || "User";
 
   // Filter items for search
   const filteredItems = items?.filter(item => {
     const q = searchQuery.toLowerCase();
-    
+
     // 1. Match Name or Type
     if (item.name.toLowerCase().includes(q) || item.type.toLowerCase().includes(q)) {
       return true;
@@ -68,18 +69,18 @@ export default function DashboardContent({ user, items }: DashboardContentProps)
 
     // 2. Match "Next of Kin" / "Family" if the item is shared
     if (item.share_with_nok) {
-       const nokTerms = ["next of kin", "nok", "family", "shared"];
-       // If the search query matches any of these terms (partial match)
-       if (nokTerms.some(term => term.includes(q) || q.includes(term))) {
-         return true;
-       }
+      const nokTerms = ["next of kin", "nok", "family", "shared"];
+      // If the search query matches any of these terms (partial match)
+      if (nokTerms.some(term => term.includes(q) || q.includes(term))) {
+        return true;
+      }
     }
 
     return false;
   });
 
   return (
-    <motion.div 
+    <motion.div
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -93,7 +94,7 @@ export default function DashboardContent({ user, items }: DashboardContentProps)
           </h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Here is an overview of your secure vault.</p>
         </div>
-        
+
         <div className="col-span-1 flex gap-4 justify-start md:justify-end items-center">
           <div className="relative w-full md:w-64 group">
             <IoSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
@@ -111,33 +112,33 @@ export default function DashboardContent({ user, items }: DashboardContentProps)
 
       {/* --- CATEGORY SELECTOR (Hidden when searching) --- */}
       {!searchQuery && (
-        <motion.div 
+        <motion.div
           variants={itemVariants}
           initial="hidden"
           animate="visible"
         >
-          <DashboardCategorySelector 
-            items={items || []} 
-            selectedCategory={selectedCategory} 
-            onSelectCategory={setSelectedCategory} 
+          <DashboardCategorySelector
+            items={items || []}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
           />
         </motion.div>
       )}
 
       {/* --- DYNAMIC CONTENT (Home, Search, or Category Grid) --- */}
       {searchQuery ? (
-         <CategoryItemGrid 
-            items={items || []}
-            selectedCategory="search"
-            customItems={filteredItems}
-            onSelectItem={setSelectedItem}
-            emptyMessage={`No results found for "${searchQuery}"`}
-         />
+        <CategoryItemGrid
+          items={items || []}
+          selectedCategory="search"
+          customItems={filteredItems}
+          onSelectItem={setSelectedItem}
+          emptyMessage={`No results found for "${searchQuery}"`}
+        />
       ) : selectedCategory ? (
-        <CategoryItemGrid 
-          items={items || []} 
-          selectedCategory={selectedCategory} 
-          onSelectItem={setSelectedItem} 
+        <CategoryItemGrid
+          items={items || []}
+          selectedCategory={selectedCategory}
+          onSelectItem={setSelectedItem}
         />
       ) : (
         <DashboardHome items={items || []} />
@@ -145,9 +146,9 @@ export default function DashboardContent({ user, items }: DashboardContentProps)
 
       {/* --- DETAIL MODAL --- */}
       {selectedItem && (
-        <ItemDetailModal 
-          item={selectedItem} 
-          onClose={() => setSelectedItem(null)} 
+        <ItemDetailModal
+          item={selectedItem}
+          onClose={() => setSelectedItem(null)}
         />
       )}
 

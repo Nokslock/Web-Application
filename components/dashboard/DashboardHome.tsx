@@ -12,7 +12,7 @@ import {
   IoCreateOutline,
 } from "react-icons/io5";
 import { formatDistanceToNow } from "date-fns";
-import { FaXmark, FaLock } from "react-icons/fa6";
+import { FaXmark, FaLock, FaShieldHalved, FaBoxesStacked, FaCubesStacked, FaHandHoldingHeart } from "react-icons/fa6";
 import StorageUsageCard from "./StorageUsageCard";
 
 const boxVariants: Variants = {
@@ -20,14 +20,7 @@ const boxVariants: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
-const barVariants: Variants = {
-  hidden: { height: 0, opacity: 0 },
-  visible: (customHeight: string) => ({
-    height: customHeight,
-    opacity: 1,
-    transition: { duration: 0.8, ease: "backOut" },
-  }),
-};
+
 
 interface DashboardHomeProps {
   items?: any[];
@@ -118,65 +111,47 @@ export default function DashboardHome({ items = [] }: DashboardHomeProps) {
         </motion.div>
 
         <div className="col-span-1 lg:col-span-3 flex flex-col gap-6 h-[36rem]">
-          {/* Security Score & Chart Card */}
+          {/* Vault Insights Card */}
           <motion.div
             variants={boxVariants}
             initial="hidden"
             animate="visible"
             className="flex-1 p-6 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col"
           >
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h2 className="font-bold text-lg text-gray-800 dark:text-white">
-                  Security Score
-                </h2>
-                <p className="text-[10px] text-gray-400 font-medium">
-                  Updated just now
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                </span>
-                <span className="bg-emerald-100 text-emerald-700 text-xs font-black px-3 py-1 rounded-lg">
-                  92%
-                </span>
-              </div>
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="font-bold text-lg text-gray-800 dark:text-white flex items-center gap-2">
+                <FaShieldHalved className="text-blue-500" /> Vault Insights
+              </h2>
+              <span className="text-[10px] text-gray-400 font-medium">
+                {items.length} total items
+              </span>
             </div>
 
-            {/* --- ANIMATED GRAPH UI --- */}
-            <div className="flex-1 flex flex-col items-end justify-end">
-              <div className="w-full flex items-end justify-between gap-3 h-full px-2">
-                <AnimatedChartBar
-                  customHeight="40%"
-                  color="bg-blue-200"
-                  label="Mon"
-                />
-                <AnimatedChartBar
-                  customHeight="70%"
-                  color="bg-blue-300"
-                  label="Tue"
-                />
-                <AnimatedChartBar
-                  customHeight="50%"
-                  color="bg-blue-400"
-                  label="Wed"
-                />
-                <AnimatedChartBar
-                  customHeight="85%"
-                  color="bg-blue-600"
-                  label="Thu"
-                />
-                <AnimatedChartBar
-                  customHeight="60%"
-                  color="bg-blue-300"
-                  label="Fri"
-                />
-              </div>
-              <p className="w-full text-center text-[10px] uppercase tracking-wider text-gray-400 mt-5 border-t border-gray-100 dark:border-gray-700 pt-3">
-                Encryption Activity (7 Days)
-              </p>
+            <div className="grid grid-cols-2 gap-3 flex-1">
+              <InsightTile
+                icon={<FaCubesStacked />}
+                label="Total Items"
+                count={items.length}
+                color="blue"
+              />
+              <InsightTile
+                icon={<FaLock />}
+                label="Locked"
+                count={items.filter((i: any) => i.is_locked).length}
+                color="emerald"
+              />
+              <InsightTile
+                icon={<FaHandHoldingHeart />}
+                label="Shared with NOK"
+                count={items.filter((i: any) => i.share_with_nok).length}
+                color="amber"
+              />
+              <InsightTile
+                icon={<FaBoxesStacked />}
+                label="In Vaults"
+                count={items.filter((i: any) => i.vault_id).length}
+                color="indigo"
+              />
             </div>
           </motion.div>
 
@@ -312,25 +287,47 @@ function ActivityItem({ item }: { item: any }) {
   );
 }
 
-function AnimatedChartBar({
-  customHeight,
-  color,
-  label,
-}: {
-  customHeight: string;
-  color: string;
-  label: string;
-}) {
+const insightColors: Record<string, { bg: string; text: string; iconBg: string }> = {
+  blue: {
+    bg: "bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800/40",
+    text: "text-blue-600 dark:text-blue-400",
+    iconBg: "bg-blue-100 dark:bg-blue-900/40",
+  },
+  emerald: {
+    bg: "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/40",
+    text: "text-emerald-600 dark:text-emerald-400",
+    iconBg: "bg-emerald-100 dark:bg-emerald-900/40",
+  },
+  amber: {
+    bg: "bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-800/40",
+    text: "text-amber-600 dark:text-amber-400",
+    iconBg: "bg-amber-100 dark:bg-amber-900/40",
+  },
+  indigo: {
+    bg: "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-100 dark:border-indigo-800/40",
+    text: "text-indigo-600 dark:text-indigo-400",
+    iconBg: "bg-indigo-100 dark:bg-indigo-900/40",
+  },
+};
+
+function InsightTile({ icon, label, count, color }: { icon: React.ReactNode; label: string; count: number; color: string }) {
+  const c = insightColors[color] || insightColors.blue;
   return (
-    <div className="flex flex-col items-center gap-2 w-full h-full justify-end">
-      <motion.div
-        variants={barVariants}
-        initial="hidden"
-        animate="visible"
-        custom={customHeight}
-        className={`w-full ${color} rounded-t-lg hover:opacity-80 cursor-pointer transition-all duration-300`}
-      ></motion.div>
-      <span className="text-[10px] text-gray-400 font-bold">{label}</span>
+    <div className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border ${c.bg} transition-all duration-200 hover:scale-[1.03]`}>
+      <div className={`h-9 w-9 rounded-full flex items-center justify-center ${c.iconBg} ${c.text}`}>
+        {icon}
+      </div>
+      <motion.span
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, type: "spring" }}
+        className={`text-2xl font-black ${c.text}`}
+      >
+        {count}
+      </motion.span>
+      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center leading-tight">
+        {label}
+      </span>
     </div>
   );
 }

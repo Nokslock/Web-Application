@@ -6,7 +6,8 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import AuthButton from "@/components/AuthButton";
 import Link from "next/link";
 import PasswordInput from "@/components/PasswordInput";
-import { toast } from "sonner"; // <--- Import Sonner
+import { toast } from "sonner";
+import { unlockVault } from "@/lib/vaultKeyManager";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -23,16 +24,22 @@ export default function LoginForm() {
     const cleanEmail = email.trim();
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: cleanEmail,
         password,
       });
 
       if (error) {
-        // Show error toast instead of setting state
         toast.error(error.message || "Invalid login credentials.");
         setLoading(false);
         return;
+      }
+
+      // --- UNLOCK VAULT ---
+      // Derive Master Key → Fetch wrapped Vault Key → Unwrap into memory
+      const userId = data.user?.id;
+      if (userId) {
+        await unlockVault(password, userId);
       }
 
       // Success
@@ -40,7 +47,7 @@ export default function LoginForm() {
       router.push("/dashboard");
       router.refresh();
     } catch (err: any) {
-      toast.error("An unexpected error occurred.");
+      toast.error(err.message || "An unexpected error occurred.");
       setLoading(false);
     }
   };

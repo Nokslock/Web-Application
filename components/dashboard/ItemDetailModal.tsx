@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { decryptData, encryptData } from "@/lib/crypto";
+import { getVaultKey } from "@/lib/vaultKeyManager";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -63,7 +64,7 @@ export default function ItemDetailModal({
 
     const loadDetails = async () => {
       try {
-        const details = await decryptData(item.ciphertext);
+        const details = await decryptData(item.ciphertext, getVaultKey());
         setDecryptedDetails(details);
         setEditedDetails(details);
       } catch (err) {
@@ -126,7 +127,7 @@ export default function ItemDetailModal({
   const executeSave = async () => {
     setIsLoading(true);
     try {
-      const newCiphertext = await encryptData(editedDetails);
+      const newCiphertext = await encryptData(editedDetails, getVaultKey());
       const { error } = await (supabase.from("vault_items") as any)
         .update({
           ciphertext: newCiphertext,

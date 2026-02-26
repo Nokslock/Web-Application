@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google"; // Keep fonts if needed, t
 import "@/app/globals.css";
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 import DashboardNavbar from "@/components/dashboard/DashboardNavbar";
+import IdleTimeoutProvider from "@/components/IdleTimeoutProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,9 +42,11 @@ export default async function RootLayout({
       <DashboardNavbar user={user} fullName={fullName} email={email} />
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 w-full max-w-[1800px] mx-auto px-4 sm:px-6 py-6 md:py-8">
-        {children}
-      </main>
+      <IdleTimeoutProvider>
+        <main className="flex-1 w-full max-w-[1800px] mx-auto px-4 sm:px-6 py-6 md:py-8">
+          {children}
+        </main>
+      </IdleTimeoutProvider>
     </div>
   );
 }

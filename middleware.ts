@@ -1,6 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 
+// 4 hours in seconds
+const IDLE_TIMEOUT_SECONDS = 4 * 60 * 60;
+
 export async function middleware(request: NextRequest) {
   // 1. Create a "Response" object that we can modify
   let response = NextResponse.next({
@@ -64,7 +67,37 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 4. Protect the Dashboard Route
+  // 4. Idle Timeout Check (server-side enforcement)
+  // Only enforce on protected routes where a user session exists
+  if (user) {
+    const lastActivity = request.cookies.get("last_activity")?.value;
+
+    if (lastActivity) {
+      const lastActiveTime = parseInt(lastActivity, 10);
+      const now = Date.now();
+      const elapsedSeconds = (now - lastActiveTime) / 1000;
+
+      if (elapsedSeconds > IDLE_TIMEOUT_SECONDS) {
+        // Session has been idle too long — clear cookies and redirect to login
+        const redirectResponse = NextResponse.redirect(
+          new URL("/login", request.url)
+        );
+        redirectResponse.cookies.delete("last_activity");
+        return redirectResponse;
+      }
+    }
+
+    // Refresh the last_activity cookie on every authenticated request
+    response.cookies.set("last_activity", Date.now().toString(), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: IDLE_TIMEOUT_SECONDS,
+    });
+  }
+
+  // 5. Protect the Dashboard Route
   if (request.nextUrl.pathname.startsWith("/dashboard")) {
     if (!user) {
       // If no user found, redirect to Access Denied (or Login)
@@ -72,7 +105,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 5. Protect the Admin Route
+  // 6. Protect the Admin Route
   if (request.nextUrl.pathname.startsWith("/admin")) {
     if (!user) {
       return NextResponse.redirect(new URL("/access-denied", request.url));
@@ -87,7 +120,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 5. Return the response (with any updated cookies)
+  // 7. Return the response (with any updated cookies)
   return response;
 }
 

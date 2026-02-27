@@ -11,14 +11,14 @@ interface PageProps {
 export default async function VaultDetailPage({ params }: PageProps) {
   const supabase = await createSupabaseServerClient();
   const { id } = await params;
-  
+
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // 1. Fetch Vault Details
+  // 1. Fetch Vault Details — explicitly exclude lock_code
   const { data: vault, error } = await supabase
     .from("vaults")
-    .select("*")
+    .select("id, name, description, is_locked, share_with_nok, created_at")
     .eq("id", id)
     .single();
 
@@ -26,16 +26,19 @@ export default async function VaultDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  // 2. Fetch Items in this vault
-  // Note: We are fetching ciphertext here. In a real highly-secure app, we might ONLY fetch this after a second password verification on the server,
-  // but for this architecture, we send the encrypted blobs to the client, and the client "Gatekeeper" UI prevents viewing them until unlocked.
-  const { data: items } = await supabase
-    .from("vault_items")
-    .select("*")
-    .eq("vault_id", id)
-    .order("created_at", { ascending: false });
+  // 2. Only fetch items if the vault is UNLOCKED
+  // For locked vaults, items are fetched via the verifyVaultPin server action after PIN entry
+  let items: any[] = [];
+  if (!vault.is_locked) {
+    const { data } = await supabase
+      .from("vault_items")
+      .select("id, type, name, ciphertext, created_at, share_with_nok, vault_id, is_locked")
+      .eq("vault_id", id)
+      .order("created_at", { ascending: false });
+    items = data || [];
+  }
 
   return (
-    <VaultDetailClient vault={vault} items={items || []} />
+    <VaultDetailClient vault={vault} items={items} />
   );
 }

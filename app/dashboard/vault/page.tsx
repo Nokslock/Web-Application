@@ -10,9 +10,10 @@ export default async function VaultPage() {
   if (!user) redirect("/login");
 
   // Fetch Vaults
+  // Explicitly exclude lock_code from the response
   const { data: vaults } = await supabase
     .from("vaults")
-    .select("*")
+    .select("id, name, description, is_locked, share_with_nok, created_at")
     .order("created_at", { ascending: false });
 
   // Optional: Fetch item counts per vault (requires join or separate query) - skipping for now
@@ -27,7 +28,7 @@ export default async function VaultPage() {
       </div>
 
       <VaultGrid vaults={vaults || []} />
-      
+
       <CreateVaultFab />
     </div>
   );

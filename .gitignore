@@ -15,7 +15,7 @@
 
 #docs 
 /docs/
-/supabase/
+/supabase/sql
 
 # next.js
 /.next/

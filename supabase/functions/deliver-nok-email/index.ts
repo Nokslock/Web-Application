@@ -90,7 +90,11 @@ async function escrowDecrypt(escrowed: string): Promise<string> {
 
 // ── Email Builder ─────────────────────────────────────────────
 
-function buildNokEmail(emergencyKey: string, claimUrl: string): {
+function buildNokEmail(
+  ownerEmail: string,
+  emergencyKey: string,
+  claimUrl: string
+): {
   subject: string;
   html: string;
   text: string;
@@ -112,6 +116,7 @@ function buildNokEmail(emergencyKey: string, claimUrl: string): {
     .header p { color: #94a3b8; font-size: 13px; margin: 6px 0 0; }
     .body { padding: 32px; }
     .body p { color: #374151; font-size: 15px; line-height: 1.7; margin: 0 0 16px; }
+    .owner-tag { display: inline-block; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px; padding: 2px 8px; font-family: 'Courier New', Courier, monospace; font-size: 14px; color: #0f172a; }
     .key-box { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px 24px; margin: 24px 0; }
     .key-box p { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 10px; }
     .key-box code { display: block; font-family: 'Courier New', Courier, monospace; font-size: 15px; color: #0f172a; line-height: 1.8; word-break: break-all; }
@@ -130,7 +135,7 @@ function buildNokEmail(emergencyKey: string, claimUrl: string): {
       <p>Digital Inheritance Notification</p>
     </div>
     <div class="body">
-      <p>You are receiving this message because someone trusted you enough to name you as their <strong>Next of Kin recovery contact</strong> on Nokslock — a secure digital vault service.</p>
+      <p>You are receiving this message because <span class="owner-tag">${ownerEmail}</span> trusted you enough to name you as their <strong>Next of Kin recovery contact</strong> on Nokslock — a secure digital vault service.</p>
       <p>Our system has detected that this person has been unreachable for an extended period of time. As their designated contact, you are now authorised to access their digital vault using the <strong>Emergency Recovery Key</strong> below.</p>
 
       <div class="key-box">
@@ -142,7 +147,7 @@ function buildNokEmail(emergencyKey: string, claimUrl: string): {
         <p><strong>Keep this key private.</strong> Anyone who possesses this key can access the vault. Do not share it over email or messaging apps. Store it somewhere safe before proceeding.</p>
       </div>
 
-      <p>To claim the inheritance and access the vault, visit the secure claim portal and enter this key when prompted:</p>
+      <p>To claim the inheritance and access the vault, visit the secure claim portal. When prompted for the vault owner's email, enter <span class="owner-tag">${ownerEmail}</span>:</p>
 
       <div class="cta">
         <a href="${claimUrl}">Access the Claim Portal →</a>
@@ -162,9 +167,9 @@ function buildNokEmail(emergencyKey: string, claimUrl: string): {
 NOKSLOCK — DIGITAL INHERITANCE NOTIFICATION
 ============================================
 
-You are receiving this message because you have been designated as a Next of Kin recovery contact on Nokslock.
+You are receiving this message because ${ownerEmail} trusted you enough to name you as their Next of Kin recovery contact on Nokslock.
 
-Our system has detected that the account owner has been unreachable for an extended period. You are now authorised to access their digital vault.
+Our system has detected that this person has been unreachable for an extended period. You are now authorised to access their digital vault.
 
 YOUR EMERGENCY RECOVERY KEY
 ----------------------------
@@ -172,7 +177,7 @@ ${emergencyKey}
 
 Keep this key private. Do not share it.
 
-To access the vault, visit the claim portal:
+To access the vault, visit the claim portal and enter ${ownerEmail} as the vault owner's email when prompted:
 ${claimUrl}
 
 If you were not expecting this message, you can safely ignore it.
@@ -259,7 +264,30 @@ Deno.serve(async (req: Request) => {
     );
   }
 
-  // ── 4. Decrypt the escrowed values ────────────────────────
+  // ── 4. Fetch the vault owner's email via auth admin ────────
+
+  let ownerEmail: string;
+
+  try {
+    const { data: userData, error: userError } = await supabase.auth.admin.getUserById(
+      switchRow.user_id
+    );
+
+    if (userError || !userData?.user?.email) {
+      throw new Error(userError?.message ?? "Owner email not found.");
+    }
+
+    ownerEmail = userData.user.email;
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown user lookup error.";
+    console.error("[deliver-nok-email] Owner email lookup failed:", message);
+    return new Response(
+      JSON.stringify({ error: "Failed to resolve vault owner identity.", detail: message }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  // ── 5. Decrypt the escrowed values ────────────────────────
 
   let nokEmail: string;
   let emergencyKey: string;
@@ -276,7 +304,7 @@ Deno.serve(async (req: Request) => {
     );
   }
 
-  // ── 5. Send the email via Resend ───────────────────────────
+  // ── 6. Send the email via Resend ───────────────────────────
 
   const resendApiKey = Deno.env.get("RESEND_API_KEY");
   const fromEmail = Deno.env.get("NOKSLOCK_FROM_EMAIL") ?? "noreply@yourdomain.com";
@@ -290,7 +318,7 @@ Deno.serve(async (req: Request) => {
     );
   }
 
-  const { subject, html, text } = buildNokEmail(emergencyKey, claimUrl);
+  const { subject, html, text } = buildNokEmail(ownerEmail, emergencyKey, claimUrl);
 
   let resendResponse: Response;
 
@@ -333,10 +361,10 @@ Deno.serve(async (req: Request) => {
     );
   }
 
-  // ── 6. Log delivery and return success ─────────────────────
+  // ── 7. Log delivery and return success ─────────────────────
   //
-  // We intentionally do NOT log the NOK email address or the
-  // emergency key — only the switch ID and user ID are safe to log.
+  // We intentionally do NOT log the NOK email address, the owner
+  // email, or the emergency key — only the switch ID is safe to log.
 
   console.log(
     `[deliver-nok-email] Switch ${switch_id} — NOK email delivered successfully.`

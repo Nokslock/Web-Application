@@ -1,6 +1,7 @@
 "use server";
 
 import crypto from "node:crypto";
+import { createClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 
 // ── Helpers ───────────────────────────────────────────────────
@@ -85,6 +86,7 @@ export async function setupDeadManSwitch(
   const { error } = await (supabase.from("dead_man_switches") as any).upsert(
     {
       user_id: user.id,
+      owner_email: user.email ?? null,
       nok_email_escrowed: nokEmailEscrowed,
       emergency_key_escrowed: emergencyKeyEscrowed,
       wrapped_vault_key: payload.wrappedVaultKey,
@@ -101,4 +103,103 @@ export async function setupDeadManSwitch(
   }
 
   return { success: true };
+}
+
+// ── Claim Portal: Fetch Triggered Vault ───────────────────────
+
+export interface FetchedVaultItem {
+  id: string;
+  type: string;
+  name: string;
+  ciphertext: string;
+}
+
+export type FetchTriggeredVaultResult =
+  | { success: true; switch_id: string; wrappedVaultKey: string; items: FetchedVaultItem[] }
+  | { success: false; error: string };
+
+/**
+ * Service-role client used exclusively by unauthenticated server actions
+ * (the NOK claim flow). Never exposed to the browser.
+ */
+function createAdminClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error("Missing Supabase service-role credentials.");
+  }
+  return createClient(url, key, { auth: { persistSession: false } });
+}
+
+/**
+ * Called from the NOK claim portal. Takes the vault owner's email,
+ * verifies their switch is in 'triggered' state, and returns the
+ * PBKDF2-wrapped vault key plus all share_with_nok vault items.
+ *
+ * Security guarantees:
+ *  - Uses service role to bypass RLS (no auth cookie needed).
+ *  - Returns a generic error whether the email is unknown OR the switch
+ *    is not triggered — prevents email enumeration.
+ *  - The wrapped vault key and ciphertexts are useless without the
+ *    16-word emergency key, which is never returned from the server.
+ */
+export async function fetchTriggeredVault(
+  ownerEmail: string
+): Promise<FetchTriggeredVaultResult> {
+  if (!ownerEmail || !ownerEmail.includes("@")) {
+    return { success: false, error: "A valid email address is required." };
+  }
+
+  let adminClient: ReturnType<typeof createAdminClient>;
+  try {
+    adminClient = createAdminClient();
+  } catch (err: unknown) {
+    console.error("[fetchTriggeredVault] Admin client init failed:", err);
+    return { success: false, error: "Service unavailable. Please try again." };
+  }
+
+  // Find the triggered switch by the owner's email (lowercase match)
+  const { data: switchData, error: switchError } = await (
+    adminClient.from("dead_man_switches") as any
+  )
+    .select("id, user_id, wrapped_vault_key")
+    .eq("status", "triggered")
+    .ilike("owner_email", ownerEmail.trim())
+    .single();
+
+  if (switchError || !switchData) {
+    // Generic message — do not reveal whether the email exists
+    return {
+      success: false,
+      error:
+        "No active inheritance claim found for this email address. " +
+        "Please verify the vault owner's email and ensure the switch has triggered.",
+    };
+  }
+
+  // Fetch vault items marked for NOK inheritance
+  const { data: items, error: itemsError } = await (
+    adminClient.from("vault_items") as any
+  )
+    .select("id, type, name, ciphertext")
+    .eq("user_id", switchData.user_id)
+    .eq("share_with_nok", true);
+
+  if (itemsError) {
+    console.error(
+      "[fetchTriggeredVault] Vault items fetch failed:",
+      itemsError.message
+    );
+    return {
+      success: false,
+      error: "Failed to retrieve vault data. Please try again.",
+    };
+  }
+
+  return {
+    success: true,
+    switch_id: switchData.id,
+    wrappedVaultKey: switchData.wrapped_vault_key,
+    items: (items ?? []) as FetchedVaultItem[],
+  };
 }

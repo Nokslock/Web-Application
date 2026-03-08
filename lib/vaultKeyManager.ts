@@ -145,3 +145,23 @@ export function isVaultUnlocked(): boolean {
 export function clearVaultKey(): void {
     vaultKey = null;
 }
+
+/**
+ * Export the in-memory Vault Key as raw base64-encoded bytes.
+ *
+ * Used exclusively during Dead Man's Switch setup so the vault key can be
+ * wrapped with the Emergency Key (PBKDF2 + AES-GCM) before escrow.
+ * The exported bytes are never persisted directly — only the wrapped form is.
+ *
+ * Throws if the vault is locked (i.e. the user must be authenticated).
+ */
+export async function exportVaultKeyMaterial(): Promise<string> {
+    const key = getVaultKey(); // throws "Vault is locked" if not in memory
+    const rawBytes = await crypto.subtle.exportKey("raw", key);
+    const bytes = new Uint8Array(rawBytes);
+    let binary = "";
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}

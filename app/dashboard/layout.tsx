@@ -4,6 +4,7 @@ import "@/app/globals.css";
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 import DashboardNavbar from "@/components/dashboard/DashboardNavbar";
 import IdleTimeoutProvider from "@/components/IdleTimeoutProvider";
+import HeartbeatTracker from "@/components/HeartbeatTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -58,6 +59,7 @@ export default async function RootLayout({
 
       {/* MAIN CONTENT */}
       <IdleTimeoutProvider>
+        <HeartbeatTracker />
         <main className="flex-1 w-full max-w-[1800px] mx-auto px-4 sm:px-6 py-6 md:py-8">
           {children}
         </main>

@@ -4,9 +4,7 @@ import { NextResponse } from "next/server";
 let cachedRates: { rates: Record<string, number>; timestamp: number } | null = null;
 const CACHE_DURATION_MS = 60 * 60 * 1000; // 1 hour
 
-const SUPPORTED_CURRENCIES = [
-    "USD", "EUR", "GBP", "NGN", "CAD", "AUD", "KES", "GHS", "ZAR", "INR",
-];
+const SUPPORTED_CURRENCIES = ["USD", "NGN"];
 
 export async function GET() {
     try {
@@ -53,9 +51,7 @@ export async function GET() {
         // Ultimate fallback with hardcoded approximate rates
         return NextResponse.json({
             rates: {
-                USD: 1, EUR: 0.92, GBP: 0.79, NGN: 1550,
-                CAD: 1.36, AUD: 1.53, KES: 129, GHS: 15.8,
-                ZAR: 18.2, INR: 83.5,
+                USD: 1, NGN: 1550,
             },
             cached: false,
             fallback: true,

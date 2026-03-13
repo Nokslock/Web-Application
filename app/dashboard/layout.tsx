@@ -53,19 +53,21 @@ export default async function RootLayout({
   const email = user?.email || "Please sign in";
 
   let isAdmin = false;
+  let plan = "free";
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("is_admin")
+      .select("is_admin, plan")
       .eq("id", user.id)
       .single();
     isAdmin = profile?.is_admin ?? false;
+    plan = profile?.plan ?? "free";
   }
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-gray-950 transition-colors duration-300 flex flex-col">
       {/* TOP NAVBAR */}
-      <DashboardNavbar user={user} fullName={fullName} email={email} isAdmin={isAdmin} />
+      <DashboardNavbar user={user} fullName={fullName} email={email} isAdmin={isAdmin} plan={plan} />
 
       {/* MAIN CONTENT */}
       <IdleTimeoutProvider>

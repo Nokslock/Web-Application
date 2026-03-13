@@ -21,6 +21,7 @@ interface DashboardNavbarProps {
   fullName?: string;
   email: string;
   isAdmin?: boolean;
+  plan?: string;
 }
 
 const links = [
@@ -34,9 +35,12 @@ export default function DashboardNavbar({
   fullName,
   email,
   isAdmin = false,
+  plan = "free",
 }: DashboardNavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [planMenuOpen, setPlanMenuOpen] = useState(false);
   const pathname = usePathname();
+  const isPremium = plan !== "free";
 
   // Avatar Logic
   const avatarUrl = user?.user_metadata?.avatar_url || Pfp;
@@ -106,14 +110,55 @@ export default function DashboardNavbar({
               </Link>
             )}
 
-            {/* Promo Button (Hidden on small mobile) */}
-            <Link
-              href="/pricing"
-              className="hidden sm:flex group items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md hover:shadow-lg transition-all hover:scale-105"
-            >
-              <FaCrown className="text-xs animate-pulse" />
-              <span className="text-xs font-bold">Upgrade</span>
-            </Link>
+            {/* Plan Button */}
+            {isPremium ? (
+              <div className="relative hidden sm:block">
+                <button
+                  onClick={() => setPlanMenuOpen(!planMenuOpen)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-yellow-500 text-white shadow-md hover:shadow-lg transition-all hover:scale-105"
+                >
+                  <FaCrown className="text-xs" />
+                  <span className="text-xs font-bold capitalize">{plan}</span>
+                </button>
+                <AnimatePresence>
+                  {planMenuOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setPlanMenuOpen(false)} />
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 top-full mt-2 z-50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl min-w-[180px] overflow-hidden"
+                      >
+                        <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-800">
+                          <p className="text-[10px] text-gray-400 uppercase tracking-wider">Current Plan</p>
+                          <p className="text-sm font-bold text-gray-900 dark:text-white capitalize">{plan}</p>
+                        </div>
+                        <div className="p-1">
+                          <Link
+                            href="/pricing"
+                            onClick={() => setPlanMenuOpen(false)}
+                            className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                          >
+                            <FaCrown className="text-amber-500 text-xs" />
+                            Change Plan
+                          </Link>
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <Link
+                href="/pricing"
+                className="hidden sm:flex group items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md hover:shadow-lg transition-all hover:scale-105"
+              >
+                <FaCrown className="text-xs animate-pulse" />
+                <span className="text-xs font-bold">Upgrade</span>
+              </Link>
+            )}
 
             <ThemeToggle />
 
@@ -218,9 +263,14 @@ export default function DashboardNavbar({
                   <Link
                     href="/pricing"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex justify-center items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-sm"
+                    className={`flex justify-center items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm ${
+                      isPremium
+                        ? "bg-gradient-to-r from-amber-400 to-yellow-500 text-white"
+                        : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
+                    }`}
                   >
-                    <FaCrown size={12} /> Upgrade
+                    <FaCrown size={12} />
+                    {isPremium ? <span className="capitalize">{plan}</span> : "Upgrade"}
                   </Link>
                   <div className="rounded-lg overflow-hidden">
                     <SignOutButton className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold text-sm hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors" showLabel />

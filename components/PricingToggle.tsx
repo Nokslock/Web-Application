@@ -2,29 +2,21 @@
 
 import { useState, useEffect } from "react";
 import { FaCheck, FaCrown, FaBolt, FaShieldHalved, FaChevronDown } from "react-icons/fa6";
-import Link from "next/link";
+import Script from "next/script";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import UpgradeButton from "@/components/UpgradeButton";
 
 // --- CURRENCY METADATA ---
 const currencyMeta = [
   { code: "USD", symbol: "$", name: "US Dollar" },
-  { code: "EUR", symbol: "€", name: "Euro" },
-  { code: "GBP", symbol: "£", name: "British Pound" },
   { code: "NGN", symbol: "₦", name: "Nigerian Naira" },
-  { code: "CAD", symbol: "C$", name: "Canadian Dollar" },
-  { code: "AUD", symbol: "A$", name: "Australian Dollar" },
-  { code: "KES", symbol: "KSh", name: "Kenyan Shilling" },
-  { code: "GHS", symbol: "GH₵", name: "Ghanaian Cedi" },
-  { code: "ZAR", symbol: "R", name: "South African Rand" },
-  { code: "INR", symbol: "₹", name: "Indian Rupee" },
 ] as const;
 
 type CurrencyCode = (typeof currencyMeta)[number]["code"];
 
 // Fallback rates if API fails
 const FALLBACK_RATES: Record<string, number> = {
-  USD: 1, EUR: 0.92, GBP: 0.79, NGN: 1550,
-  CAD: 1.36, AUD: 1.53, KES: 129, GHS: 15.8,
-  ZAR: 18.2, INR: 83.5,
+  USD: 1, NGN: 1550,
 };
 
 // Base prices in USD
@@ -35,8 +27,7 @@ const BASE_YEARLY = 45;
 const BASE_YEARLY_ORIGINAL = 60;
 
 function formatPrice(amount: number, symbol: string, code: string): string {
-  const wholeNumberCurrencies = ["NGN", "KES", "INR", "GHS", "ZAR"];
-  if (wholeNumberCurrencies.includes(code)) {
+  if (code === "NGN") {
     return `${symbol}${Math.round(amount).toLocaleString()}`;
   }
   return `${symbol}${amount.toFixed(2)}`;
@@ -60,6 +51,19 @@ export default function PricingToggle() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [rates, setRates] = useState<Record<string, number>>(FALLBACK_RATES);
   const [ratesLoading, setRatesLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [userId, setUserId] = useState<string>("");
+
+  // Fetch authenticated user on mount
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user) {
+        setUserEmail(data.session.user.email ?? "");
+        setUserId(data.session.user.id);
+      }
+    });
+  }, []);
 
   // Fetch live exchange rates on mount
   useEffect(() => {
@@ -94,6 +98,7 @@ export default function PricingToggle() {
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4">
+      <Script src="https://js.paystack.co/v2/inline.js" strategy="afterInteractive" />
 
       {/* CURRENCY SELECTOR */}
       <div className="flex justify-center mb-10 animate-in slide-in-from-top-4 fade-in duration-700">
@@ -194,12 +199,16 @@ export default function PricingToggle() {
             ))}
           </div>
 
-          <Link
-            href="/dashboard"
-            className="w-full block text-center py-3.5 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold hover:bg-blue-100 dark:hover:bg-blue-900/50 text-sm transition-colors"
+          <UpgradeButton
+            userEmail={userEmail}
+            userId={userId}
+            amount={currencyCode === "NGN" ? monthly : BASE_MONTHLY}
+            currency={currencyCode === "NGN" ? "NGN" : "USD"}
+            planType="monthly"
+            className="w-full py-3.5 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold hover:bg-blue-100 dark:hover:bg-blue-900/50 text-sm transition-colors"
           >
             Get Started
-          </Link>
+          </UpgradeButton>
         </div>
 
         {/* --- CARD 2: 6-MONTH (POPULAR) --- */}
@@ -250,12 +259,16 @@ export default function PricingToggle() {
             ))}
           </div>
 
-          <Link
-            href="/dashboard"
-            className="w-full block text-center py-3.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold hover:from-blue-600 hover:to-blue-700 text-sm transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30"
+          <UpgradeButton
+            userEmail={userEmail}
+            userId={userId}
+            amount={currencyCode === "NGN" ? sixMonth : BASE_6MONTH}
+            currency={currencyCode === "NGN" ? "NGN" : "USD"}
+            planType="6month"
+            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold hover:from-blue-600 hover:to-blue-700 text-sm transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30"
           >
             Get 6-Month Plan
-          </Link>
+          </UpgradeButton>
         </div>
 
         {/* --- CARD 3: YEARLY (BEST VALUE) --- */}
@@ -307,12 +320,16 @@ export default function PricingToggle() {
             ))}
           </div>
 
-          <Link
-            href="/dashboard"
-            className="w-full block text-center py-3.5 rounded-xl bg-white text-blue-700 font-bold hover:bg-gray-100 text-sm transition-colors shadow-lg relative z-10"
+          <UpgradeButton
+            userEmail={userEmail}
+            userId={userId}
+            amount={currencyCode === "NGN" ? yearly : BASE_YEARLY}
+            currency={currencyCode === "NGN" ? "NGN" : "USD"}
+            planType="yearly"
+            className="w-full py-3.5 rounded-xl bg-white text-blue-700 font-bold hover:bg-gray-100 text-sm transition-colors shadow-lg relative z-10"
           >
             Get Yearly Plan
-          </Link>
+          </UpgradeButton>
 
           {/* Background Decorations */}
           <div className="absolute -bottom-10 -right-10 w-44 h-44 bg-purple-500 rounded-full blur-3xl opacity-40 pointer-events-none animate-pulse duration-[3000ms]" />

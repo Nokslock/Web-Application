@@ -20,6 +20,7 @@ interface DashboardNavbarProps {
   user: any;
   fullName?: string;
   email: string;
+  isAdmin?: boolean;
 }
 
 const links = [
@@ -32,6 +33,7 @@ export default function DashboardNavbar({
   user,
   fullName,
   email,
+  isAdmin = false,
 }: DashboardNavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -94,7 +96,7 @@ export default function DashboardNavbar({
           {/* RIGHT: Actions (Theme, User, Mobile Toggle) */}
           <div className="flex items-center justify-end gap-4">
             {/* Admin Link (Only for Super Admins) */}
-            {user?.user_metadata?.role === "super_admin" && (
+            {isAdmin && (
               <Link
                 href="/admin"
                 className="hidden sm:flex group items-center gap-2 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 border border-red-100 dark:border-red-900/50 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all hover:scale-105"
@@ -226,7 +228,7 @@ export default function DashboardNavbar({
                 </div>
 
                 {/* Mobile Admin Link */}
-                {user?.user_metadata?.role === "super_admin" && (
+                {isAdmin && (
                   <Link
                     href="/admin"
                     onClick={() => setIsMobileMenuOpen(false)}

@@ -55,7 +55,13 @@ export async function sendNotification({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user || user.user_metadata?.role !== "super_admin") {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile?.is_admin) {
     throw new Error("Unauthorized");
   }
 

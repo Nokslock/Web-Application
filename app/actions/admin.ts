@@ -17,8 +17,13 @@ async function checkAdminAccess() {
     throw new Error("Unauthorized: No user found");
   }
 
-  const role = user.user_metadata?.role;
-  if (role !== "super_admin") {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile?.is_admin) {
     throw new Error("Unauthorized: Insufficient permissions");
   }
 
@@ -74,10 +79,12 @@ export async function getAdminStats() {
   const verifiedUsers = users.filter((u) => u.email_confirmed_at).length;
 
   // Role Distribution
-  const admins = users.filter(
-    (u) => u.user_metadata?.role === "super_admin",
-  ).length;
-  const regularUsers = totalUsers - admins;
+  const { count } = await adminClient
+    .from("profiles")
+    .select("*", { count: "exact", head: true })
+    .eq("is_admin", true);
+  const adminCount = count ?? 0;
+  const regularUsers = totalUsers - adminCount;
 
   // Auth Provider Breakdown
   const providerCounts: Record<string, number> = {};
@@ -107,7 +114,7 @@ export async function getAdminStats() {
     newSignups,
     signupGrowth,
     verifiedUsers,
-    roleDistribution: { admins, users: regularUsers },
+    roleDistribution: { admins: adminCount, users: regularUsers },
     providerBreakdown: providerCounts,
     signupTimeline,
   };
@@ -127,11 +134,20 @@ export async function getUsersList(page = 1, limit = 100) {
 
   if (error) throw error;
 
+  // Fetch admin flags from profiles
+  const { data: profiles } = await adminClient
+    .from("profiles")
+    .select("id, is_admin");
+
+  const adminMap = new Map(
+    (profiles ?? []).map((p: { id: string; is_admin: boolean }) => [p.id, p.is_admin]),
+  );
+
   return users.map((u) => ({
     id: u.id,
     email: u.email,
     full_name: u.user_metadata?.full_name || "N/A",
-    role: u.user_metadata?.role || "user",
+    role: adminMap.get(u.id) ? "super_admin" : "user",
     provider: u.app_metadata?.provider || "email",
     email_confirmed: !!u.email_confirmed_at,
     created_at: u.created_at,
@@ -143,14 +159,15 @@ export async function toggleAdminRole(userId: string, currentRole: string) {
   await checkAdminAccess();
   const adminClient = createSupabaseAdminClient();
 
-  const newRole = currentRole === "super_admin" ? "user" : "super_admin";
+  const newIsAdmin = currentRole !== "super_admin";
 
-  const { error } = await adminClient.auth.admin.updateUserById(userId, {
-    user_metadata: { role: newRole },
-  });
+  const { error } = await adminClient
+    .from("profiles")
+    .update({ is_admin: newIsAdmin })
+    .eq("id", userId);
 
   if (error) throw new Error(error.message);
 
   revalidatePath("/admin");
-  return { success: true, newRole };
+  return { success: true, newRole: newIsAdmin ? "super_admin" : "user" };
 }

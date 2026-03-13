@@ -24,6 +24,8 @@ import {
 } from "@/lib/dead-man-actions";
 import { unwrapMasterVaultKey } from "@/lib/emergency-key";
 import { decryptData } from "@/lib/crypto";
+import AuthNavbar from "@/components/AuthNavbar";
+import { toast } from "sonner";
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -78,22 +80,26 @@ const TYPE_META: Record<string, TypeMeta> = {
   password: {
     label: "Login Credential",
     icon: <FaGlobe size={14} />,
-    iconClass: "text-blue-600 bg-blue-50 border-blue-100",
+    iconClass:
+      "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/30",
   },
   card: {
     label: "Payment Card",
     icon: <FaCreditCard size={14} />,
-    iconClass: "text-purple-600 bg-purple-50 border-purple-100",
+    iconClass:
+      "text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/10 border-purple-100 dark:border-purple-900/30",
   },
   crypto: {
     label: "Crypto Wallet",
     icon: <FaWallet size={14} />,
-    iconClass: "text-amber-600 bg-amber-50 border-amber-100",
+    iconClass:
+      "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/10 border-amber-100 dark:border-amber-900/30",
   },
   file: {
     label: "File Reference",
     icon: <FaFile size={14} />,
-    iconClass: "text-slate-500 bg-slate-50 border-slate-100",
+    iconClass:
+      "text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700",
   },
 };
 
@@ -163,8 +169,9 @@ export default function ClaimPage() {
       await navigator.clipboard.writeText(value);
       setCopiedField(key);
       setTimeout(() => setCopiedField(null), 2000);
+      toast.success("Copied to clipboard");
     } catch {
-      // Clipboard access denied — silently ignore
+      toast.error("Clipboard access denied");
     }
   }, []);
 
@@ -227,15 +234,16 @@ export default function ClaimPage() {
 
       setDecryptedItems(decrypted);
       setClaimState("done");
+      toast.success(`${decrypted.length} item${decrypted.length !== 1 ? "s" : ""} decrypted successfully`);
     } catch (err: unknown) {
       const isDomException = err instanceof DOMException;
-      setError(
-        isDomException
-          ? "Invalid Emergency Recovery Key. Please check the key from your email and try again."
-          : err instanceof Error
-            ? err.message
-            : "An unexpected error occurred. Please try again."
-      );
+      const msg = isDomException
+        ? "Invalid Emergency Recovery Key. Please check the key from your email and try again."
+        : err instanceof Error
+          ? err.message
+          : "An unexpected error occurred. Please try again.";
+      setError(msg);
+      toast.error(msg);
       setClaimState("idle");
     }
   };
@@ -249,20 +257,14 @@ export default function ClaimPage() {
     setEmergencyKey("");
     setError(null);
     setClaimState("idle");
+    toast.info("Session cleared");
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* ── Header ───────────────────────────────────────────── */}
-      <header className="bg-slate-900 px-4 py-8 text-center">
-        <p className="text-white text-xl font-bold tracking-tight">Nokslock</p>
-        <p className="text-slate-400 text-sm mt-1">
-          Secure Inheritance Claim Portal
-        </p>
-      </header>
+    <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col transition-colors duration-300">
+      <AuthNavbar />
 
-      {/* ── Main ─────────────────────────────────────────────── */}
-      <main className="flex-1 flex items-start justify-center px-4 py-10">
+      <main className="flex-1 flex items-start justify-center px-4 sm:px-6 py-10">
         <div className="w-full max-w-lg">
           {claimState === "idle" && (
             <FormPanel
@@ -294,11 +296,9 @@ export default function ClaimPage() {
         </div>
       </main>
 
-      {/* ── Footer ───────────────────────────────────────────── */}
-      <footer className="py-6 text-center">
-        <p className="text-xs text-gray-400">
-          Nokslock · End-to-end encrypted digital vault
-        </p>
+      <footer className="py-6 px-8 flex justify-between items-center border-t border-gray-100 dark:border-gray-900">
+        <p className="text-xs font-medium text-gray-400">&copy; Nokslock 2025</p>
+        <p className="text-xs text-gray-400">End-to-end encrypted digital vault</p>
       </footer>
     </div>
   );
@@ -326,132 +326,176 @@ function FormPanel({
   const isReady = ownerEmail.includes("@") && wordCount === 16;
 
   const inputClass =
-    "w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition";
+    "w-full p-3 rounded-lg border transition-all text-sm outline-none bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10";
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-      {/* Card header */}
-      <div className="bg-slate-50 border-b border-gray-100 px-6 py-5 flex items-center gap-3">
-        <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shrink-0">
-          <FaShieldHalved size={17} />
-        </div>
-        <div>
-          <h1 className="text-base font-bold text-gray-900">
-            Claim Inheritance
-          </h1>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Authorised next-of-kin access only
-          </p>
-        </div>
+    <div>
+      {/* Page heading */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter mb-2">
+          Claim Inheritance
+        </h1>
+        <p className="text-base text-gray-500 dark:text-gray-400">
+          Authorised next-of-kin access only.
+        </p>
       </div>
 
-      <form onSubmit={onSubmit} className="px-6 py-6 space-y-5">
-        <p className="text-sm text-gray-600 leading-relaxed">
-          Enter the email address of the person who designated you, and the{" "}
-          <strong className="text-gray-800">Emergency Recovery Key</strong>{" "}
-          from the notification email you received.
-        </p>
-
-        {error && (
-          <div className="flex items-start gap-3 px-4 py-3.5 bg-red-50 border border-red-200 rounded-xl">
-            <FaTriangleExclamation
-              className="text-red-500 mt-0.5 shrink-0"
-              size={14}
-            />
-            <p className="text-sm text-red-700 leading-snug">{error}</p>
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+        {/* Card header */}
+        <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100 dark:border-gray-800">
+          <div className="p-2 bg-blue-50 dark:bg-blue-900/10 rounded-lg text-blue-600 dark:text-blue-400">
+            <FaShieldHalved size={16} />
           </div>
-        )}
-
-        {/* Owner email */}
-        <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">
-            Vault Owner&apos;s Email Address
-          </label>
-          <input
-            type="email"
-            required
-            value={ownerEmail}
-            onChange={(e) => setOwnerEmail(e.target.value)}
-            placeholder="their.email@example.com"
-            className={inputClass}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-          />
+          <div>
+            <h2 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+              Secure Access Portal
+            </h2>
+            <p className="text-xs text-gray-400 font-medium">
+              Enter the details from your notification email
+            </p>
+          </div>
         </div>
 
-        {/* Emergency key */}
-        <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">
-            Emergency Recovery Key
-          </label>
-          <textarea
-            required
-            value={emergencyKey}
-            onChange={(e) => setEmergencyKey(e.target.value)}
-            placeholder="Paste your 16-word recovery key here…"
-            rows={4}
-            className={`${inputClass} resize-none font-mono leading-relaxed`}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-          />
-          <p
-            className={`text-xs font-medium tabular-nums ${
-              wordCount === 0
-                ? "text-gray-400"
+        <form onSubmit={onSubmit} className="px-6 py-6 space-y-5">
+          {error && (
+            <div className="flex items-start gap-3 px-4 py-3.5 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/40 rounded-lg">
+              <FaTriangleExclamation
+                className="text-red-500 dark:text-red-400 mt-0.5 shrink-0"
+                size={14}
+              />
+              <p className="text-sm text-red-700 dark:text-red-400 leading-snug">{error}</p>
+            </div>
+          )}
+
+          {/* Owner email */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Vault Owner&apos;s Email Address
+            </label>
+            <input
+              type="email"
+              required
+              value={ownerEmail}
+              onChange={(e) => setOwnerEmail(e.target.value)}
+              placeholder="their.email@example.com"
+              className={inputClass}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+            />
+          </div>
+
+          {/* Emergency key */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Emergency Recovery Key
+            </label>
+            <textarea
+              required
+              value={emergencyKey}
+              onChange={(e) => setEmergencyKey(e.target.value)}
+              placeholder="Paste your 16-word recovery key here…"
+              rows={4}
+              className={`${inputClass} resize-none font-mono leading-relaxed`}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+            />
+            <p
+              className={`text-xs font-semibold tabular-nums ${
+                wordCount === 0
+                  ? "text-gray-400 dark:text-gray-600"
+                  : wordCount === 16
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-orange-500 dark:text-orange-400"
+              }`}
+            >
+              {wordCount === 0
+                ? "16 words required"
                 : wordCount === 16
-                  ? "text-green-600"
-                  : "text-amber-500"
-            }`}
+                  ? "✓ 16 words entered"
+                  : `${wordCount} / 16 words`}
+            </p>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={!isReady}
+            className="w-full flex items-center justify-center gap-2 bg-black dark:bg-white text-white dark:text-black text-sm font-bold py-3 rounded-lg hover:opacity-90 active:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
           >
-            {wordCount === 0
-              ? "16 words required"
-              : wordCount === 16
-                ? "✓ 16 words entered"
-                : `${wordCount} / 16 words`}
-          </p>
-        </div>
+            <FaLock size={12} />
+            Unlock Inheritance
+          </button>
 
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={!isReady}
-          className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white text-sm font-semibold py-3.5 rounded-xl hover:bg-slate-800 active:bg-slate-950 disabled:opacity-40 disabled:cursor-not-allowed transition"
-        >
-          <FaLock size={12} />
-          Unlock Inheritance
-        </button>
-
-        {/* Security note */}
-        <div className="flex items-start gap-2.5 px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl">
-          <FaShieldHalved className="text-slate-400 mt-0.5 shrink-0" size={13} />
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Your recovery key is{" "}
-            <strong className="text-slate-700">never sent to the server</strong>.
-            All decryption runs entirely inside your browser.
-          </p>
-        </div>
-      </form>
+          {/* Security note */}
+          <div className="flex items-start gap-2.5 px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 rounded-lg">
+            <FaShieldHalved className="text-gray-400 mt-0.5 shrink-0" size={13} />
+            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+              Your recovery key is{" "}
+              <strong className="text-gray-700 dark:text-gray-200">never sent to the server</strong>.
+              All decryption runs entirely inside your browser.
+            </p>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
 
 // ── Loading Panel ──────────────────────────────────────────────
 
+const LOADING_ORDER: LoadingStep[] = ["fetching", "deriving", "decrypting"];
+
 function LoadingPanel({ step }: { step: LoadingStep }) {
   const { title, subtitle } = LOADING_COPY[step];
+  const currentIdx = LOADING_ORDER.indexOf(step);
+
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-16 text-center">
-      <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-slate-50 border border-slate-100 mb-6">
-        <FaSpinner className="animate-spin text-slate-500" size={22} />
+    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 px-6 py-10 space-y-8">
+      {/* Spinner + message */}
+      <div className="flex flex-col items-center text-center gap-4">
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <FaSpinner className="animate-spin text-gray-500 dark:text-gray-400" size={22} />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-gray-900 dark:text-white">{title}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-xs mx-auto leading-relaxed">
+            {subtitle}
+          </p>
+        </div>
       </div>
-      <h2 className="text-base font-bold text-gray-900">{title}</h2>
-      <p className="text-sm text-gray-500 mt-2 max-w-xs mx-auto leading-relaxed">
-        {subtitle}
-      </p>
+
+      {/* Progress steps */}
+      <div className="space-y-2">
+        {LOADING_ORDER.map((s, idx) => {
+          const isDone = idx < currentIdx;
+          const isActive = idx === currentIdx;
+          return (
+            <div
+              key={s}
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
+                isActive
+                  ? "bg-blue-50 dark:bg-blue-900/10 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30"
+                  : isDone
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-gray-400 dark:text-gray-600"
+              }`}
+            >
+              {isDone ? (
+                <FaCircleCheck size={13} />
+              ) : isActive ? (
+                <FaSpinner className="animate-spin" size={13} />
+              ) : (
+                <span className="w-3.5 h-3.5 rounded-full border-2 border-current inline-block shrink-0" />
+              )}
+              {LOADING_COPY[s].title}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -478,29 +522,29 @@ function ResultsPanel({
   return (
     <div className="space-y-4">
       {/* Success header + security notice */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-5 space-y-4">
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 px-6 py-5 space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-green-50 border border-green-100 rounded-xl flex items-center justify-center shrink-0">
-            <FaCircleCheck className="text-green-600" size={17} />
+          <div className="p-2 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg text-emerald-600 dark:text-emerald-400">
+            <FaCircleCheck size={16} />
           </div>
           <div>
-            <h2 className="text-base font-bold text-gray-900">
+            <h2 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">
               {items.length === 1
                 ? "1 item recovered"
                 : `${items.length} items recovered`}
             </h2>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-xs text-gray-400 font-medium mt-0.5">
               Vault decrypted successfully
             </p>
           </div>
         </div>
 
-        <div className="flex items-start gap-3 px-4 py-3.5 bg-amber-50 border border-amber-200 rounded-xl">
+        <div className="flex items-start gap-3 px-4 py-3.5 bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-900/40 rounded-lg">
           <FaTriangleExclamation
-            className="text-amber-500 mt-0.5 shrink-0"
+            className="text-orange-500 dark:text-orange-400 mt-0.5 shrink-0"
             size={14}
           />
-          <p className="text-xs text-amber-800 leading-relaxed">
+          <p className="text-xs text-orange-800 dark:text-orange-300 leading-relaxed">
             <strong>Session-only.</strong> This data is held in your
             browser&apos;s memory only. It is not saved or transmitted
             anywhere. Closing or refreshing this tab will permanently clear it.
@@ -510,8 +554,8 @@ function ResultsPanel({
 
       {/* Item cards */}
       {items.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-10 text-center">
-          <p className="text-sm text-gray-500">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 px-6 py-10 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             No items were marked for inheritance sharing.
           </p>
         </div>
@@ -532,7 +576,7 @@ function ResultsPanel({
       {/* Reset */}
       <button
         onClick={onReset}
-        className="w-full flex items-center justify-center gap-2 text-gray-500 text-sm font-medium py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition"
+        className="w-full flex items-center justify-center gap-2 text-gray-600 dark:text-gray-300 text-sm font-semibold py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
       >
         <FaArrowRotateLeft size={12} />
         Clear and Start Over
@@ -595,10 +639,11 @@ function ItemCard({
       a.href = json.signedUrl;
       a.download = fileName ?? "file";
       a.click();
+      toast.success("Download started");
     } catch (err: unknown) {
-      setDownloadError(
-        err instanceof Error ? err.message : "Download failed. Please try again."
-      );
+      const msg = err instanceof Error ? err.message : "Download failed. Please try again.";
+      setDownloadError(msg);
+      toast.error(msg);
     } finally {
       setIsDownloading(false);
     }
@@ -607,7 +652,8 @@ function ItemCard({
   const meta = TYPE_META[item.type] ?? {
     label: item.type,
     icon: <FaFile size={14} />,
-    iconClass: "text-slate-500 bg-slate-50 border-slate-100",
+    iconClass:
+      "text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700",
   };
   const fieldCfg = FIELD_CONFIG[item.type] ?? {};
   const hasError = "_error" in item.fields;
@@ -618,27 +664,27 @@ function ItemCard({
   );
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
       {/* Card header */}
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 dark:border-gray-800">
         <div
           className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 ${meta.iconClass}`}
         >
           {meta.icon}
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-gray-900 truncate">
+          <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
             {item.name}
           </p>
-          <p className="text-xs text-gray-400">{meta.label}</p>
+          <p className="text-xs text-gray-400 font-medium">{meta.label}</p>
         </div>
       </div>
 
       {/* Fields */}
-      <div className="divide-y divide-gray-50">
+      <div className="divide-y divide-gray-50 dark:divide-gray-800">
         {hasError ? (
           <div className="px-5 py-3">
-            <p className="text-xs text-red-500">
+            <p className="text-xs text-red-500 dark:text-red-400">
               {String(item.fields._error)}
             </p>
           </div>
@@ -670,9 +716,11 @@ function ItemCard({
                 className="flex items-center justify-between gap-4 px-5 py-3.5"
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-400 mb-0.5">{label}</p>
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-0.5">
+                    {label}
+                  </p>
                   <p
-                    className={`text-sm text-gray-900 break-all ${
+                    className={`text-sm text-gray-900 dark:text-white break-all ${
                       isSensitive ? "font-mono" : ""
                     }`}
                   >
@@ -686,8 +734,8 @@ function ItemCard({
                   {isSensitive && (
                     <button
                       type="button"
-                      onClick={() => onToggleReveal(fieldKey)}
-                      className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition"
+                      onClick={() => { onToggleReveal(fieldKey); toast(isRevealed ? "Field hidden" : "Field revealed"); }}
+                      className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                       title={isRevealed ? "Hide" : "Reveal"}
                       aria-label={isRevealed ? "Hide field" : "Reveal field"}
                     >
@@ -701,12 +749,12 @@ function ItemCard({
                   <button
                     type="button"
                     onClick={() => onCopy(displayValue, fieldKey)}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition"
+                    className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                     title="Copy to clipboard"
                     aria-label={`Copy ${label}`}
                   >
                     {isCopied ? (
-                      <FaCheck size={12} className="text-green-500" />
+                      <FaCheck size={12} className="text-emerald-500" />
                     ) : (
                       <FaCopy size={12} />
                     )}
@@ -719,22 +767,24 @@ function ItemCard({
 
         {/* File download */}
         {item.type === "file" && !hasError && Boolean(item.fields.storagePath) && (
-          <div className="px-5 py-4 bg-slate-50 border-t border-slate-100 space-y-2">
+          <div className="px-5 py-4 bg-gray-50 dark:bg-gray-800/50 space-y-2">
             <button
               type="button"
               onClick={handleDownload}
               disabled={isDownloading}
-              className="flex items-center gap-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 active:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-lg transition"
+              className="flex items-center gap-2 text-xs font-semibold text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-lg transition-colors"
             >
               {isDownloading ? (
-                <FaSpinner className="animate-spin" size={13} />
+                <FaSpinner className="animate-spin" size={12} />
               ) : (
-                <FaDownload size={13} />
+                <FaDownload size={12} />
               )}
               {isDownloading ? "Generating link…" : "Download File"}
             </button>
             {downloadError && (
-              <p className="text-xs text-red-600 leading-snug">{downloadError}</p>
+              <p className="text-xs text-red-600 dark:text-red-400 leading-snug">
+                {downloadError}
+              </p>
             )}
           </div>
         )}

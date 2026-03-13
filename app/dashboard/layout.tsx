@@ -52,10 +52,20 @@ export default async function RootLayout({
   const fullName = user?.user_metadata?.full_name || user?.user_metadata?.name || "Welcome User";
   const email = user?.email || "Please sign in";
 
+  let isAdmin = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", user.id)
+      .single();
+    isAdmin = profile?.is_admin ?? false;
+  }
+
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-gray-950 transition-colors duration-300 flex flex-col">
       {/* TOP NAVBAR */}
-      <DashboardNavbar user={user} fullName={fullName} email={email} />
+      <DashboardNavbar user={user} fullName={fullName} email={email} isAdmin={isAdmin} />
 
       {/* MAIN CONTENT */}
       <IdleTimeoutProvider>

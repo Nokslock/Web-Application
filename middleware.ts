@@ -111,11 +111,14 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/access-denied", request.url));
     }
 
-    // Check for super_admin role
-    const role = user.user_metadata?.role;
-    if (role !== "super_admin") {
-      // Allow access to setup-admin for initial setup if needed, but better to lock it down.
-      // For now, redirect strictly.
+    // Check for admin role in profiles table
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile?.is_admin) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }

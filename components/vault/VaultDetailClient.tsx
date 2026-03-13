@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaLock, FaFolderOpen, FaArrowLeft, FaGear, FaSpinner } from "react-icons/fa6";
 import Link from "next/link";
@@ -10,7 +10,7 @@ import ItemDetailModal from "@/components/dashboard/ItemDetailModal";
 import VaultSettingsModal from "@/components/vault/VaultSettingsModal";
 import { verifyVaultPin } from "@/lib/vault-actions";
 import { useRouter } from "next/navigation";
-import { isVaultUnlocked, unlockVault } from "@/lib/vaultKeyManager";
+import { isVaultUnlocked, unlockVault, tryRestoreVaultKey } from "@/lib/vaultKeyManager";
 import { toast } from "sonner";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 
@@ -37,6 +37,15 @@ export default function VaultDetailClient({ vault, items: initialItems }: VaultD
   const [unlockingMaster, setUnlockingMaster] = useState(false);
 
   const router = useRouter();
+
+  // Auto-restore vault key from sessionStorage on page refresh
+  useEffect(() => {
+    if (!isVaultUnlocked()) {
+      tryRestoreVaultKey().then((restored) => {
+        if (restored) setSessionVaultLocked(false);
+      });
+    }
+  }, []);
 
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();

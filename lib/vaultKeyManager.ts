@@ -16,8 +16,49 @@ import {
     unwrapVaultKey,
 } from "@/lib/crypto";
 
-// In-memory store — cleared on page refresh or explicit logout
+// In-memory store — restored from sessionStorage on page refresh, cleared on tab close
 let vaultKey: CryptoKey | null = null;
+
+const SESSION_KEY = "nokslock_vk";
+
+async function saveKeyToSession(key: CryptoKey): Promise<void> {
+    try {
+        const raw = await crypto.subtle.exportKey("raw", key);
+        const bytes = new Uint8Array(raw);
+        let binary = "";
+        for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+        sessionStorage.setItem(SESSION_KEY, btoa(binary));
+    } catch {
+        // Non-critical — silently ignore
+    }
+}
+
+/**
+ * Try to restore the vault key from sessionStorage (survives page refresh,
+ * cleared when the tab or browser is closed).
+ * Returns true if the key was successfully restored.
+ */
+export async function tryRestoreVaultKey(): Promise<boolean> {
+    if (vaultKey) return true;
+    try {
+        const stored = sessionStorage.getItem(SESSION_KEY);
+        if (!stored) return false;
+        const binaryString = atob(stored);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+        vaultKey = await crypto.subtle.importKey(
+            "raw",
+            bytes.buffer,
+            { name: "AES-GCM", length: 256 },
+            true,
+            ["encrypt", "decrypt"],
+        );
+        return true;
+    } catch {
+        sessionStorage.removeItem(SESSION_KEY);
+        return false;
+    }
+}
 
 // =============================================================================
 // REGISTRATION: Initialize keys for a brand-new user
@@ -64,8 +105,9 @@ export async function initializeVaultKey(
         throw new Error(`Failed to save encryption keys: ${error.message}`);
     }
 
-    // Step 6: Store in memory
+    // Step 6: Store in memory and session
     vaultKey = newVaultKey;
+    await saveKeyToSession(vaultKey);
 }
 
 // =============================================================================
@@ -106,6 +148,7 @@ export async function unlockVault(
     // Step 3: Unwrap Vault Key
     try {
         vaultKey = await unwrapVaultKey(data.encrypted_vault_key, masterKey);
+        await saveKeyToSession(vaultKey);
     } catch {
         throw new Error(
             "Failed to unlock vault. The password may be incorrect or the key data is corrupted.",
@@ -144,6 +187,7 @@ export function isVaultUnlocked(): boolean {
  */
 export function clearVaultKey(): void {
     vaultKey = null;
+    sessionStorage.removeItem(SESSION_KEY);
 }
 
 /**

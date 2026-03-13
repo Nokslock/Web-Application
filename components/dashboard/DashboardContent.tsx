@@ -11,7 +11,7 @@ import DashboardHome from "./DashboardHome";
 import CategoryItemGrid from "./CategoryItemGrid";
 import ItemDetailModal from "./ItemDetailModal";
 import PasswordInput from "@/components/PasswordInput";
-import { isVaultUnlocked, unlockVault } from "@/lib/vaultKeyManager";
+import { isVaultUnlocked, unlockVault, tryRestoreVaultKey } from "@/lib/vaultKeyManager";
 import { toast } from "sonner";
 
 // --- ANIMATION VARIANTS (Typed correctly) ---
@@ -55,6 +55,15 @@ export default function DashboardContent({ user, items }: DashboardContentProps)
   const [vaultLocked, setVaultLocked] = useState(!isVaultUnlocked());
   const [vaultPassword, setVaultPassword] = useState("");
   const [unlocking, setUnlocking] = useState(false);
+
+  // Auto-restore vault key from sessionStorage on page refresh
+  useEffect(() => {
+    if (!isVaultUnlocked()) {
+      tryRestoreVaultKey().then((restored) => {
+        if (restored) setVaultLocked(false);
+      });
+    }
+  }, []);
 
   // Dynamic Greeting based on time
   useEffect(() => {

@@ -32,7 +32,7 @@ export default function VaultDetailClient({ vault, items: initialItems }: VaultD
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // -- OVERALL MASTER VAULT LOCK STATE --
-  const [sessionVaultLocked, setSessionVaultLocked] = useState(!isVaultUnlocked());
+  const [sessionVaultLocked, setSessionVaultLocked] = useState(true);
   const [masterPassword, setMasterPassword] = useState("");
   const [unlockingMaster, setUnlockingMaster] = useState(false);
 

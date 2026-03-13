@@ -36,8 +36,8 @@ export default function CategoryItemGrid({
 }: CategoryItemGridProps) {
   
   // Filter items based on category OR use customItems (for search)
-  const categoryItems = customItems || (selectedCategory === "nok" 
-    ? items.filter((i) => i.share_with_nok && (i.type === 'vault' || !i.vault_id)) // Show shared vaults OR shared items that are NOT in a vault
+  const categoryItems = customItems || (selectedCategory === "nok"
+    ? items.filter((i) => i.share_with_nok)
     : items.filter((i) => i.type === selectedCategory));
 
   const colors = getColorClasses(selectedCategory === "search" ? "file" : selectedCategory);

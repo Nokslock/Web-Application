@@ -52,17 +52,19 @@ export default function DashboardContent({ user, items }: DashboardContentProps)
   const [searchQuery, setSearchQuery] = useState("");
 
   // --- VAULT LOCK STATE ---
-  const [vaultLocked, setVaultLocked] = useState(!isVaultUnlocked());
+  const [vaultLocked, setVaultLocked] = useState(true);
   const [vaultPassword, setVaultPassword] = useState("");
   const [unlocking, setUnlocking] = useState(false);
 
-  // Auto-restore vault key from sessionStorage on page refresh
+  // Restore vault key from sessionStorage after mount (client-only, avoids hydration mismatch)
   useEffect(() => {
-    if (!isVaultUnlocked()) {
-      tryRestoreVaultKey().then((restored) => {
-        if (restored) setVaultLocked(false);
-      });
+    if (isVaultUnlocked()) {
+      setVaultLocked(false);
+      return;
     }
+    tryRestoreVaultKey().then((restored) => {
+      setVaultLocked(!restored);
+    });
   }, []);
 
   // Dynamic Greeting based on time

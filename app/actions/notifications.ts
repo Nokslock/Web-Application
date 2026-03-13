@@ -55,6 +55,8 @@ export async function sendNotification({
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) throw new Error("Unauthorized");
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("is_admin")

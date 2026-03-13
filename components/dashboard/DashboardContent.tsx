@@ -204,7 +204,7 @@ export default function DashboardContent({ user, items }: DashboardContentProps)
       className="pb-20"
     >
       {/* HEADER SECTION */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 items-center">
+      <motion.div variants={itemVariants} initial="hidden" animate="visible" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 items-center">
         <div className="col-span-1 md:col-span-2">
           <h1 className="text-3xl font-black text-gray-800 dark:text-white tracking-tight">
             {greeting}, <span className="text-blue-600">{userName}</span>

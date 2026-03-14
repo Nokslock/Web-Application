@@ -54,6 +54,23 @@ export async function POST(req: NextRequest) {
         console.error("Failed to update profile:", error);
       }
 
+      // Insert into payment history
+      const { error: historyError } = await supabase
+        .from("payment_history")
+        .insert({
+          user_id: userId,
+          reference: data.reference,
+          plan,
+          amount: data.amount,
+          currency: data.currency,
+          paid_at: now.toISOString(),
+          plan_expires_at: expiresAt.toISOString(),
+        });
+
+      if (historyError) {
+        console.error("Failed to insert payment history:", historyError);
+      }
+
       console.log("Upgraded user plan:", userId, "→", plan);
     }
   }

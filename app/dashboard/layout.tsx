@@ -5,6 +5,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 import DashboardNavbar from "@/components/dashboard/DashboardNavbar";
 import IdleTimeoutProvider from "@/components/IdleTimeoutProvider";
 import HeartbeatTracker from "@/components/HeartbeatTracker";
+import VaultGuard from "@/components/VaultGuard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -73,7 +74,9 @@ export default async function RootLayout({
       <IdleTimeoutProvider>
         <HeartbeatTracker />
         <main className="flex-1 w-full max-w-[1800px] mx-auto px-4 sm:px-6 py-6 md:py-8">
-          {children}
+          <VaultGuard userId={user?.id ?? ""}>
+            {children}
+          </VaultGuard>
         </main>
       </IdleTimeoutProvider>
     </div>

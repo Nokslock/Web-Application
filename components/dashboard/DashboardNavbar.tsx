@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaBars, FaXmark, FaCrown, FaShieldHalved } from "react-icons/fa6";
+import { FaBars, FaXmark, FaCrown, FaShieldHalved, FaArrowRight } from "react-icons/fa6";
 import { TbLayoutDashboardFilled } from "react-icons/tb";
 import { IoSettingsSharp } from "react-icons/io5";
 import { BsFillShieldFill } from "react-icons/bs";
@@ -137,11 +137,19 @@ export default function DashboardNavbar({
                         </div>
                         <div className="p-1">
                           <Link
-                            href="/pricing"
+                            href="/dashboard/subscription"
                             onClick={() => setPlanMenuOpen(false)}
                             className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
                           >
                             <FaCrown className="text-amber-500 text-xs" />
+                            Manage Subscription
+                          </Link>
+                          <Link
+                            href="/pricing"
+                            onClick={() => setPlanMenuOpen(false)}
+                            className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                          >
+                            <FaArrowRight className="text-gray-400 text-xs" />
                             Change Plan
                           </Link>
                         </div>

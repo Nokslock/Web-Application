@@ -118,7 +118,7 @@ function OtpVerificationForm() {
       </h2>
 
       <p className="text-center text-lg pb-5 text-gray-600">
-        We've sent a verification code to{" "}
+        We&apos;ve sent a verification code to{" "}
         <span className="font-bold text-gray-900">{email || "your email"}</span>
       </p>
 
@@ -167,7 +167,7 @@ function OtpVerificationForm() {
         </form>
 
         <p className="text-center mt-6 text-gray-500">
-          Didn't receive the code?{" "}
+          Didn&apos;t receive the code?{" "}
           <button
             type="button"
             className="text-blue-500 font-semibold hover:underline"

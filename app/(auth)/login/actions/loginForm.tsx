@@ -46,8 +46,9 @@ export default function LoginForm() {
       toast.success("Welcome back! Redirecting...");
       router.push("/dashboard");
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message || "An unexpected error occurred.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "An unexpected error occurred.";
+      toast.error(message);
       setLoading(false);
     }
   };

@@ -118,8 +118,9 @@ export default function BioForm() {
       sessionStorage.removeItem("registerEmail");
       router.push(`/register/email-otp?email=${encodeURIComponent(email)}`);
 
-    } catch (err: any) {
-      toast.error(err.message || "An unexpected error occurred.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "An unexpected error occurred.";
+      toast.error(message);
     } finally {
       setLoading(false);
     }

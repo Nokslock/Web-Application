@@ -42,7 +42,7 @@ export default function AccessDenied() {
         </h2>
         
         <p className="text-gray-500 dark:text-gray-400 mb-10 text-lg leading-relaxed px-4">
-          It looks like you don't have permission to access this page. Please log in with the appropriate credentials.
+          It looks like you don&apos;t have permission to access this page. Please log in with the appropriate credentials.
         </p>
 
         {/* Action Buttons */}

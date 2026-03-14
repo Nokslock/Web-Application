@@ -38,12 +38,13 @@ export default function EmailForm() {
       
       router.push(`/forgot-password/email-otp?email=${encodeURIComponent(cleanEmail)}`);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      if (error.message.includes("not found") || error.status === 404) {
+      if (error instanceof Error && error.message.includes("not found")) {
         toast.error("This email does not exist in our system.");
       } else {
-        toast.error(error.message || "Failed to send reset email.");
+        const message = error instanceof Error ? error.message : "Failed to send reset email.";
+        toast.error(message);
       }
     } finally {
       setLoading(false);

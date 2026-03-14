@@ -16,9 +16,10 @@ if (!globalThis.crypto) {
 
 // Polyfill TextEncoder/TextDecoder (usually available, but just in case)
 if (!globalThis.TextEncoder) {
-  const { TextEncoder, TextDecoder } = require("util");
-  globalThis.TextEncoder = TextEncoder;
-  globalThis.TextDecoder = TextDecoder;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const util = require("util");
+  globalThis.TextEncoder = util.TextEncoder;
+  globalThis.TextDecoder = util.TextDecoder;
 }
 
 // Polyfill btoa/atob for base64 encoding (available in Node 16+, but ensure it)

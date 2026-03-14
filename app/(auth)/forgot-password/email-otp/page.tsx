@@ -101,8 +101,9 @@ function OtpVerificationForm() {
       if (error) throw error;
       toast.success("Code verified! Please set a new password.");
       setStep("PASSWORD");
-    } catch (error: any) {
-      toast.error(error.message || "Invalid or expired code");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Invalid or expired code";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -127,8 +128,9 @@ function OtpVerificationForm() {
       if (error) throw error;
       toast.success("Password reset successfully!");
       router.push("/dashboard");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update password");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to update password";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -152,7 +154,7 @@ function OtpVerificationForm() {
               Verification Code
             </h1>
             <p className="text-base text-gray-500 dark:text-gray-400 md:text-lg">
-              We've sent a 6-digit code to <span className="font-bold text-gray-900 dark:text-gray-200">{email}</span>
+              We&apos;ve sent a 6-digit code to <span className="font-bold text-gray-900 dark:text-gray-200">{email}</span>
             </p>
           </div>
           

@@ -1,8 +1,26 @@
 import PricingToggle from "@/components/PricingToggle";
 import Link from "next/link";
 import { FaArrowLeft, FaShieldHalved, FaLock, FaRotate } from "react-icons/fa6";
+import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let currentPlan = "free";
+  let userEmail = "";
+  let userId = "";
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("plan")
+      .eq("id", user.id)
+      .single();
+    currentPlan = profile?.plan ?? "free";
+    userEmail = user.email ?? "";
+    userId = user.id;
+  }
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-gray-950 py-12 px-4 transition-colors duration-300">
 
@@ -20,7 +38,7 @@ export default function PricingPage() {
       </div>
 
       {/* Pricing Component */}
-      <PricingToggle />
+      <PricingToggle currentPlan={currentPlan} userEmail={userEmail} userId={userId} />
 
       {/* Security Assurance Footer */}
       <div className="mt-20 max-w-4xl mx-auto">

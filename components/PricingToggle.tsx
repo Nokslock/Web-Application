@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { FaCheck, FaCrown, FaBolt, FaShieldHalved, FaChevronDown } from "react-icons/fa6";
 import Script from "next/script";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import UpgradeButton from "@/components/UpgradeButton";
 
 // --- CURRENCY METADATA ---
@@ -46,24 +45,25 @@ const features = [
   "Email support",
 ];
 
-export default function PricingToggle() {
+const PLAN_RANK: Record<string, number> = {
+  free: 0, monthly: 1, "6month": 2, yearly: 3,
+};
+
+interface PricingToggleProps {
+  currentPlan?: string;
+  userEmail?: string;
+  userId?: string;
+}
+
+export default function PricingToggle({
+  currentPlan = "free",
+  userEmail = "",
+  userId = "",
+}: PricingToggleProps) {
   const [currencyCode, setCurrencyCode] = useState<CurrencyCode>("USD");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [rates, setRates] = useState<Record<string, number>>(FALLBACK_RATES);
   const [ratesLoading, setRatesLoading] = useState(true);
-  const [userEmail, setUserEmail] = useState<string>("");
-  const [userId, setUserId] = useState<string>("");
-
-  // Fetch authenticated user on mount
-  useEffect(() => {
-    const supabase = getSupabaseBrowserClient();
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session?.user) {
-        setUserEmail(data.session.user.email ?? "");
-        setUserId(data.session.user.id);
-      }
-    });
-  }, []);
 
   // Fetch live exchange rates on mount
   useEffect(() => {
@@ -95,6 +95,39 @@ export default function PricingToggle() {
   const yearly = BASE_YEARLY * rate;
   const yearlyOriginal = BASE_YEARLY_ORIGINAL * rate;
   const yearlyPerMonth = (BASE_YEARLY / 12) * rate;
+
+  function PlanButton({
+    planType, amount, className, dark = false,
+  }: {
+    planType: "monthly" | "6month" | "yearly";
+    amount: number;
+    className: string;
+    dark?: boolean;
+  }) {
+    const isCurrent = currentPlan === planType;
+    const isDowngrade = PLAN_RANK[planType] < PLAN_RANK[currentPlan];
+
+    if (isCurrent) {
+      return (
+        <div className={`${className} flex items-center justify-center gap-2 cursor-default opacity-80 ${dark ? "bg-white/20 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"}`}>
+          <span className="text-xs">✓</span> Your Current Plan
+        </div>
+      );
+    }
+
+    return (
+      <UpgradeButton
+        userEmail={userEmail}
+        userId={userId}
+        amount={currencyCode === "NGN" ? amount : (planType === "monthly" ? BASE_MONTHLY : planType === "6month" ? BASE_6MONTH : BASE_YEARLY)}
+        currency={currencyCode === "NGN" ? "NGN" : "USD"}
+        planType={planType}
+        className={isDowngrade ? `${className} ${dark ? "bg-white/20 text-white hover:bg-white/30" : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"}` : className}
+      >
+        {isDowngrade ? "Downgrade" : planType === "monthly" ? "Get Started" : planType === "6month" ? "Get 6-Month Plan" : "Get Yearly Plan"}
+      </UpgradeButton>
+    );
+  }
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4">
@@ -168,13 +201,22 @@ export default function PricingToggle() {
 
         {/* --- CARD 1: MONTHLY --- */}
         <div
-          className="
-            bg-white dark:bg-gray-900 rounded-3xl p-7 border border-gray-200 dark:border-gray-800
-            shadow-sm flex flex-col h-full
+          className={`
+            bg-white dark:bg-gray-900 rounded-3xl p-7 flex flex-col h-full relative
             animate-in slide-in-from-bottom-8 fade-in duration-700 fill-mode-backwards delay-0
-            transition-all hover:-translate-y-2 hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-700
-          "
+            transition-all hover:-translate-y-2 hover:shadow-xl
+            ${currentPlan === "monthly"
+              ? "border-2 border-green-400 dark:border-green-500 shadow-lg shadow-green-100 dark:shadow-green-900/20"
+              : "border border-gray-200 dark:border-gray-800 shadow-sm hover:border-blue-200 dark:hover:border-blue-700"}
+          `}
         >
+          {currentPlan === "monthly" && (
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
+              <span className="bg-green-500 text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow tracking-wider uppercase">
+                You are here
+              </span>
+            </div>
+          )}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-2">
               <FaShieldHalved className="text-blue-500" />
@@ -199,32 +241,35 @@ export default function PricingToggle() {
             ))}
           </div>
 
-          <UpgradeButton
-            userEmail={userEmail}
-            userId={userId}
-            amount={currencyCode === "NGN" ? monthly : BASE_MONTHLY}
-            currency={currencyCode === "NGN" ? "NGN" : "USD"}
+          <PlanButton
             planType="monthly"
+            amount={monthly}
             className="w-full py-3.5 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold hover:bg-blue-100 dark:hover:bg-blue-900/50 text-sm transition-colors"
-          >
-            Get Started
-          </UpgradeButton>
+          />
         </div>
 
         {/* --- CARD 2: 6-MONTH (POPULAR) --- */}
         <div
-          className="
-            bg-white dark:bg-gray-900 rounded-3xl p-7 border-2 border-blue-200 dark:border-blue-700
-            shadow-lg relative flex flex-col h-full
+          className={`
+            bg-white dark:bg-gray-900 rounded-3xl p-7 relative flex flex-col h-full
             animate-in slide-in-from-bottom-8 fade-in duration-700 fill-mode-backwards delay-150
-            transition-all hover:-translate-y-2 hover:shadow-2xl hover:border-blue-400 dark:hover:border-blue-500
-          "
+            transition-all hover:-translate-y-2 hover:shadow-2xl
+            ${currentPlan === "6month"
+              ? "border-2 border-green-400 dark:border-green-500 shadow-lg shadow-green-100 dark:shadow-green-900/20"
+              : "border-2 border-blue-200 dark:border-blue-700 shadow-lg hover:border-blue-400 dark:hover:border-blue-500"}
+          `}
         >
-          {/* POPULAR Badge */}
+          {/* Badge */}
           <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
-            <span className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-lg shadow-blue-500/30 tracking-wider uppercase">
-              Popular
-            </span>
+            {currentPlan === "6month" ? (
+              <span className="bg-green-500 text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow tracking-wider uppercase">
+                You are here
+              </span>
+            ) : (
+              <span className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-lg shadow-blue-500/30 tracking-wider uppercase">
+                Popular
+              </span>
+            )}
           </div>
 
           <div className="mb-6 mt-2">
@@ -259,33 +304,36 @@ export default function PricingToggle() {
             ))}
           </div>
 
-          <UpgradeButton
-            userEmail={userEmail}
-            userId={userId}
-            amount={currencyCode === "NGN" ? sixMonth : BASE_6MONTH}
-            currency={currencyCode === "NGN" ? "NGN" : "USD"}
+          <PlanButton
             planType="6month"
+            amount={sixMonth}
             className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold hover:from-blue-600 hover:to-blue-700 text-sm transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30"
-          >
-            Get 6-Month Plan
-          </UpgradeButton>
+          />
         </div>
 
         {/* --- CARD 3: YEARLY (BEST VALUE) --- */}
         <div
-          className="
+          className={`
             bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 rounded-3xl p-7
-            text-white shadow-xl shadow-blue-300/30 dark:shadow-blue-900/40
-            relative flex flex-col h-full overflow-hidden
+            text-white shadow-xl relative flex flex-col h-full overflow-hidden
             animate-in slide-in-from-bottom-8 fade-in duration-700 fill-mode-backwards delay-300
-            transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-400/30 hover:scale-[1.02]
-          "
+            transition-all hover:-translate-y-2 hover:shadow-2xl hover:scale-[1.02]
+            ${currentPlan === "yearly"
+              ? "ring-2 ring-green-400 shadow-green-300/30 dark:shadow-green-900/40"
+              : "shadow-blue-300/30 dark:shadow-blue-900/40 hover:shadow-purple-400/30"}
+          `}
         >
-          {/* BEST VALUE Badge */}
+          {/* BEST VALUE / You are here Badge */}
           <div className="absolute top-0 right-0 z-10">
-            <div className="bg-yellow-400 text-yellow-900 text-[10px] font-bold px-4 py-1.5 rounded-bl-xl tracking-wider animate-pulse">
-              BEST VALUE
-            </div>
+            {currentPlan === "yearly" ? (
+              <div className="bg-green-400 text-green-900 text-[10px] font-bold px-4 py-1.5 rounded-bl-xl tracking-wider">
+                YOU ARE HERE
+              </div>
+            ) : (
+              <div className="bg-yellow-400 text-yellow-900 text-[10px] font-bold px-4 py-1.5 rounded-bl-xl tracking-wider animate-pulse">
+                BEST VALUE
+              </div>
+            )}
           </div>
 
           <div className="mb-6 relative z-10">
@@ -320,16 +368,12 @@ export default function PricingToggle() {
             ))}
           </div>
 
-          <UpgradeButton
-            userEmail={userEmail}
-            userId={userId}
-            amount={currencyCode === "NGN" ? yearly : BASE_YEARLY}
-            currency={currencyCode === "NGN" ? "NGN" : "USD"}
+          <PlanButton
             planType="yearly"
+            amount={yearly}
             className="w-full py-3.5 rounded-xl bg-white text-blue-700 font-bold hover:bg-gray-100 text-sm transition-colors shadow-lg relative z-10"
-          >
-            Get Yearly Plan
-          </UpgradeButton>
+            dark
+          />
 
           {/* Background Decorations */}
           <div className="absolute -bottom-10 -right-10 w-44 h-44 bg-purple-500 rounded-full blur-3xl opacity-40 pointer-events-none animate-pulse duration-[3000ms]" />

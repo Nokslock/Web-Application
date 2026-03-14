@@ -46,6 +46,9 @@ import {
   fetchTriggeredVault,
   type SetupDeadManSwitchPayload,
 } from "@/lib/dead-man-actions";
+import { createClient } from "@supabase/supabase-js";
+
+const mockCreateClient = createClient as jest.Mock;
 
 // =============================================================================
 // 1. SETUP DEAD MAN'S SWITCH
@@ -361,9 +364,8 @@ describe("fetchTriggeredVault", () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     delete process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    // Need to re-mock createClient to actually throw
-    const { createClient } = require("@supabase/supabase-js");
-    createClient.mockImplementationOnce(() => {
+    // Make createClient throw to simulate missing credentials
+    mockCreateClient.mockImplementationOnce(() => {
       throw new Error("Missing Supabase service-role credentials.");
     });
 

@@ -31,17 +31,30 @@ export async function POST(req: NextRequest) {
         process.env.SUPABASE_SERVICE_ROLE_KEY!
       );
 
-      await supabase
-        .from("profiles")
-        .update({ plan: data.metadata.plan })
-        .eq("id", data.metadata.userId);
+      const plan = data.metadata.plan;
+      const userId = data.metadata.userId;
+      const now = new Date();
+      const expiresAt = new Date(now);
 
-      console.log(
-        "Upgraded user plan:",
-        data.metadata.userId,
-        "→",
-        data.metadata.plan
-      );
+      if (plan === "monthly") expiresAt.setMonth(now.getMonth() + 1);
+      if (plan === "6month") expiresAt.setMonth(now.getMonth() + 6);
+      if (plan === "yearly") expiresAt.setFullYear(now.getFullYear() + 1);
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          plan,
+          plan_started_at: now.toISOString(),
+          plan_expires_at: expiresAt.toISOString(),
+          plan_reference: data.reference,
+        })
+        .eq("id", userId);
+
+      if (error) {
+        console.error("Failed to update profile:", error);
+      }
+
+      console.log("Upgraded user plan:", userId, "→", plan);
     }
   }
 

@@ -23,13 +23,30 @@ export async function GET(req: NextRequest) {
     const { data } = response.data;
 
     if (data.status === "success") {
+      const plan = data.metadata.plan;
+      const now = new Date();
+      const expiresAt = new Date(now);
+
+      if (plan === "monthly") expiresAt.setMonth(now.getMonth() + 1);
+      if (plan === "6month") expiresAt.setMonth(now.getMonth() + 6);
+      if (plan === "yearly") expiresAt.setFullYear(now.getFullYear() + 1);
+
       const supabase = await createSupabaseServerClient();
-      await supabase
+      const { error } = await supabase
         .from("profiles")
-        .update({ plan: data.metadata.plan })
+        .update({
+          plan,
+          plan_started_at: now.toISOString(),
+          plan_expires_at: expiresAt.toISOString(),
+          plan_reference: data.reference,
+        })
         .eq("id", data.metadata.userId);
 
-      return NextResponse.json({ success: true, plan: data.metadata.plan });
+      if (error) {
+        console.error("Failed to update profile:", error);
+      }
+
+      return NextResponse.json({ success: true, plan });
     }
 
     return NextResponse.json({ success: false });

@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
+import DemoImg1 from "@/public/db-light.png";
+import DemoImg2 from "@/public/vaults.png";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -240,16 +242,16 @@ function AppShowcaseSection() {
                                     <div className="w-3 h-3 rounded-full bg-green-400" />
                                 </div>
                                 <div className="flex-1 flex justify-center">
-                                    <div className="bg-white dark:bg-gray-900 rounded-lg px-4 py-1 text-xs text-gray-400 font-mono w-52 text-center flex items-center justify-center gap-2">
+                                    <div className="bg-white dark:bg-gray-900 rounded-lg px-4 py-1 text-xs text-gray-400 font-mono w-70 text-center flex items-center justify-center gap-2">
                                         <FaLock className="text-green-500 text-[8px]" />
-                                        nockslock.com
+                                        dashboard.nockslock.com/vaults
                                     </div>
                                 </div>
                             </div>
                             {/* Screenshot slot — replace with your mockup */}
                             <div className="relative">
                                 <Image
-                                    src={DemoImg}
+                                    src={DemoImg2}
                                     alt="Nockslock Dashboard"
                                     className="w-full h-auto"
                                     placeholder="blur"
@@ -266,7 +268,7 @@ function AppShowcaseSection() {
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-gray-900 rounded-b-xl z-10" />
                                 {/* Phone screen — replace with your mobile mockup */}
                                 <Image
-                                    src={HeroImg}
+                                    src={DemoImg1}
                                     alt="Nockslock Mobile View"
                                     className="w-full h-auto"
                                     placeholder="blur"

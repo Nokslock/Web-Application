@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import HeroImg from "@/public/hero-banner.png";
 import BgImg from "@/public/hero-img.png";
 import NavBar from "@/components/NavBar";
 import AuthButton from "@/components/AuthButton";
@@ -136,7 +137,7 @@ export default function Home() {
               </Link>
             </div>
 
-            <p className="text-sm text-gray-400 dark:text-gray-500 mb-12 opacity-0" ref={ctaRef}>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mb-12">
               Trusted by 10,000+ users • No credit card required
             </p>
 
@@ -152,12 +153,12 @@ export default function Home() {
                   </div>
                   <div className="flex-1 flex justify-center">
                     <div className="bg-white dark:bg-gray-900 rounded-lg px-4 py-1 text-xs text-gray-400 font-mono w-64 text-center">
-                      nockslock.com/dashboard
+                      dashboard.nockslock.com
                     </div>
                   </div>
                 </div>
                 <Image
-                  src={BgImg}
+                  src={HeroImg}
                   alt="Nockslock Dashboard Preview"
                   priority
                   className="w-full h-auto"

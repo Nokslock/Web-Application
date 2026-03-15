@@ -33,6 +33,7 @@ interface Props {
   planStartedAt: string | null;
   planExpiresAt: string | null;
   planReference: string | null;
+  planCancelled: boolean;
   userEmail: string;
   paymentHistory: PaymentRecord[];
 }
@@ -52,13 +53,39 @@ function formatAmount(amount: number, currency: string) {
 
 export default function SubscriptionManager({
   plan, planStartedAt, planExpiresAt, planReference,
-  userEmail, paymentHistory,
+  planCancelled, userEmail, paymentHistory,
 }: Props) {
   const [receipt, setReceipt] = useState<Receipt | null>(null);
   const [receiptOpen, setReceiptOpen] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [isCancelled, setIsCancelled] = useState(planCancelled);
 
   const days = daysRemaining(planExpiresAt);
   const active = isSubscriptionActive(planExpiresAt);
+
+  async function handleCancel() {
+    setCancelling(true);
+    setCancelError(null);
+
+    try {
+      const res = await fetch("/api/subscription/cancel", { method: "POST" });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setCancelError(data.error || "Something went wrong");
+        return;
+      }
+
+      setIsCancelled(true);
+      setShowCancelModal(false);
+    } catch {
+      setCancelError("Network error. Please try again.");
+    } finally {
+      setCancelling(false);
+    }
+  }
 
   function openReceipt(record: PaymentRecord) {
     setReceipt({
@@ -107,12 +134,25 @@ export default function SubscriptionManager({
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <FaCrown className="text-yellow-300" />
-                <span className="text-blue-200 text-xs font-bold uppercase tracking-wider">Active Plan</span>
+                <span className="text-blue-200 text-xs font-bold uppercase tracking-wider">
+                  {isCancelled && active ? "Cancelling" : "Active Plan"}
+                </span>
               </div>
               <h2 className="text-3xl font-extrabold">{planLabel(plan)}</h2>
+              {isCancelled && active && (
+                <p className="text-yellow-200 text-xs mt-1">
+                  Access until {formatDate(planExpiresAt)}
+                </p>
+              )}
             </div>
-            <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${active ? "bg-green-400/20 text-green-200" : "bg-red-400/20 text-red-200"}`}>
-              {active ? "Active" : "Expired"}
+            <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${
+              isCancelled && active
+                ? "bg-yellow-400/20 text-yellow-200"
+                : active
+                  ? "bg-green-400/20 text-green-200"
+                  : "bg-red-400/20 text-red-200"
+            }`}>
+              {isCancelled && active ? "Cancelling" : active ? "Active" : "Expired"}
             </span>
           </div>
 
@@ -122,7 +162,9 @@ export default function SubscriptionManager({
               <p className="font-bold text-sm">{formatDate(planStartedAt)}</p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
-              <p className="text-blue-200 text-xs mb-1">Renews / Expires</p>
+              <p className="text-blue-200 text-xs mb-1">
+                {isCancelled ? "Access Until" : "Renews / Expires"}
+              </p>
               <p className="font-bold text-sm">{formatDate(planExpiresAt)}</p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
@@ -146,6 +188,19 @@ export default function SubscriptionManager({
             >
               Change Plan <FaArrowRight size={12} />
             </Link>
+            {active && !isCancelled && (
+              <button
+                onClick={() => setShowCancelModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 backdrop-blur-sm rounded-xl text-sm font-semibold text-red-200 transition-colors"
+              >
+                Cancel Subscription
+              </button>
+            )}
+            {isCancelled && active && (
+              <span className="flex items-center gap-2 px-4 py-2 bg-yellow-500/20 backdrop-blur-sm rounded-xl text-sm font-semibold text-yellow-200">
+                Cancellation pending
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -200,6 +255,68 @@ export default function SubscriptionManager({
           </div>
         )}
       </div>
+
+      {/* Cancel Confirmation Modal */}
+      {showCancelModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={() => !cancelling && setShowCancelModal(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+              <span className="font-bold text-gray-900 dark:text-white">Cancel Subscription</span>
+              <button
+                onClick={() => setShowCancelModal(false)}
+                disabled={cancelling}
+                className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition-colors"
+              >
+                <FaXmark />
+              </button>
+            </div>
+
+            <div className="px-6 py-5 space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Are you sure you want to cancel your{" "}
+                <span className="font-bold">{planLabel(plan)}</span>?
+              </p>
+
+              <div className="bg-amber-50 dark:bg-amber-900/20 rounded-2xl px-4 py-3 border border-amber-200 dark:border-amber-800/50">
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  You will keep access to all premium features until{" "}
+                  <span className="font-bold">{formatDate(planExpiresAt)}</span>.
+                  After that, your account will revert to the Free plan.
+                </p>
+              </div>
+
+              {cancelError && (
+                <div className="bg-red-50 dark:bg-red-900/20 rounded-2xl px-4 py-3 border border-red-200 dark:border-red-800/50">
+                  <p className="text-sm text-red-600 dark:text-red-400">{cancelError}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowCancelModal(false)}
+                disabled={cancelling}
+                className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
+              >
+                Keep my plan
+              </button>
+              <button
+                onClick={handleCancel}
+                disabled={cancelling}
+                className="px-4 py-2 text-sm font-bold text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors disabled:opacity-50"
+              >
+                {cancelling ? "Cancelling..." : "Yes, cancel"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Receipt Modal */}
       {receiptOpen && (

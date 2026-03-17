@@ -16,6 +16,7 @@
 # product documentation
 /docs/
 /supabase/
+/coverage/
 
 # next.js
 /.next/

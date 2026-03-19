@@ -1,11 +1,7 @@
-import { getAdminStats, getUsersList } from "@/app/actions/admin";
-import { getNotificationHistory } from "@/app/actions/notifications";
+import { getAdminStats } from "@/app/actions/admin";
 import AdminStats from "@/components/admin/AdminStats";
 import SignupChart from "@/components/admin/SignupChart";
 import UserBreakdown from "@/components/admin/UserBreakdown";
-import UsersTable from "@/components/admin/UsersTable";
-import NotificationComposer from "@/components/admin/NotificationComposer";
-import NotificationHistory from "@/components/admin/NotificationHistory";
 import { Suspense } from "react";
 import { FaSpinner } from "react-icons/fa6";
 
@@ -20,22 +16,17 @@ function LoadingSpinner() {
 }
 
 export default async function AdminPage() {
-  const [stats, users, notificationHistory] = await Promise.all([
-    getAdminStats(),
-    getUsersList(1, 100),
-    getNotificationHistory(50),
-  ]);
+  const stats = await getAdminStats();
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900 dark:text-white">
-            Dashboard Overview
+            Overview
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-            Real-time platform metrics and user management.
+            Real-time platform metrics.
           </p>
         </div>
         <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
@@ -47,19 +38,17 @@ export default async function AdminPage() {
         </p>
       </div>
 
-      {/* Stats Cards */}
       <Suspense fallback={<LoadingSpinner />}>
         <AdminStats stats={stats} />
       </Suspense>
 
-      {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
           <Suspense fallback={<LoadingSpinner />}>
             <SignupChart timeline={stats.signupTimeline} />
           </Suspense>
         </div>
-        <div className="lg:col-span-1 flex flex-col">
+        <div className="lg:col-span-1">
           <Suspense fallback={<LoadingSpinner />}>
             <UserBreakdown
               roleDistribution={stats.roleDistribution}
@@ -69,21 +58,6 @@ export default async function AdminPage() {
           </Suspense>
         </div>
       </div>
-
-      {/* Notification Composer + Users Table side by side on large screens */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-1">
-          <NotificationComposer users={users} />
-        </div>
-        <div className="xl:col-span-2">
-          <Suspense fallback={<LoadingSpinner />}>
-            <UsersTable users={users} />
-          </Suspense>
-        </div>
-      </div>
-
-      {/* Notification History */}
-      <NotificationHistory notifications={notificationHistory} />
     </div>
   );
 }

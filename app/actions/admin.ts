@@ -155,6 +155,81 @@ export async function getUsersList(page = 1, limit = 100) {
   }));
 }
 
+export async function getSubscriptionStats() {
+  await checkAdminAccess();
+  const adminClient = createSupabaseAdminClient();
+
+  const { data: profiles } = await adminClient
+    .from("profiles")
+    .select("plan, plan_expires_at, plan_cancelled");
+
+  const now = new Date();
+  const thirtyDaysFromNow = new Date(now);
+  thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
+  const all = profiles ?? [];
+  const payingPlans = ["monthly", "6month", "yearly"];
+
+  const payingUsers = all.filter((p: any) => payingPlans.includes(p.plan)).length;
+  const freeUsers = all.filter((p: any) => !payingPlans.includes(p.plan)).length;
+  const cancelledCount = all.filter((p: any) => p.plan_cancelled).length;
+  const expiringSoon = all.filter(
+    (p: any) =>
+      payingPlans.includes(p.plan) &&
+      p.plan_expires_at &&
+      new Date(p.plan_expires_at) > now &&
+      new Date(p.plan_expires_at) <= thirtyDaysFromNow,
+  ).length;
+
+  const planBreakdown = {
+    monthly: all.filter((p: any) => p.plan === "monthly").length,
+    "6month": all.filter((p: any) => p.plan === "6month").length,
+    yearly: all.filter((p: any) => p.plan === "yearly").length,
+  };
+
+  return { payingUsers, freeUsers, cancelledCount, expiringSoon, planBreakdown };
+}
+
+export async function getDmsStats() {
+  await checkAdminAccess();
+  const adminClient = createSupabaseAdminClient();
+
+  const { data: switches } = await adminClient
+    .from("dead_man_switches")
+    .select("id, status, last_active_at, inactivity_threshold_days, owner_email");
+
+  const now = new Date();
+  const all = switches ?? [];
+
+  const totalActive = all.filter((s: any) => s.status === "active").length;
+  const totalTriggered = all.filter((s: any) => s.status === "triggered").length;
+  const totalCancelled = all.filter((s: any) => s.status === "cancelled").length;
+
+  const activeSwitches = all
+    .filter((s: any) => s.status === "active")
+    .map((s: any) => {
+      const expiryDate = new Date(s.last_active_at);
+      expiryDate.setDate(expiryDate.getDate() + s.inactivity_threshold_days);
+      const daysRemaining = Math.ceil(
+        (expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      return {
+        id: s.id as string,
+        ownerEmail: (s.owner_email as string | null) ?? "Unknown",
+        thresholdDays: s.inactivity_threshold_days as number,
+        lastActiveAt: s.last_active_at as string,
+        expiresAt: expiryDate.toISOString(),
+        daysRemaining,
+      };
+    })
+    .sort(
+      (a: { daysRemaining: number }, b: { daysRemaining: number }) =>
+        a.daysRemaining - b.daysRemaining,
+    );
+
+  return { totalActive, totalTriggered, totalCancelled, activeSwitches };
+}
+
 export async function toggleAdminRole(userId: string, currentRole: string) {
   await checkAdminAccess();
   const adminClient = createSupabaseAdminClient();

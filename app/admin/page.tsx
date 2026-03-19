@@ -1,9 +1,11 @@
 import { getAdminStats, getUsersList } from "@/app/actions/admin";
+import { getNotificationHistory } from "@/app/actions/notifications";
 import AdminStats from "@/components/admin/AdminStats";
 import SignupChart from "@/components/admin/SignupChart";
 import UserBreakdown from "@/components/admin/UserBreakdown";
 import UsersTable from "@/components/admin/UsersTable";
 import NotificationComposer from "@/components/admin/NotificationComposer";
+import NotificationHistory from "@/components/admin/NotificationHistory";
 import { Suspense } from "react";
 import { FaSpinner } from "react-icons/fa6";
 
@@ -18,9 +20,10 @@ function LoadingSpinner() {
 }
 
 export default async function AdminPage() {
-  const [stats, users] = await Promise.all([
+  const [stats, users, notificationHistory] = await Promise.all([
     getAdminStats(),
     getUsersList(1, 100),
+    getNotificationHistory(50),
   ]);
 
   return (
@@ -78,6 +81,9 @@ export default async function AdminPage() {
           </Suspense>
         </div>
       </div>
+
+      {/* Notification History */}
+      <NotificationHistory notifications={notificationHistory} />
     </div>
   );
 }

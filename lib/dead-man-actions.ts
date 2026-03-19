@@ -203,3 +203,66 @@ export async function fetchTriggeredVault(
     items: (items ?? []) as FetchedVaultItem[],
   };
 }
+
+// ── Claim Portal: Upload Death Certificate ─────────────────────
+
+export type UploadDeathCertificateResult =
+  | { success: true }
+  | { success: false; error: string };
+
+/**
+ * Uploads a death certificate file to the `death-certificates` bucket
+ * and saves the storage path on the dead_man_switches row.
+ * Uses the service-role client — no auth required (NOK has no account).
+ */
+export async function uploadDeathCertificate(
+  formData: FormData
+): Promise<UploadDeathCertificateResult> {
+  const file = formData.get("file") as File | null;
+  const switchId = formData.get("switch_id") as string | null;
+
+  if (!file || !switchId) {
+    return { success: false, error: "Missing file or switch reference." };
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    return { success: false, error: "File must be under 10 MB." };
+  }
+
+  let adminClient: ReturnType<typeof createAdminClient>;
+  try {
+    adminClient = createAdminClient();
+  } catch {
+    return { success: false, error: "Service unavailable." };
+  }
+
+  // Confirm the switch exists and is triggered before accepting the upload
+  const { data: switchRow } = await (adminClient.from("dead_man_switches") as any)
+    .select("id")
+    .eq("id", switchId)
+    .eq("status", "triggered")
+    .single();
+
+  if (!switchRow) {
+    return { success: false, error: "Invalid claim reference." };
+  }
+
+  const ext = file.name.split(".").pop() ?? "bin";
+  const storagePath = `${switchId}/${Date.now()}.${ext}`;
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  const { error: uploadError } = await adminClient.storage
+    .from("death-certificates")
+    .upload(storagePath, buffer, { contentType: file.type, upsert: true });
+
+  if (uploadError) {
+    console.error("[uploadDeathCertificate] Storage upload failed:", uploadError.message);
+    return { success: false, error: "Failed to upload certificate. Please try again." };
+  }
+
+  await (adminClient.from("dead_man_switches") as any)
+    .update({ death_certificate_path: storagePath })
+    .eq("id", switchId);
+
+  return { success: true };
+}

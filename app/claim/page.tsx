@@ -17,9 +17,12 @@ import {
   FaSpinner,
   FaLock,
   FaDownload,
+  FaFileMedical,
+  FaXmark,
 } from "react-icons/fa6";
 import {
   fetchTriggeredVault,
+  uploadDeathCertificate,
   type FetchedVaultItem,
 } from "@/lib/dead-man-actions";
 import { unwrapMasterVaultKey } from "@/lib/emergency-key";
@@ -148,6 +151,7 @@ export default function ClaimPage() {
   const [loadingStep, setLoadingStep] = useState<LoadingStep>("fetching");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [emergencyKey, setEmergencyKey] = useState("");
+  const [certFile, setCertFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [decryptedItems, setDecryptedItems] = useState<DecryptedItem[]>([]);
   const [switchId, setSwitchId] = useState<string | null>(null);
@@ -192,6 +196,14 @@ export default function ClaimPage() {
 
       const { switch_id, wrappedVaultKey, items } = result;
       setSwitchId(switch_id);
+
+      // ── Step 1b: Upload death certificate (non-blocking on decryption)
+      if (certFile) {
+        const fd = new FormData();
+        fd.append("file", certFile);
+        fd.append("switch_id", switch_id);
+        await uploadDeathCertificate(fd);
+      }
 
       // ── Step 2: Browser — PBKDF2 key derivation (intentionally slow)
       setLoadingStep("deriving");
@@ -255,6 +267,7 @@ export default function ClaimPage() {
     setCopiedField(null);
     setOwnerEmail("");
     setEmergencyKey("");
+    setCertFile(null);
     setError(null);
     setClaimState("idle");
     toast.info("Session cleared");
@@ -273,6 +286,8 @@ export default function ClaimPage() {
               emergencyKey={emergencyKey}
               setEmergencyKey={setEmergencyKey}
               wordCount={wordCount}
+              certFile={certFile}
+              setCertFile={setCertFile}
               error={error}
               onSubmit={handleSubmit}
             />
@@ -312,6 +327,8 @@ function FormPanel({
   emergencyKey,
   setEmergencyKey,
   wordCount,
+  certFile,
+  setCertFile,
   error,
   onSubmit,
 }: {
@@ -320,10 +337,12 @@ function FormPanel({
   emergencyKey: string;
   setEmergencyKey: (v: string) => void;
   wordCount: number;
+  certFile: File | null;
+  setCertFile: (f: File | null) => void;
   error: string | null;
   onSubmit: (e: React.FormEvent) => void;
 }) {
-  const isReady = ownerEmail.includes("@") && wordCount === 16;
+  const isReady = ownerEmail.includes("@") && wordCount === 16 && certFile !== null;
 
   const inputClass =
     "w-full p-3 rounded-lg border transition-all text-sm outline-none bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10";
@@ -418,6 +437,45 @@ function FormPanel({
                   ? "✓ 16 words entered"
                   : `${wordCount} / 16 words`}
             </p>
+          </div>
+
+          {/* Death certificate upload */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Death Certificate <span className="text-red-500">*</span>
+            </label>
+            {certFile ? (
+              <div className="flex items-center gap-3 px-4 py-3 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-900/40 rounded-lg">
+                <FaFileMedical className="text-emerald-500 shrink-0" size={14} />
+                <p className="text-sm text-emerald-800 dark:text-emerald-300 font-medium flex-1 truncate">
+                  {certFile.name}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setCertFile(null)}
+                  className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-200 shrink-0"
+                  aria-label="Remove file"
+                >
+                  <FaXmark size={13} />
+                </button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center gap-2 px-4 py-5 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50/40 dark:hover:bg-blue-900/10 transition-colors">
+                <FaFileMedical className="text-gray-400 dark:text-gray-600" size={20} />
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Click to upload death certificate
+                </span>
+                <span className="text-xs text-gray-400 dark:text-gray-600">
+                  PDF, JPG or PNG — max 10 MB
+                </span>
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  className="sr-only"
+                  onChange={(e) => setCertFile(e.target.files?.[0] ?? null)}
+                />
+              </label>
+            )}
           </div>
 
           {/* Submit */}

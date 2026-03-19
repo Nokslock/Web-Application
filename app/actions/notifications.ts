@@ -188,6 +188,36 @@ export async function markNotificationRead(notificationId: string) {
   }
 }
 
+// ─── ADMIN: Get notification history ─────────────────────────
+export async function getNotificationHistory(limit = 50) {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("Unauthorized");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile?.is_admin) throw new Error("Unauthorized");
+
+  const adminClient = createSupabaseAdminClient();
+
+  const { data, error } = await adminClient
+    .from("notifications")
+    .select("id, title, message, type, is_broadcast, user_id, created_at")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw new Error(error.message);
+
+  return data ?? [];
+}
+
 // ─── USER: Mark all notifications as read ────────────────────
 export async function markAllNotificationsRead() {
   const supabase = await createSupabaseServerClient();

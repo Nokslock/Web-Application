@@ -397,11 +397,13 @@ const panelVariants: Variants = {
 interface SettingsContentProps {
   user: any;
   nokData: any;
+  hasDmsSetup: boolean;
 }
 
 export default function SettingsContent({
   user,
   nokData,
+  hasDmsSetup,
 }: SettingsContentProps) {
   const [activeTab, setActiveTab] = useState<TabId>("profile");
 
@@ -500,7 +502,7 @@ export default function SettingsContent({
               >
                 <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                   <div className="p-0">
-                    <NextOfKinForm initialData={nokData} userId={user.id} />
+                    <NextOfKinForm initialData={nokData} userId={user.id} hasDmsSetup={hasDmsSetup} />
                   </div>
                 </div>
               </motion.div>

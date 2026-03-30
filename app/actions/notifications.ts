@@ -76,6 +76,7 @@ export async function sendNotification({
       message,
       type,
       is_broadcast: true,
+      sent_by_admin: true,
       user_id: null,
     });
     if (error) throw new Error(error.message);
@@ -85,6 +86,7 @@ export async function sendNotification({
       message,
       type,
       is_broadcast: false,
+      sent_by_admin: true,
       user_id: userId,
     });
     if (error) throw new Error(error.message);
@@ -210,6 +212,7 @@ export async function getNotificationHistory(limit = 50) {
   const { data, error } = await adminClient
     .from("notifications")
     .select("id, title, message, type, is_broadcast, user_id, created_at")
+    .eq("sent_by_admin", true)
     .order("created_at", { ascending: false })
     .limit(limit);
 

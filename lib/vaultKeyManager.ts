@@ -190,6 +190,125 @@ export function clearVaultKey(): void {
     sessionStorage.removeItem(SESSION_KEY);
 }
 
+// =============================================================================
+// PASSWORD CHANGE: Re-wrap vault key with a new password
+// =============================================================================
+
+/**
+ * Re-wrap the existing in-memory Vault Key with a new password.
+ * Called during password change (settings) when the user is logged in
+ * and the vault is already unlocked.
+ *
+ * Returns the old salt and encrypted vault key for rollback if the
+ * subsequent password update fails.
+ */
+export async function rewrapVaultKey(
+    newPassword: string,
+    userId: string,
+): Promise<{ oldSalt: string; oldEncryptedVaultKey: string }> {
+    const supabase = getSupabaseBrowserClient();
+    const currentVaultKey = getVaultKey(); // throws if vault is locked
+
+    // Fetch current key material (for rollback)
+    const { data: oldRow, error: fetchError } = await (
+        supabase.from("user_encryption_keys") as any
+    )
+        .select("user_salt, encrypted_vault_key")
+        .eq("user_id", userId)
+        .single();
+
+    if (fetchError || !oldRow) {
+        throw new Error("Failed to fetch current encryption keys for re-wrapping.");
+    }
+
+    // Generate new salt and derive new master key
+    const newSalt = generateUserSalt();
+    const newMasterKey = await deriveMasterKey(newPassword, newSalt);
+
+    // Wrap the existing vault key with the new master key
+    const newEncryptedVaultKey = await wrapVaultKey(currentVaultKey, newMasterKey);
+
+    // Persist new wrapped key + salt to DB
+    const { error: updateError } = await (
+        supabase.from("user_encryption_keys") as any
+    )
+        .update({
+            user_salt: newSalt,
+            encrypted_vault_key: newEncryptedVaultKey,
+        })
+        .eq("user_id", userId);
+
+    if (updateError) {
+        throw new Error(`Failed to update encryption keys: ${updateError.message}`);
+    }
+
+    return {
+        oldSalt: oldRow.user_salt,
+        oldEncryptedVaultKey: oldRow.encrypted_vault_key,
+    };
+}
+
+/**
+ * Restore the old vault key wrapping after a failed password update.
+ * This is the rollback path for `rewrapVaultKey`.
+ */
+export async function restoreVaultKeyWrapping(
+    userId: string,
+    oldSalt: string,
+    oldEncryptedVaultKey: string,
+): Promise<void> {
+    const supabase = getSupabaseBrowserClient();
+    await (supabase.from("user_encryption_keys") as any)
+        .update({
+            user_salt: oldSalt,
+            encrypted_vault_key: oldEncryptedVaultKey,
+        })
+        .eq("user_id", userId);
+}
+
+// =============================================================================
+// FORGOT PASSWORD: Reset vault with a new key (old data becomes inaccessible)
+// =============================================================================
+
+/**
+ * Generate a completely new vault key and wrap it with the new password.
+ * Called during forgot-password flow when the old password is unknown
+ * and the vault key cannot be recovered.
+ *
+ * WARNING: All previously encrypted vault data becomes permanently inaccessible.
+ */
+export async function resetVaultKey(
+    newPassword: string,
+    userId: string,
+): Promise<void> {
+    const supabase = getSupabaseBrowserClient();
+
+    const newSalt = generateUserSalt();
+    const newMasterKey = await deriveMasterKey(newPassword, newSalt);
+    const newVaultKey = await generateVaultKey();
+    const newEncryptedVaultKey = await wrapVaultKey(newVaultKey, newMasterKey);
+
+    const { error } = await (
+        supabase.from("user_encryption_keys") as any
+    )
+        .update({
+            user_salt: newSalt,
+            encrypted_vault_key: newEncryptedVaultKey,
+        })
+        .eq("user_id", userId);
+
+    if (error) {
+        throw new Error(`Failed to reset vault keys: ${error.message}`);
+    }
+
+    vaultKey = newVaultKey;
+    await saveKeyToSession(newVaultKey);
+}
+
+// =============================================================================
+// EXPORT
+// =============================================================================
+
 /**
  * Export the in-memory Vault Key as raw base64-encoded bytes.
  *

@@ -8,6 +8,7 @@ import AuthButton from "@/components/AuthButton";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { toast } from "sonner";
 import PasswordInput from "@/components/PasswordInput";
+import { resetVaultKey } from "@/lib/vaultKeyManager";
 
 export default function EmailOtpVerificationPage() {
   return (
@@ -123,10 +124,18 @@ function OtpVerificationForm() {
     setLoading(true);
     try {
       const { error } = await supabase.auth.updateUser({
-        password: newPassword
+        password: newPassword,
       });
       if (error) throw error;
-      toast.success("Password reset successfully!");
+
+      // Reset vault key since the old password is unknown and the vault
+      // key cannot be unwrapped. All previously encrypted data is lost.
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await resetVaultKey(newPassword, user.id);
+      }
+
+      toast.success("Password reset successfully! Your vault has been reset.");
       router.push("/dashboard");
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Failed to update password";
@@ -238,6 +247,11 @@ function OtpVerificationForm() {
                         }`}
                     />
                 </div>
+             </div>
+
+             {/* VAULT RESET WARNING */}
+             <div className="mb-5 p-3 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 text-xs font-medium">
+               Resetting your password without your old password will reset your encrypted vault. Any previously stored vault data will become permanently inaccessible.
              </div>
 
              {/* PASSWORD CHECKER LIST */}

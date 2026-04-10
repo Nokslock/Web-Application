@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import DefaultPfp from "@/public/pfp-default.jpg";
 import clsx from "clsx";
+import { rewrapVaultKey, restoreVaultKeyWrapping } from "@/lib/vaultKeyManager";
 
 interface ProfileFormProps {
   user: any;
@@ -528,10 +529,18 @@ function PasswordResetModal({
         type: "recovery",
       });
       if (verifyError) throw verifyError;
+
+      // Re-wrap vault key with new password before updating auth password
+      const oldWrapping = await rewrapVaultKey(newPassword, user.id);
+
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });
-      if (updateError) throw updateError;
+      if (updateError) {
+        // Rollback vault key wrapping since password update failed
+        await restoreVaultKeyWrapping(user.id, oldWrapping.oldSalt, oldWrapping.oldEncryptedVaultKey);
+        throw updateError;
+      }
       toast.success("Password updated!");
       createAutoNotification({
         title: "Password Changed",

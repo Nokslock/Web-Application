@@ -759,7 +759,7 @@ describe("Edge Cases & Security", () => {
 
     // Start: generate vault key with first password
     let currentSalt = generateUserSalt();
-    let currentMasterKey = await deriveMasterKey(passwords[0], currentSalt);
+    const currentMasterKey = await deriveMasterKey(passwords[0], currentSalt);
     const vaultKey = await generateVaultKey();
     let currentWrapped = await wrapVaultKey(vaultKey, currentMasterKey);
 

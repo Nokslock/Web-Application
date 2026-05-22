@@ -279,7 +279,7 @@ function OtpVerificationForm() {
       {/* FOOTER */}
       <div className="mt-12 pt-6 border-t border-gray-100 dark:border-gray-900 flex justify-between items-center text-xs text-gray-400">
           <div className="font-medium">&copy; Nokslock 2025</div>
-          <Link href="#" className="hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+          <Link href="/privacy" className="hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
             Privacy & Security
           </Link>
       </div>

@@ -22,10 +22,10 @@ const footerLinks = {
     { name: "Contact", href: "#" },
   ],
   Legal: [
-    { name: "Privacy Policy", href: "#" },
-    { name: "Terms of Service", href: "#" },
-    { name: "Cookie Policy", href: "#" },
-    { name: "GDPR", href: "#" },
+    { name: "Privacy Policy", href: "/privacy" },
+    { name: "Terms of Service", href: "/terms" },
+    { name: "Cookie Policy", href: "/privacy#cookies" },
+    { name: "GDPR", href: "/privacy#your-rights" },
   ],
 };
 
@@ -101,19 +101,19 @@ export default function Footer() {
           </p>
           <div className="flex items-center gap-6">
             <Link
-              href="#"
+              href="/privacy"
               className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
             >
               Privacy
             </Link>
             <Link
-              href="#"
+              href="/terms"
               className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
             >
               Terms
             </Link>
             <Link
-              href="#"
+              href="/privacy#cookies"
               className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
             >
               Cookies

@@ -19,11 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  icons: {
-    icon: "@/public/logo.svg",
-  },
-  title: "Nockslock - Dashboard",
-  description: "Secure your digital assets with Nockslock.",
+  title: "Dashboard",
+  description: "Manage your secure digital vaults with Nokslock.",
 };
 
 export default async function RootLayout({

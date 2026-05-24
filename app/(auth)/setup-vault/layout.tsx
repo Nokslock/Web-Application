@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     icons: {
         icon: "/logo.svg",
     },
-    title: "Nockslock - Setup Vault",
+    title: "Nokslock - Setup Vault",
     description:
         "Create a Master Password to secure your vault with zero-knowledge encryption.",
 };

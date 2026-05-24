@@ -138,7 +138,7 @@ export default function LandingOne() {
             variants={fadeInUp}
             className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed"
           >
-            Stop relying on browser autofill and sticky notes. Nockslock secures
+            Stop relying on browser autofill and sticky notes. Nokslock secures
             your passwords, files, and crypto assets with bank-grade encryption
             that only you hold the keys to.
           </motion.p>
@@ -168,7 +168,7 @@ export default function LandingOne() {
           >
             <Image
               src={landingOneImage}
-              alt="Nockslock Dashboard Interface"
+              alt="Nokslock Dashboard Interface"
               className="relative w-full h-auto rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800"
             />
           </motion.div>
@@ -377,7 +377,7 @@ export default function LandingOne() {
             <span className="text-blue-600">Privacy Obsessives</span>
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            We built Nockslock because existing solutions weren't secure enough
+            We built Nokslock because existing solutions weren't secure enough
             for our own families.
           </p>
         </motion.div>

@@ -111,7 +111,7 @@ export default function Home() {
               ref={subRef}
               className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-2xl leading-relaxed opacity-0"
             >
-              Nockslock is your all-in-one vault for passwords, crypto keys,
+              Nokslock is your all-in-one vault for passwords, crypto keys,
               files, and digital inheritance. Bank-grade encryption meets
               stunning simplicity.
             </p>
@@ -159,7 +159,7 @@ export default function Home() {
                 </div>
                 <Image
                   src={HeroImg}
-                  alt="Nockslock Dashboard Preview"
+                  alt="Nokslock Dashboard Preview"
                   priority
                   className="w-full h-auto"
                 />

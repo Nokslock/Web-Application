@@ -252,7 +252,7 @@ function AppShowcaseSection() {
                             <div className="relative">
                                 <Image
                                     src={DemoImg2}
-                                    alt="Nockslock Dashboard"
+                                    alt="Nokslock Dashboard"
                                     className="w-full h-auto"
                                     placeholder="blur"
                                 />
@@ -269,7 +269,7 @@ function AppShowcaseSection() {
                                 {/* Phone screen — replace with your mobile mockup */}
                                 <Image
                                     src={DemoImg1}
-                                    alt="Nockslock Mobile View"
+                                    alt="Nokslock Mobile View"
                                     className="w-full h-auto"
                                     placeholder="blur"
                                 />
@@ -577,7 +577,7 @@ function SecuritySection() {
                             people
                         </h2>
                         <p className="text-gray-600 dark:text-gray-400 mb-10 text-lg leading-relaxed">
-                            We built Nockslock because existing solutions weren&apos;t secure enough
+                            We built Nokslock because existing solutions weren&apos;t secure enough
                             for our own families. Every byte is encrypted before it leaves your
                             device.
                         </p>
@@ -750,7 +750,7 @@ function HowItWorksSection() {
 const testimonials = [
     {
         quote:
-            "Nockslock is the first security app I actually enjoy using. The interface is stunning and the peace of mind is priceless.",
+            "Nokslock is the first security app I actually enjoy using. The interface is stunning and the peace of mind is priceless.",
         name: "Sarah Chen",
         role: "Product Designer",
         stars: 5,
@@ -764,7 +764,7 @@ const testimonials = [
     },
     {
         quote:
-            "We switched our entire team to Nockslock. The zero-knowledge architecture gives us the compliance confidence we need.",
+            "We switched our entire team to Nokslock. The zero-knowledge architecture gives us the compliance confidence we need.",
         name: "Elena Rodriguez",
         role: "CTO, Finstack",
         stars: 5,
@@ -827,7 +827,7 @@ function TestimonialsSection() {
                         Loved by thousands
                     </h2>
                     <p className="text-gray-500 dark:text-gray-400 text-lg max-w-xl mx-auto">
-                        See what our users have to say about Nockslock.
+                        See what our users have to say about Nokslock.
                     </p>
                 </div>
 
@@ -978,7 +978,7 @@ function StatsSection() {
 
 const faqs = [
     {
-        q: "How does Nockslock encryption work?",
+        q: "How does Nokslock encryption work?",
         a: "All data is encrypted with AES-256 on your device before transmission. Your master password never leaves your device — we use zero-knowledge architecture.",
     },
     {
@@ -998,8 +998,8 @@ const faqs = [
         a: "Due to zero-knowledge design, we cannot reset your master password. We recommend storing a backup in a secure physical location.",
     },
     {
-        q: "Is Nockslock free?",
-        a: "Yes! Nockslock offers a generous free tier. Premium plans are available for power users with extended storage and priority support.",
+        q: "Is Nokslock free?",
+        a: "Yes! Nokslock offers a generous free tier. Premium plans are available for power users with extended storage and priority support.",
     },
 ];
 
@@ -1058,7 +1058,7 @@ function FAQSection() {
                         Questions? Answered.
                     </h2>
                     <p className="text-gray-500 dark:text-gray-400 text-lg">
-                        Everything you need to know about Nockslock.
+                        Everything you need to know about Nokslock.
                     </p>
                 </div>
 

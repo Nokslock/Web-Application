@@ -3,9 +3,9 @@ import "../../globals.css";
 import ForgotPasswordLayoutClient from "./ForgotPasswordLayoutClient"; // <--- Import new client layout
 
 export const metadata: Metadata = {
-  title: "Nockslock - Password Recovery",
+  title: "Nokslock - Password Recovery",
   description:
-    "Secure your digital assets with Nockslock, the ultimate cold storage solution for cryptocurrencies.",
+    "Protect your most important digital assets with Nokslock. Zero-knowledge encrypted vaults and secure file storage.",
 };
 
 export default function RootLayout({

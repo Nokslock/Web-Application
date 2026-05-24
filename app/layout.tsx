@@ -16,12 +16,39 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://nokslock.com"),
   icons: {
-    icon: "@/public/logo.svg",
+    icon: "/logo.svg",
   },
-  title: "Nockslock - Home",
+  title: {
+    default: "Nokslock - Secure Digital Vault",
+    template: "%s | Nokslock",
+  },
   description:
-    "Secure your digital assets with Nockslock, the ultimate cold storage solution for cryptocurrencies.",
+    "Protect your most important digital assets with Nokslock. Zero-knowledge encrypted vaults, secure file storage, and automated digital inheritance with Dead Man's Switch.",
+  openGraph: {
+    type: "website",
+    siteName: "Nokslock",
+    title: "Nokslock - Secure Digital Vault",
+    description:
+      "Protect your most important digital assets with Nokslock. Zero-knowledge encrypted vaults, secure file storage, and automated digital inheritance.",
+    url: "https://nokslock.com",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Nokslock - Secure Digital Vault",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Nokslock - Secure Digital Vault",
+    description:
+      "Protect your most important digital assets with Nokslock. Zero-knowledge encrypted vaults, secure file storage, and automated digital inheritance.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({

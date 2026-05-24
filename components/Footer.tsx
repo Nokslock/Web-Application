@@ -47,7 +47,7 @@ export default function Footer() {
             <Link href="/" className="inline-block mb-4">
               <Image
                 src={Logo}
-                alt="Nockslock Logo"
+                alt="Nokslock Logo"
                 width={160}
                 className="brightness-0 invert"
               />
@@ -97,7 +97,7 @@ export default function Footer() {
       <div className="border-t border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-gray-500">
-            &copy; {new Date().getFullYear()} Nockslock. All rights reserved.
+            &copy; {new Date().getFullYear()} Nokslock. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <Link

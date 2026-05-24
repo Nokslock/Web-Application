@@ -6,8 +6,8 @@ export const metadata: Metadata = {
   icons: {
     icon: "/logo.svg",
   },
-  title: 'Nockslock - Login',
-  description: 'Secure your digital assets with Nockslock, the ultimate cold storage solution for cryptocurrencies.',
+  title: 'Nokslock - Login',
+  description: 'Protect your most important digital assets with Nokslock. Zero-knowledge encrypted vaults and secure file storage.',
 };
 
 export default function RootLayout({

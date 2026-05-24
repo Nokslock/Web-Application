@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 import { notFound, redirect } from "next/navigation";
 import VaultDetailClient from "@/components/vault/VaultDetailClient";
+import { isSubscriptionActive } from "@/lib/subscription";
 
 interface PageProps {
   params: {
@@ -14,6 +15,20 @@ export default async function VaultDetailPage({ params }: PageProps) {
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+
+  // Check subscription status — redirect to vault list (which shows paywall)
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan, plan_expires_at")
+    .eq("id", user.id)
+    .single();
+
+  const hasActiveSubscription =
+    profile?.plan !== "free" && isSubscriptionActive(profile?.plan_expires_at);
+
+  if (!hasActiveSubscription) {
+    redirect("/dashboard/vault");
+  }
 
   // 1. Fetch Vault Details — explicitly exclude lock_code
   const { data: vault, error } = await supabase

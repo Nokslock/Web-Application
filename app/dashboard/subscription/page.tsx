@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import SubscriptionManager from "@/components/subscription/SubscriptionManager";
 
 export const metadata = {
-  title: "Nockslock - Manage Subscription",
+  title: "Manage Subscription",
 };
 
 export default async function SubscriptionPage() {

@@ -6,7 +6,7 @@ export default function HomeLogo() {
   return (
     <div>
       <Link href="/">
-        <Image src={Logo} alt="Nockslock Logo" width={200} />
+        <Image src={Logo} alt="Nokslock Logo" width={200} />
       </Link>
     </div>
   );

@@ -2,6 +2,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 import { redirect } from "next/navigation";
 import VaultGrid from "@/components/vault/VaultGrid";
 import CreateVaultFab from "@/components/vault/CreateVaultFab";
+import VaultPaywall from "@/components/vault/VaultPaywall";
+import { isSubscriptionActive } from "@/lib/subscription";
 
 export default async function VaultPage() {
   const supabase = await createSupabaseServerClient();
@@ -9,14 +11,26 @@ export default async function VaultPage() {
 
   if (!user) redirect("/login");
 
+  // Check subscription status
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan, plan_expires_at")
+    .eq("id", user.id)
+    .single();
+
+  const hasActiveSubscription =
+    profile?.plan !== "free" && isSubscriptionActive(profile?.plan_expires_at);
+
+  if (!hasActiveSubscription) {
+    return <VaultPaywall />;
+  }
+
   // Fetch Vaults
   // Explicitly exclude lock_code from the response
   const { data: vaults } = await supabase
     .from("vaults")
     .select("id, name, description, is_locked, share_with_nok, created_at")
     .order("created_at", { ascending: false });
-
-  // Optional: Fetch item counts per vault (requires join or separate query) - skipping for now
 
   return (
     <div className="flex flex-col h-full relative pb-20">

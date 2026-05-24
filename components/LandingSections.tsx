@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
-import DemoImg1 from "@/public/db-light.png";
+import DemoImg1 from "@/public/sc-1.png";
 import DemoImg2 from "@/public/vaults.png";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,7 +24,12 @@ import {
     FaMobileScreen,
     FaDesktop,
 } from "react-icons/fa6";
-import DemoImg from "@/public/demo-img.png";
+import DemoImg from "@/public/sc-4.png";
+import DemoImg3 from "@/public/sc-6.png";
+import SecImg1 from "@/public/sc-2.png";
+import SecImg2 from "@/public/sc-6.png";
+import FeatureImg2 from "@/public/sc-7.png";
+import FeatureImg3 from "@/public/sc-8.png";
 import HeroImg from "@/public/hero-img.png";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -263,9 +268,7 @@ function AppShowcaseSection() {
                     {/* Phone mockup — overlapping */}
                     <div className="showcase-phone opacity-0 hidden lg:block absolute -right-4 xl:right-8 bottom-0 w-56 xl:w-64 z-20">
                         <div className="bg-gray-900 rounded-[2rem] p-2 shadow-2xl shadow-black/30 border border-gray-700">
-                            {/* Phone notch */}
                             <div className="relative rounded-[1.5rem] overflow-hidden bg-gray-800">
-                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-gray-900 rounded-b-xl z-10" />
                                 {/* Phone screen — replace with your mobile mockup */}
                                 <Image
                                     src={DemoImg1}
@@ -433,14 +436,47 @@ function FeaturesSection() {
                             </p>
                             {/* Image slot for bigger cards */}
                             {f.big && (
-                                <div className="mt-auto pt-6">
-                                    <div className="rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm">
-                                        <Image
-                                            src={DemoImg}
-                                            alt={`${f.title} preview`}
-                                            className="w-full h-auto"
-                                            placeholder="blur"
-                                        />
+                                <div className="mt-auto pt-6 flex justify-center">
+                                    <div className="relative flex items-center justify-center">
+                                        {/* Left phone */}
+                                        <div className="w-32 sm:w-36 relative z-10 -rotate-[6deg]">
+                                            <div className="bg-gray-900 rounded-[1.8rem] p-1.5 shadow-xl shadow-black/20 border border-gray-700">
+                                                <div className="rounded-[1.4rem] overflow-hidden bg-gray-800">
+                                                    <Image
+                                                        src={DemoImg}
+                                                        alt={`${f.title} preview`}
+                                                        className="w-full h-auto"
+                                                        placeholder="blur"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {/* Center phone — front */}
+                                        <div className="w-32 sm:w-36 relative z-20 -mx-3 -mt-2">
+                                            <div className="bg-gray-900 rounded-[1.8rem] p-1.5 shadow-2xl shadow-black/30 border border-gray-600">
+                                                <div className="rounded-[1.4rem] overflow-hidden bg-gray-800">
+                                                    <Image
+                                                        src={FeatureImg2}
+                                                        alt={`${f.title} detail`}
+                                                        className="w-full h-auto"
+                                                        placeholder="blur"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {/* Right phone */}
+                                        <div className="w-32 sm:w-36 relative z-10 rotate-[6deg]">
+                                            <div className="bg-gray-900 rounded-[1.8rem] p-1.5 shadow-xl shadow-black/20 border border-gray-700">
+                                                <div className="rounded-[1.4rem] overflow-hidden bg-gray-800">
+                                                    <Image
+                                                        src={FeatureImg3}
+                                                        alt={`${f.title} more`}
+                                                        className="w-full h-auto"
+                                                        placeholder="blur"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -543,14 +579,34 @@ function SecuritySection() {
                                         </div>
                                     </motion.div>
 
-                                    {/* Mockup slot inside security card */}
-                                    <div className="w-full rounded-xl overflow-hidden border border-gray-700/50 shadow-inner mt-4">
-                                        <Image
-                                            src={HeroImg}
-                                            alt="Encrypted vault view"
-                                            className="w-full h-auto opacity-60"
-                                            placeholder="blur"
-                                        />
+                                    {/* Dual phone mockups */}
+                                    <div className="relative flex items-center justify-center w-full mt-4">
+                                        {/* Front phone */}
+                                        <div className="w-36 sm:w-40 md:w-44 relative z-10 -mr-5">
+                                            <div className="bg-gray-800 rounded-[2rem] p-1.5 shadow-2xl shadow-black/40 border border-gray-600">
+                                                <div className="relative rounded-[1.6rem] overflow-hidden bg-gray-900">
+                                                    <Image
+                                                        src={SecImg1}
+                                                        alt="Secure cards view"
+                                                        className="w-full h-auto"
+                                                        placeholder="blur"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {/* Back phone */}
+                                        <div className="w-36 sm:w-40 md:w-44 relative z-0 -ml-5 mt-6 rotate-[6deg]">
+                                            <div className="bg-gray-800 rounded-[2rem] p-1.5 shadow-2xl shadow-black/40 border border-gray-600">
+                                                <div className="relative rounded-[1.6rem] overflow-hidden bg-gray-900">
+                                                    <Image
+                                                        src={SecImg2}
+                                                        alt="Add payment card"
+                                                        className="w-full h-auto"
+                                                        placeholder="blur"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div className="mt-6 flex items-center gap-2">
@@ -616,6 +672,7 @@ const steps = [
         desc: "Sign up and set a master password. This single key encrypts everything — we never see it.",
         color: "from-blue-500 to-indigo-500",
         img: HeroImg,
+        mobile: false,
     },
     {
         number: "02",
@@ -623,6 +680,8 @@ const steps = [
         desc: "Store passwords, files, seed phrases, and notes. Everything encrypted with AES-256 on your device.",
         color: "from-emerald-500 to-teal-500",
         img: DemoImg,
+        img2: DemoImg3,
+        mobile: true,
     },
     {
         number: "03",
@@ -630,6 +689,7 @@ const steps = [
         desc: "Designate a trusted person to inherit vault access. Your digital legacy, protected forever.",
         color: "from-rose-500 to-pink-500",
         img: HeroImg,
+        mobile: false,
     },
 ];
 
@@ -725,15 +785,48 @@ function HowItWorksSection() {
                             </div>
 
                             {/* Mockup slot */}
-                            <div className={`${i % 2 !== 0 ? "lg:order-1" : ""}`}>
-                                <div className="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-xl shadow-black/5 dark:shadow-black/20 bg-white dark:bg-gray-800">
-                                    <Image
-                                        src={step.img}
-                                        alt={step.title}
-                                        className="w-full h-auto"
-                                        placeholder="blur"
-                                    />
-                                </div>
+                            <div className={`${i % 2 !== 0 ? "lg:order-1" : ""} flex justify-center`}>
+                                {step.mobile ? (
+                                    <div className="relative flex items-center justify-center w-full">
+                                        {/* Front phone — shifted left */}
+                                        <div className="w-44 sm:w-52 md:w-56 relative z-10 -mr-6">
+                                            <div className="bg-gray-900 rounded-[2.5rem] p-2 shadow-2xl shadow-black/30 border border-gray-700">
+                                                <div className="relative rounded-[2rem] overflow-hidden bg-gray-800">
+                                                    <Image
+                                                        src={step.img}
+                                                        alt={step.title}
+                                                        className="w-full h-auto"
+                                                        placeholder="blur"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {/* Back phone — shifted right and tilted */}
+                                        {step.img2 && (
+                                            <div className="w-44 sm:w-52 md:w-56 relative z-0 -ml-6 mt-8 rotate-[6deg]">
+                                                <div className="bg-gray-900 rounded-[2.5rem] p-2 shadow-2xl shadow-black/40 border border-gray-700">
+                                                    <div className="relative rounded-[2rem] overflow-hidden bg-gray-800">
+                                                        <Image
+                                                            src={step.img2}
+                                                            alt={`${step.title} detail`}
+                                                            className="w-full h-auto"
+                                                            placeholder="blur"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-xl shadow-black/5 dark:shadow-black/20 bg-white dark:bg-gray-800 w-full">
+                                        <Image
+                                            src={step.img}
+                                            alt={step.title}
+                                            className="w-full h-auto"
+                                            placeholder="blur"
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}

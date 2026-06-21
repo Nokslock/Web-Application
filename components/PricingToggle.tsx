@@ -1,35 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { FaCheck, FaCrown, FaBolt, FaShieldHalved, FaChevronDown } from "react-icons/fa6";
-import Script from "next/script";
+import { FaCheck, FaCrown, FaBolt, FaShieldHalved } from "react-icons/fa6";
 import UpgradeButton from "@/components/UpgradeButton";
+import ChangePlanButton from "@/components/ChangePlanButton";
 
-// --- CURRENCY METADATA ---
-const currencyMeta = [
-  { code: "USD", symbol: "$", name: "US Dollar" },
-  { code: "NGN", symbol: "₦", name: "Nigerian Naira" },
-] as const;
+// --- PRICES (USD) ---
+const MONTHLY = 5;
+const SIXMONTH = 22.5;
+const SIXMONTH_ORIGINAL = 30;
+const YEARLY = 45;
+const YEARLY_ORIGINAL = 60;
+const YEARLY_PER_MONTH = YEARLY / 12;
 
-type CurrencyCode = (typeof currencyMeta)[number]["code"];
-
-// Fallback rates if API fails
-const FALLBACK_RATES: Record<string, number> = {
-  USD: 1, NGN: 1550,
-};
-
-// Base prices in USD
-const BASE_MONTHLY = 5;
-const BASE_6MONTH = 22.5;
-const BASE_6MONTH_ORIGINAL = 30;
-const BASE_YEARLY = 45;
-const BASE_YEARLY_ORIGINAL = 60;
-
-function formatPrice(amount: number, symbol: string, code: string): string {
-  if (code === "NGN") {
-    return `${symbol}${Math.round(amount).toLocaleString()}`;
-  }
-  return `${symbol}${amount.toFixed(2)}`;
+function formatPrice(amount: number): string {
+  return `$${amount.toFixed(2)}`;
 }
 
 const features = [
@@ -51,61 +35,21 @@ const PLAN_RANK: Record<string, number> = {
 
 interface PricingToggleProps {
   currentPlan?: string;
-  userEmail?: string;
-  userId?: string;
 }
 
 export default function PricingToggle({
   currentPlan = "free",
-  userEmail = "",
-  userId = "",
 }: PricingToggleProps) {
-  const [currencyCode, setCurrencyCode] = useState<CurrencyCode>("USD");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [rates, setRates] = useState<Record<string, number>>(FALLBACK_RATES);
-  const [ratesLoading, setRatesLoading] = useState(true);
-
-  // Fetch live exchange rates on mount
-  useEffect(() => {
-    async function fetchRates() {
-      try {
-        const res = await fetch("/api/exchange-rates");
-        if (!res.ok) throw new Error("Failed to fetch rates");
-        const data = await res.json();
-        if (data.rates) {
-          setRates(data.rates);
-        }
-      } catch {
-        // Keep fallback rates
-        console.warn("Using fallback exchange rates");
-      } finally {
-        setRatesLoading(false);
-      }
-    }
-    fetchRates();
-  }, []);
-
-  const meta = currencyMeta.find((c) => c.code === currencyCode)!;
-  const rate = rates[currencyCode] ?? 1;
-  const { symbol, code } = meta;
-
-  const monthly = BASE_MONTHLY * rate;
-  const sixMonth = BASE_6MONTH * rate;
-  const sixMonthOriginal = BASE_6MONTH_ORIGINAL * rate;
-  const yearly = BASE_YEARLY * rate;
-  const yearlyOriginal = BASE_YEARLY_ORIGINAL * rate;
-  const yearlyPerMonth = (BASE_YEARLY / 12) * rate;
-
   function PlanButton({
-    planType, amount, className, dark = false,
+    planType, className, dark = false,
   }: {
     planType: "monthly" | "6month" | "yearly";
-    amount: number;
     className: string;
     dark?: boolean;
   }) {
     const isCurrent = currentPlan === planType;
     const isDowngrade = PLAN_RANK[planType] < PLAN_RANK[currentPlan];
+    const hasActivePlan = currentPlan !== "free";
 
     if (isCurrent) {
       return (
@@ -115,86 +59,34 @@ export default function PricingToggle({
       );
     }
 
+    const mutedClassName = isDowngrade
+      ? `${className} ${dark ? "bg-white/20 text-white hover:bg-white/30" : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"}`
+      : className;
+
+    // Existing subscribers change their plan in-place (modify the current Stripe
+    // subscription) — going through Checkout again would create a second one.
+    if (hasActivePlan) {
+      return (
+        <ChangePlanButton
+          planType={planType}
+          isDowngrade={isDowngrade}
+          className={mutedClassName}
+        >
+          {isDowngrade ? "Downgrade" : "Upgrade"}
+        </ChangePlanButton>
+      );
+    }
+
+    // New customers start a fresh subscription via Checkout.
     return (
-      <UpgradeButton
-        userEmail={userEmail}
-        userId={userId}
-        amount={currencyCode === "NGN" ? amount : (planType === "monthly" ? BASE_MONTHLY : planType === "6month" ? BASE_6MONTH : BASE_YEARLY)}
-        currency={currencyCode === "NGN" ? "NGN" : "USD"}
-        planType={planType}
-        className={isDowngrade ? `${className} ${dark ? "bg-white/20 text-white hover:bg-white/30" : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"}` : className}
-      >
-        {isDowngrade ? "Downgrade" : planType === "monthly" ? "Get Started" : planType === "6month" ? "Get 6-Month Plan" : "Get Yearly Plan"}
+      <UpgradeButton planType={planType} className={className}>
+        {planType === "monthly" ? "Get Started" : planType === "6month" ? "Get 6-Month Plan" : "Get Yearly Plan"}
       </UpgradeButton>
     );
   }
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4">
-      <Script src="https://js.paystack.co/v2/inline.js" strategy="afterInteractive" />
-
-      {/* CURRENCY SELECTOR */}
-      <div className="flex justify-center mb-10 animate-in slide-in-from-top-4 fade-in duration-700">
-        <div className="relative">
-          <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="
-              flex items-center gap-2.5 px-5 py-2.5 rounded-xl
-              bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700
-              shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600
-              transition-all duration-200 text-sm font-semibold text-gray-700 dark:text-gray-200
-              focus:outline-none focus:ring-2 focus:ring-blue-500/30
-            "
-          >
-            <span className="text-base">{symbol}</span>
-            <span>{code}</span>
-            {ratesLoading && (
-              <span className="h-3 w-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-            )}
-            <FaChevronDown
-              size={10}
-              className={`text-gray-400 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
-            />
-          </button>
-
-          {dropdownOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setDropdownOpen(false)}
-              />
-              <div className="
-                absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50
-                bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700
-                rounded-xl shadow-xl overflow-hidden min-w-[220px]
-                animate-in slide-in-from-top-2 fade-in duration-200
-              ">
-                {currencyMeta.map((c) => (
-                  <button
-                    key={c.code}
-                    onClick={() => {
-                      setCurrencyCode(c.code);
-                      setDropdownOpen(false);
-                    }}
-                    className={`
-                      w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors
-                      hover:bg-blue-50 dark:hover:bg-blue-900/30
-                      ${c.code === currencyCode
-                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-bold"
-                        : "text-gray-600 dark:text-gray-300"
-                      }
-                    `}
-                  >
-                    <span className="w-8 text-right font-semibold opacity-60">{c.symbol}</span>
-                    <span>{c.name}</span>
-                    <span className="ml-auto text-xs text-gray-400">{c.code}</span>
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
 
       {/* 3-CARD GRID */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
@@ -226,7 +118,7 @@ export default function PricingToggle({
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-4xl font-extrabold text-gray-900 dark:text-white">
-                {formatPrice(monthly, symbol, code)}
+                {formatPrice(MONTHLY)}
               </span>
               <span className="text-gray-400 dark:text-gray-500 text-sm font-medium">/month</span>
             </div>
@@ -243,7 +135,6 @@ export default function PricingToggle({
 
           <PlanButton
             planType="monthly"
-            amount={monthly}
             className="w-full py-3.5 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold hover:bg-blue-100 dark:hover:bg-blue-900/50 text-sm transition-colors"
           />
         </div>
@@ -281,13 +172,13 @@ export default function PricingToggle({
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-4xl font-extrabold text-gray-900 dark:text-white">
-                {formatPrice(sixMonth, symbol, code)}
+                {formatPrice(SIXMONTH)}
               </span>
               <span className="text-gray-400 dark:text-gray-500 text-sm font-medium">/6 months</span>
             </div>
             <div className="flex items-center gap-2 mt-2">
               <span className="text-gray-400 dark:text-gray-500 text-xs line-through">
-                {formatPrice(sixMonthOriginal, symbol, code)}
+                {formatPrice(SIXMONTH_ORIGINAL)}
               </span>
               <span className="text-[10px] bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-bold">
                 Save 25%
@@ -306,7 +197,6 @@ export default function PricingToggle({
 
           <PlanButton
             planType="6month"
-            amount={sixMonth}
             className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold hover:from-blue-600 hover:to-blue-700 text-sm transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30"
           />
         </div>
@@ -345,20 +235,20 @@ export default function PricingToggle({
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-4xl font-extrabold">
-                {formatPrice(yearly, symbol, code)}
+                {formatPrice(YEARLY)}
               </span>
               <span className="text-blue-200 text-sm font-medium">/year</span>
             </div>
             <div className="flex items-center gap-2 mt-2">
               <span className="text-blue-300 text-xs line-through opacity-70">
-                {formatPrice(yearlyOriginal, symbol, code)}
+                {formatPrice(YEARLY_ORIGINAL)}
               </span>
               <span className="text-[10px] bg-green-400/20 text-green-200 px-2 py-0.5 rounded-full font-bold backdrop-blur-sm">
                 Save 25%
               </span>
             </div>
             <p className="text-blue-100 text-xs mt-2 opacity-80">
-              Only <span className="font-bold text-white">{formatPrice(yearlyPerMonth, symbol, code)}/month</span> — best deal available.
+              Only <span className="font-bold text-white">{formatPrice(YEARLY_PER_MONTH)}/month</span> — best deal available.
             </p>
           </div>
 
@@ -370,7 +260,6 @@ export default function PricingToggle({
 
           <PlanButton
             planType="yearly"
-            amount={yearly}
             className="w-full py-3.5 rounded-xl bg-white text-blue-700 font-bold hover:bg-gray-100 text-sm transition-colors shadow-lg relative z-10"
             dark
           />

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
+import { stripe } from "@/lib/stripe";
 
 export async function POST() {
   const supabase = await createSupabaseServerClient();
@@ -14,7 +15,7 @@ export async function POST() {
   // Fetch current plan to validate they actually have one
   const { data: profile } = await supabase
     .from("profiles")
-    .select("plan, plan_expires_at")
+    .select("plan, plan_expires_at, stripe_subscription_id")
     .eq("id", user.id)
     .single();
 
@@ -25,7 +26,28 @@ export async function POST() {
     );
   }
 
-  // Mark as cancelled — user keeps access until plan_expires_at
+  if (!profile.stripe_subscription_id) {
+    return NextResponse.json(
+      { error: "No Stripe subscription found for this account" },
+      { status: 400 }
+    );
+  }
+
+  // Cancel at period end so the user keeps access until plan_expires_at.
+  // The customer.subscription.updated webhook syncs plan_cancelled back to us.
+  try {
+    await stripe.subscriptions.update(profile.stripe_subscription_id, {
+      cancel_at_period_end: true,
+    });
+  } catch (error) {
+    console.error("Failed to cancel Stripe subscription:", error);
+    return NextResponse.json(
+      { error: "Failed to cancel subscription" },
+      { status: 500 }
+    );
+  }
+
+  // Optimistically reflect the cancellation locally; the webhook will confirm.
   const { error } = await supabase
     .from("profiles")
     .update({
@@ -35,16 +57,13 @@ export async function POST() {
     .eq("id", user.id);
 
   if (error) {
-    console.error("Failed to cancel subscription:", error);
-    return NextResponse.json(
-      { error: "Failed to cancel subscription" },
-      { status: 500 }
-    );
+    console.error("Failed to flag cancellation locally:", error);
   }
 
   return NextResponse.json({
     success: true,
-    message: "Subscription cancelled. You will retain access until your current billing period ends.",
+    message:
+      "Subscription cancelled. You will retain access until your current billing period ends.",
     expiresAt: profile.plan_expires_at,
   });
 }

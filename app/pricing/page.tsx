@@ -8,8 +8,6 @@ export default async function PricingPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   let currentPlan = "free";
-  let userEmail = "";
-  let userId = "";
 
   if (user) {
     const { data: profile } = await supabase
@@ -18,8 +16,6 @@ export default async function PricingPage() {
       .eq("id", user.id)
       .single();
     currentPlan = profile?.plan ?? "free";
-    userEmail = user.email ?? "";
-    userId = user.id;
   }
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-gray-950 py-12 px-4 transition-colors duration-300">
@@ -38,7 +34,7 @@ export default async function PricingPage() {
       </div>
 
       {/* Pricing Component */}
-      <PricingToggle currentPlan={currentPlan} userEmail={userEmail} userId={userId} />
+      <PricingToggle currentPlan={currentPlan} />
 
       {/* Security Assurance Footer */}
       <div className="mt-20 max-w-4xl mx-auto">

@@ -19,7 +19,7 @@ const footerLinks = {
     { name: "About", href: "#" },
     { name: "Blog", href: "#" },
     { name: "Careers", href: "#" },
-    { name: "Contact", href: "#" },
+    { name: "Contact", href: "/contact" },
   ],
   Legal: [
     { name: "Privacy Policy", href: "/privacy" },

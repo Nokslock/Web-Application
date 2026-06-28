@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   FaArrowUp, FaArrowDown, FaXmark, FaCircleCheck, FaArrowRight, FaCalendar,
@@ -41,6 +42,25 @@ export default function ChangePlanButton({
   async function confirm() {
     setPhase("loading");
     try {
+      // Upgrades collect money — hand off to Stripe's hosted billing portal,
+      // which confirms the proration, takes payment, and handles SCA.
+      if (!isDowngrade) {
+        const res = await fetch("/api/stripe/portal", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ planType }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.url) {
+          setMessage(data.error ?? "Could not open secure checkout. Please try again.");
+          setPhase("error");
+          return;
+        }
+        window.location.href = data.url;
+        return;
+      }
+
+      // Downgrades collect nothing — schedule the switch at period end.
       const res = await fetch("/api/subscription/change", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -55,9 +75,7 @@ export default function ChangePlanButton({
       }
 
       setMessage(
-        data.effective === "now"
-          ? `You're now on the ${planLabel(planType)}. Enjoy!`
-          : `Your plan will switch to the ${planLabel(planType)} at the end of your current billing period.`
+        `Your plan will switch to the ${planLabel(planType)} at the end of your current billing period.`
       );
       setPhase("done");
       setTimeout(() => {
@@ -80,7 +98,7 @@ export default function ChangePlanButton({
         {children}
       </button>
 
-      {open && (
+      {open && createPortal(
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
           onClick={closeModal}
@@ -145,14 +163,14 @@ export default function ChangePlanButton({
                     <>
                       <p className="text-sm text-gray-600 dark:text-gray-300">
                         Upgrade to the{" "}
-                        <span className="font-bold text-gray-900 dark:text-white">{planLabel(planType)}</span>{" "}
-                        right now?
+                        <span className="font-bold text-gray-900 dark:text-white">{planLabel(planType)}</span>?
                       </p>
                       <div className="flex items-start gap-3 bg-blue-50 dark:bg-blue-900/20 rounded-2xl px-4 py-3 border border-blue-200 dark:border-blue-800/50">
                         <FaCircleCheck className="text-blue-500 mt-0.5 flex-shrink-0" size={13} />
                         <p className="text-sm text-blue-700 dark:text-blue-300">
-                          Your new plan takes effect immediately. You&apos;ll only be charged the{" "}
-                          <span className="font-bold">prorated difference</span> for the rest of this period.
+                          You&apos;ll be taken to our secure Stripe checkout to review and pay the{" "}
+                          <span className="font-bold">prorated difference</span>. Your upgrade applies once
+                          payment succeeds.
                         </p>
                       </div>
                     </>
@@ -190,13 +208,14 @@ export default function ChangePlanButton({
                     ? "Processing…"
                     : isDowngrade
                       ? "Schedule downgrade"
-                      : "Upgrade now"}
+                      : "Continue to payment"}
                   {phase !== "loading" && <FaArrowRight size={11} />}
                 </button>
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

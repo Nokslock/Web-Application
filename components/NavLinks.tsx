@@ -15,7 +15,7 @@ const links = [
   { name: "Features", href: "/#features" },
   { name: "How It Works", href: "/#how-it-works" },
   { name: "Security", href: "/#security" },
-  { name: "Contact", href: "/#contact" },
+  { name: "Contact", href: "/contact" },
 ];
 
 export default function NavLinks() {

@@ -37,54 +37,55 @@ interface PricingToggleProps {
   currentPlan?: string;
 }
 
-export default function PricingToggle({
-  currentPlan = "free",
-}: PricingToggleProps) {
-  function PlanButton({
-    planType, className, dark = false,
-  }: {
-    planType: "monthly" | "6month" | "yearly";
-    className: string;
-    dark?: boolean;
-  }) {
-    const isCurrent = currentPlan === planType;
-    const isDowngrade = PLAN_RANK[planType] < PLAN_RANK[currentPlan];
-    const hasActivePlan = currentPlan !== "free";
+function PlanButton({
+  planType, className, dark = false, currentPlan,
+}: {
+  planType: "monthly" | "6month" | "yearly";
+  className: string;
+  dark?: boolean;
+  currentPlan: string;
+}) {
+  const isCurrent = currentPlan === planType;
+  const isDowngrade = PLAN_RANK[planType] < PLAN_RANK[currentPlan];
+  const hasActivePlan = currentPlan !== "free";
 
-    if (isCurrent) {
-      return (
-        <div className={`${className} flex items-center justify-center gap-2 cursor-default opacity-80 ${dark ? "bg-white/20 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"}`}>
-          <span className="text-xs">✓</span> Your Current Plan
-        </div>
-      );
-    }
-
-    const mutedClassName = isDowngrade
-      ? `${className} ${dark ? "bg-white/20 text-white hover:bg-white/30" : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"}`
-      : className;
-
-    // Existing subscribers change their plan in-place (modify the current Stripe
-    // subscription) — going through Checkout again would create a second one.
-    if (hasActivePlan) {
-      return (
-        <ChangePlanButton
-          planType={planType}
-          isDowngrade={isDowngrade}
-          className={mutedClassName}
-        >
-          {isDowngrade ? "Downgrade" : "Upgrade"}
-        </ChangePlanButton>
-      );
-    }
-
-    // New customers start a fresh subscription via Checkout.
+  if (isCurrent) {
     return (
-      <UpgradeButton planType={planType} className={className}>
-        {planType === "monthly" ? "Get Started" : planType === "6month" ? "Get 6-Month Plan" : "Get Yearly Plan"}
-      </UpgradeButton>
+      <div className={`${className} flex items-center justify-center gap-2 cursor-default opacity-80 ${dark ? "bg-white/20 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"}`}>
+        <span className="text-xs">✓</span> Your Current Plan
+      </div>
     );
   }
 
+  const mutedClassName = isDowngrade
+    ? `${className} ${dark ? "bg-white/20 text-white hover:bg-white/30" : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"}`
+    : className;
+
+  // Existing subscribers change their plan in-place (modify the current Stripe
+  // subscription) — going through Checkout again would create a second one.
+  if (hasActivePlan) {
+    return (
+      <ChangePlanButton
+        planType={planType}
+        isDowngrade={isDowngrade}
+        className={mutedClassName}
+      >
+        {isDowngrade ? "Downgrade" : "Upgrade"}
+      </ChangePlanButton>
+    );
+  }
+
+  // New customers start a fresh subscription via Checkout.
+  return (
+    <UpgradeButton planType={planType} className={className}>
+      {planType === "monthly" ? "Get Started" : planType === "6month" ? "Get 6-Month Plan" : "Get Yearly Plan"}
+    </UpgradeButton>
+  );
+}
+
+export default function PricingToggle({
+  currentPlan = "free",
+}: PricingToggleProps) {
   return (
     <div className="w-full max-w-6xl mx-auto px-4">
 
@@ -134,6 +135,7 @@ export default function PricingToggle({
           </div>
 
           <PlanButton
+            currentPlan={currentPlan}
             planType="monthly"
             className="w-full py-3.5 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold hover:bg-blue-100 dark:hover:bg-blue-900/50 text-sm transition-colors"
           />
@@ -196,6 +198,7 @@ export default function PricingToggle({
           </div>
 
           <PlanButton
+            currentPlan={currentPlan}
             planType="6month"
             className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold hover:from-blue-600 hover:to-blue-700 text-sm transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30"
           />
@@ -259,6 +262,7 @@ export default function PricingToggle({
           </div>
 
           <PlanButton
+            currentPlan={currentPlan}
             planType="yearly"
             className="w-full py-3.5 rounded-xl bg-white text-blue-700 font-bold hover:bg-gray-100 text-sm transition-colors shadow-lg relative z-10"
             dark

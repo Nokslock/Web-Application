@@ -22,7 +22,7 @@
     "framer-motion": "^12.23.26",
     "gsap": "^3.14.2",
     "lucide-react": "^0.562.0",
-    "next": "^16.1.0",
+    "next": "^16.2.9",
     "next-themes": "^0.4.6",
     "nextjs-toploader": "^3.9.17",
     "react": "19.2.0",
@@ -50,5 +50,9 @@
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5"
+  },
+  "overrides": {
+    "ws": "^8.21.0",
+    "handlebars": "^4.7.9"
   }
 }

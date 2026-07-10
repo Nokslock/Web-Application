@@ -1,8 +1,10 @@
 "use client";
 
-import { FaCheck, FaCrown, FaBolt, FaShieldHalved } from "react-icons/fa6";
+import Link from "next/link";
+import { FaCheck, FaCrown, FaBolt, FaShieldHalved, FaArrowRight } from "react-icons/fa6";
 import UpgradeButton from "@/components/UpgradeButton";
 import ChangePlanButton from "@/components/ChangePlanButton";
+import { isStripeEnabled } from "@/lib/payments";
 
 // --- PRICES (USD) ---
 const MONTHLY = 5;
@@ -54,6 +56,17 @@ function PlanButton({
       <div className={`${className} flex items-center justify-center gap-2 cursor-default opacity-80 ${dark ? "bg-white/20 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"}`}>
         <span className="text-xs">✓</span> Your Current Plan
       </div>
+    );
+  }
+
+  // App-payments mode: subscriptions are handled in the mobile app, so send the
+  // user to the download page instead of Stripe. (Flip NEXT_PUBLIC_PAYMENTS_MODE
+  // to "stripe" to restore the web checkout paths below.)
+  if (!isStripeEnabled) {
+    return (
+      <Link href="/download" className={`${className} flex items-center justify-center gap-2`}>
+        Get the App <FaArrowRight size={12} />
+      </Link>
     );
   }
 

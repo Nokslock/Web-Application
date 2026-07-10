@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FaLock, FaShieldHalved, FaVault, FaCrown, FaArrowRight } from "react-icons/fa6";
+import { isStripeEnabled } from "@/lib/payments";
 
 const features = [
   "Unlimited vault creation",
@@ -60,15 +61,17 @@ export default function VaultPaywall() {
 
       {/* CTA */}
       <Link
-        href="/pricing"
+        href={isStripeEnabled ? "/pricing" : "/download"}
         className="inline-flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all active:scale-[0.98]"
       >
-        View Plans & Subscribe
+        {isStripeEnabled ? "View Plans & Subscribe" : "Get the App to Subscribe"}
         <FaArrowRight className="text-sm" />
       </Link>
 
       <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">
-        30-day money-back guarantee &middot; Cancel anytime
+        {isStripeEnabled
+          ? "30-day money-back guarantee · Cancel anytime"
+          : "Available on iOS and Android"}
       </p>
     </div>
   );

@@ -1,7 +1,7 @@
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
-import { FaApple, FaGooglePlay, FaCircleCheck, FaShieldHalved } from "react-icons/fa6";
-import { APP_STORE_URL, PLAY_STORE_URL } from "@/lib/payments";
+import StoreButtons from "@/components/StoreButtons";
+import { FaCircleCheck, FaShieldHalved } from "react-icons/fa6";
 
 export const metadata = {
   title: "Nokslock - Get the App",
@@ -34,33 +34,7 @@ export default function DownloadPage() {
           </p>
 
           {/* Store buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
-            <a
-              href={APP_STORE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group inline-flex items-center gap-3 w-full sm:w-auto justify-center px-7 py-3.5 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold shadow-lg transition-transform hover:-translate-y-0.5"
-            >
-              <FaApple className="text-2xl" />
-              <span className="text-left leading-tight">
-                <span className="block text-[10px] font-normal opacity-70">Download on the</span>
-                <span className="block text-base font-bold -mt-0.5">App Store</span>
-              </span>
-            </a>
-
-            <a
-              href={PLAY_STORE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group inline-flex items-center gap-3 w-full sm:w-auto justify-center px-7 py-3.5 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold shadow-lg transition-transform hover:-translate-y-0.5"
-            >
-              <FaGooglePlay className="text-xl" />
-              <span className="text-left leading-tight">
-                <span className="block text-[10px] font-normal opacity-70">GET IT ON</span>
-                <span className="block text-base font-bold -mt-0.5">Google Play</span>
-              </span>
-            </a>
-          </div>
+          <StoreButtons className="mt-10" />
 
           {/* Perks */}
           <div className="mt-12 max-w-md mx-auto text-left bg-gray-50/60 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-3xl p-6">

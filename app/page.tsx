@@ -10,6 +10,7 @@ import BgImg from "@/public/hero-img.png";
 import NavBar from "@/components/NavBar";
 import AuthButton from "@/components/AuthButton";
 import LandingSections from "@/components/LandingSections";
+import GetTheAppSection from "@/components/GetTheAppSection";
 import Footer from "@/components/Footer";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -153,7 +154,7 @@ export default function Home() {
                   </div>
                   <div className="flex-1 flex justify-center">
                     <div className="bg-white dark:bg-gray-900 rounded-lg px-4 py-1 text-xs text-gray-400 font-mono w-64 text-center">
-                      dashboard.nockslock.com
+                      dashboard.nokslock.com
                     </div>
                   </div>
                 </div>
@@ -170,6 +171,7 @@ export default function Home() {
       </section>
 
       <LandingSections />
+      <GetTheAppSection />
       <Footer />
     </div>
   );

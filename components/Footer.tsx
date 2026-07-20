@@ -13,7 +13,7 @@ const footerLinks = {
     { name: "Features", href: "/#features" },
     { name: "How It Works", href: "/#how-it-works" },
     { name: "Security", href: "/#security" },
-    { name: "Get Started", href: "/#contact" },
+    { name: "Get Started", href: "/register" },
   ],
   Company: [
     { name: "About", href: "#" },
@@ -24,7 +24,7 @@ const footerLinks = {
   Legal: [
     { name: "Privacy Policy", href: "/privacy" },
     { name: "Terms of Service", href: "/terms" },
-    { name: "Cookie Policy", href: "/privacy#cookies" },
+    { name: "Cookie Policy", href: "/privacy" },
     { name: "GDPR", href: "/privacy#your-rights" },
   ],
 };
@@ -113,7 +113,7 @@ export default function Footer() {
               Terms
             </Link>
             <Link
-              href="/privacy#cookies"
+              href="/privacy"
               className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
             >
               Cookies

@@ -249,7 +249,7 @@ function AppShowcaseSection() {
                                 <div className="flex-1 flex justify-center">
                                     <div className="bg-white dark:bg-gray-900 rounded-lg px-4 py-1 text-xs text-gray-400 font-mono w-70 text-center flex items-center justify-center gap-2">
                                         <FaLock className="text-green-500 text-[8px]" />
-                                        dashboard.nockslock.com/vaults
+                                        dashboard.nokslock.com/vaults
                                     </div>
                                 </div>
                             </div>
@@ -1193,73 +1193,6 @@ function FAQSection() {
 }
 
 /* ===========================================================
-   SECTION 9: CTA BANNER
-   =========================================================== */
-
-function CTASection() {
-    const sectionRef = useRef<HTMLElement>(null);
-
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            gsap.fromTo(
-                ".cta-card",
-                { opacity: 0, y: 50, scale: 0.97 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: 0.9,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 75%",
-                        toggleActions: "play none none reverse",
-                    },
-                }
-            );
-        });
-        return () => ctx.revert();
-    }, []);
-
-    return (
-        <section id="contact" ref={sectionRef} className="py-20 lg:py-32 px-5 scroll-mt-24">
-            <div className="max-w-7xl mx-auto">
-                <div className="cta-card opacity-0 relative rounded-3xl overflow-hidden bg-gradient-to-br from-gray-900 via-gray-900 to-indigo-950 px-8 py-20 md:px-20 shadow-2xl">
-                    <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600 rounded-full blur-[120px] opacity-15 pointer-events-none" />
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600 rounded-full blur-[100px] opacity-10 pointer-events-none" />
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808006_1px,transparent_1px),linear-gradient(to_bottom,#80808006_1px,transparent_1px)] bg-[size:30px_30px] pointer-events-none" />
-
-                    <div className="relative z-10 text-center max-w-3xl mx-auto">
-                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 tracking-tight leading-tight">
-                            Ready to secure your{" "}
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
-                                digital legacy?
-                            </span>
-                        </h2>
-                        <p className="text-lg text-gray-300 mb-10 max-w-xl mx-auto">
-                            Join thousands who sleep better knowing their passwords, crypto, and
-                            files are under lock and key.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Link href="/register">
-                                <button className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-900/50 hover:shadow-blue-800/60 text-base hover:-translate-y-0.5">
-                                    Get Started — It&apos;s Free
-                                </button>
-                            </Link>
-                            <Link href="/#features">
-                                <button className="px-8 py-4 border border-gray-600 text-gray-300 hover:text-white hover:border-gray-500 font-bold rounded-xl transition-all text-base hover:-translate-y-0.5">
-                                    Explore Features
-                                </button>
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    );
-}
-
-/* ===========================================================
    MAIN EXPORT
    =========================================================== */
 
@@ -1274,7 +1207,6 @@ export default function LandingSections() {
             <TestimonialsSection />
             <StatsSection />
             <FAQSection />
-            <CTASection />
         </>
     );
 }

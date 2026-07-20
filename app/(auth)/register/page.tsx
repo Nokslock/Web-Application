@@ -1,5 +1,6 @@
 import Link from "next/link";
 import RegisterGoogle from "./actions/registerGoogle";
+import RegisterApple from "./actions/registerApple";
 import RegisterForm from "./actions/registerForm";
 
 export default function RegisterPage() {
@@ -33,6 +34,9 @@ export default function RegisterPage() {
           <div className="flex flex-col sm:flex-row gap-4 mb-10">
             <div className="flex-1">
               <RegisterGoogle />
+            </div>
+            <div className="flex-1">
+              <RegisterApple />
             </div>
           </div>
 

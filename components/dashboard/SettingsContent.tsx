@@ -287,18 +287,22 @@ function ConnectionsPanel({ user }: { user: any }) {
   const isGoogleLinked = !!googleIdentity;
   const googleEmail = googleIdentity?.identity_data?.email || "";
 
-  const handleLinkGoogle = async () => {
+  const appleIdentity = identities.find((id: any) => id.provider === "apple");
+  const isAppleLinked = !!appleIdentity;
+  const appleEmail = appleIdentity?.identity_data?.email || "";
+
+  const handleLink = async (provider: "google" | "apple", label: string) => {
     setLinking(true);
     try {
       const { error } = await supabase.auth.linkIdentity({
-        provider: "google",
+        provider,
         options: {
           redirectTo: `${window.location.origin}/auth/callback?next=/dashboard/settings`,
         },
       });
       if (error) throw error;
     } catch (error: any) {
-      toast.error(error.message || "Failed to link Google account");
+      toast.error(error.message || `Failed to link ${label} account`);
       setLinking(false);
     }
   };
@@ -339,17 +343,17 @@ function ConnectionsPanel({ user }: { user: any }) {
             </span>
           ) : (
             <button
-              onClick={handleLinkGoogle}
+              onClick={() => handleLink("google", "Google")}
               disabled={linking}
               className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors disabled:opacity-50"
             >
-              {linking ? "Linking..." : "Link Account"}
+              {linking ? "Linking..." : "Connect"}
             </button>
           )}
         </div>
 
-        {/* Apple Row (Coming Soon) */}
-        <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 opacity-60">
+        {/* Apple Row */}
+        <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
               <FaApple className="text-black dark:text-white text-lg" />
@@ -358,12 +362,28 @@ function ConnectionsPanel({ user }: { user: any }) {
               <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
                 Apple
               </p>
-              <p className="text-xs text-gray-400">Coming Soon</p>
+              {isAppleLinked ? (
+                <p className="text-xs text-emerald-500 font-semibold">
+                  Connected{appleEmail ? ` • ${appleEmail}` : ""}
+                </p>
+              ) : (
+                <p className="text-xs text-gray-400">Not connected</p>
+              )}
             </div>
           </div>
-          <span className="text-xs font-bold text-gray-400 px-3 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-            Soon
-          </span>
+          {isAppleLinked ? (
+            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-lg">
+              Linked
+            </span>
+          ) : (
+            <button
+              onClick={() => handleLink("apple", "Apple")}
+              disabled={linking}
+              className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors disabled:opacity-50"
+            >
+              {linking ? "Linking..." : "Connect"}
+            </button>
+          )}
         </div>
       </div>
     </div>

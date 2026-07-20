@@ -1,4 +1,5 @@
 import LoginGoogle from "./actions/loginGoogle";
+import LoginApple from "./actions/loginApple";
 import LoginForm from "./actions/loginForm";
 import Link from "next/link";
 
@@ -31,6 +32,9 @@ export default function LoginPage() {
         <div className="flex flex-col sm:flex-row gap-4 mb-10">
           <div className="flex-1">
             <LoginGoogle />
+          </div>
+          <div className="flex-1">
+            <LoginApple />
           </div>
         </div>
 

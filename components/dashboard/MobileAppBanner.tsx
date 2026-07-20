@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaXmark } from "react-icons/fa6";
+import { FaXmark, FaApple, FaGooglePlay } from "react-icons/fa6";
 import { IoPhonePortraitOutline } from "react-icons/io5";
+import { APP_STORE_URL, PLAY_STORE_URL } from "@/lib/payments";
 
-const DISMISSED_KEY = "nokslock_app_banner_dismissed";
+// Bumped so users who dismissed the old "coming soon" banner see the new one.
+const DISMISSED_KEY = "nokslock_app_banner_dismissed_v2";
 
 export default function MobileAppBanner() {
   const [visible, setVisible] = useState(false);
@@ -43,21 +45,41 @@ export default function MobileAppBanner() {
               </div>
               <div className="min-w-0">
                 <p className="font-bold text-white text-sm sm:text-base truncate">
-                  Nokslock is coming to mobile!
+                  Get the Nokslock app
                 </p>
                 <p className="text-blue-100 text-xs sm:text-sm mt-0.5 truncate">
-                  Access your vault on the go — iOS & Android coming soon.
+                  Manage your vault on the go — now on iOS &amp; Android.
                 </p>
               </div>
             </div>
 
-            <button
-              onClick={dismiss}
-              className="flex-shrink-0 h-8 w-8 rounded-lg bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors"
-              aria-label="Dismiss banner"
-            >
-              <FaXmark className="text-white text-sm" />
-            </button>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <a
+                href={APP_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors"
+              >
+                <FaApple className="text-sm" />
+                <span className="hidden sm:inline">App Store</span>
+              </a>
+              <a
+                href={PLAY_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors"
+              >
+                <FaGooglePlay className="text-xs" />
+                <span className="hidden sm:inline">Google Play</span>
+              </a>
+              <button
+                onClick={dismiss}
+                className="h-8 w-8 rounded-lg bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors"
+                aria-label="Dismiss banner"
+              >
+                <FaXmark className="text-white text-sm" />
+              </button>
+            </div>
           </div>
         </motion.div>
       )}

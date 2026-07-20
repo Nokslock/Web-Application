@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import IdleTimeoutProvider from "@/components/IdleTimeoutProvider";
 import {
   FaShieldHalved,
   FaArrowLeft,
@@ -32,6 +33,7 @@ export default function AdminLayout({
   }
 
   return (
+    <IdleTimeoutProvider>
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans text-gray-900 dark:text-white flex flex-col">
       {/* Top navbar */}
       <nav className="h-16 bg-gray-900 text-white flex items-center justify-between px-6 shadow-md sticky top-0 z-50 flex-shrink-0">
@@ -120,5 +122,6 @@ export default function AdminLayout({
         </main>
       </div>
     </div>
+    </IdleTimeoutProvider>
   );
 }

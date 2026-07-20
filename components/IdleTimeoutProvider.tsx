@@ -6,8 +6,8 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { toast } from "sonner";
 import { clearVaultKey } from "@/lib/vaultKeyManager";
 
-// 4 hours in milliseconds
-const IDLE_TIMEOUT_MS = 4 * 60 * 60 * 1000;
+// 30 minutes in milliseconds
+const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
 // Check every 60 seconds
 const CHECK_INTERVAL_MS = 60 * 1000;
 

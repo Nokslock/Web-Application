@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import DefaultPfp from "@/public/pfp-default.jpg";
 import clsx from "clsx";
-import { rewrapVaultKey, restoreVaultKeyWrapping } from "@/lib/vaultKeyManager";
+import { rewrapVaultKey } from "@/lib/vaultKeyManager";
 
 interface ProfileFormProps {
   user: any;
@@ -49,9 +49,9 @@ export default function ProfileForm({ user }: ProfileFormProps) {
   const [lastName, setLastName] = useState(initialLast);
 
   // Modal States
-  const [modalType, setModalType] = useState<"NONE" | "EMAIL" | "PASSWORD">(
-    "NONE",
-  );
+  const [modalType, setModalType] = useState<
+    "NONE" | "EMAIL" | "PASSWORD" | "MASTER"
+  >("NONE");
 
   // --- HANDLERS ---
 
@@ -315,7 +315,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
             </button>
           </div>
 
-          {/* Password Row */}
+          {/* Master Password Row */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/50 hover:border-gray-200 dark:hover:border-gray-700 transition-all shadow-sm hover:shadow-md">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-full bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
@@ -323,10 +323,33 @@ export default function ProfileForm({ user }: ProfileFormProps) {
               </div>
               <div>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-0.5">
-                  Password
+                  Master Password
                 </p>
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  Last changed recently
+                  Unlocks your vault
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setModalType("MASTER")}
+              className="px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors bg-white dark:bg-gray-900"
+            >
+              Update
+            </button>
+          </div>
+
+          {/* Login Password Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/50 hover:border-gray-200 dark:hover:border-gray-700 transition-all shadow-sm hover:shadow-md">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                <FaLock />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-0.5">
+                  Login Password
+                </p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  Used to sign in
                 </p>
               </div>
             </div>
@@ -351,6 +374,13 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         )}
         {modalType === "PASSWORD" && (
           <PasswordResetModal
+            user={user}
+            supabase={supabase}
+            onClose={() => setModalType("NONE")}
+          />
+        )}
+        {modalType === "MASTER" && (
+          <MasterPasswordModal
             user={user}
             supabase={supabase}
             onClose={() => setModalType("NONE")}
@@ -530,22 +560,18 @@ function PasswordResetModal({
       });
       if (verifyError) throw verifyError;
 
-      // Re-wrap vault key with new password before updating auth password
-      const oldWrapping = await rewrapVaultKey(newPassword, user.id);
-
+      // Login password only — the vault is protected by the separate master
+      // password and is intentionally left untouched.
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });
-      if (updateError) {
-        // Rollback vault key wrapping since password update failed
-        await restoreVaultKeyWrapping(user.id, oldWrapping.oldSalt, oldWrapping.oldEncryptedVaultKey);
-        throw updateError;
-      }
-      toast.success("Password updated!");
+      if (updateError) throw updateError;
+
+      toast.success("Login password updated!");
       createAutoNotification({
-        title: "Password Changed",
+        title: "Login Password Changed",
         message:
-          "Your account password was changed successfully. If this wasn't you, reset your password immediately.",
+          "Your login password was changed successfully. If this wasn't you, reset it immediately.",
         type: "security",
       });
       onClose();
@@ -566,7 +592,7 @@ function PasswordResetModal({
       >
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-            Reset Password
+            Change Login Password
           </h3>
           <button
             onClick={onClose}
@@ -618,6 +644,116 @@ function PasswordResetModal({
             </button>
           </div>
         )}
+      </motion.div>
+    </div>
+  );
+}
+
+// --- MASTER PASSWORD MODAL ---
+// Changes the vault master password by re-wrapping the existing (unlocked)
+// vault key. No data loss, no OTP, and the login password is untouched.
+function MasterPasswordModal({
+  user,
+  supabase,
+  onClose,
+}: {
+  user: any;
+  supabase: any;
+  onClose: () => void;
+}) {
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleUpdate = async () => {
+    if (newPassword.length < 8) {
+      toast.error("Master password must be at least 8 characters.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+    setLoading(true);
+    try {
+      // Re-wrap the existing vault key with the new master password. Vault data
+      // is preserved; the login password is not affected.
+      await rewrapVaultKey(newPassword, user.id);
+
+      // Mark the account as using a separate master password (best-effort — the
+      // forgot-password flow relies on this to avoid wiping the vault).
+      try {
+        await (supabase.from("user_encryption_keys") as any)
+          .update({ master_password_separate: true })
+          .eq("user_id", user.id);
+      } catch {}
+
+      toast.success("Master password updated!");
+      createAutoNotification({
+        title: "Master Password Changed",
+        message:
+          "Your vault master password was changed successfully. Your vault data is intact.",
+        type: "security",
+      });
+      onClose();
+    } catch (err: any) {
+      toast.error(
+        err.message ||
+          "Failed to update master password. Make sure your vault is unlocked.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 w-full max-w-sm"
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+            Change Master Password
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-900 dark:hover:text-white"
+          >
+            <FaXmark />
+          </button>
+        </div>
+
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          This unlocks your vault. It&apos;s separate from your login password,
+          and your vault data stays intact.
+        </p>
+
+        <div className="space-y-3">
+          <input
+            type="password"
+            placeholder="New master password"
+            className="w-full p-2.5 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Confirm master password"
+            className="w-full p-2.5 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          <button
+            onClick={handleUpdate}
+            disabled={loading || newPassword.length < 8}
+            className="w-full bg-black dark:bg-white text-white dark:text-black p-2.5 rounded-lg font-bold hover:opacity-80 disabled:opacity-50 transition-opacity"
+          >
+            {loading ? "Updating..." : "Update Master Password"}
+          </button>
+        </div>
       </motion.div>
     </div>
   );

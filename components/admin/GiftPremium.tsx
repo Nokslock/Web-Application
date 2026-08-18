@@ -196,11 +196,11 @@ export default function GiftPremium() {
             min={1}
             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500"
           />
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1" suppressHydrationWarning>
             Expires on{" "}
             {new Date(
               Date.now() + days * 24 * 60 * 60 * 1000,
-            ).toLocaleDateString()}
+            ).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
           </p>
         </div>
 

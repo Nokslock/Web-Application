@@ -3,6 +3,8 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin-client";
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 import { revalidatePath } from "next/cache";
+import { sendGiftPremiumEmail } from "@/lib/email";
+import { planLabel } from "@/lib/subscription";
 
 /**
  * Checks if the current user is a super_admin.
@@ -277,6 +279,37 @@ export async function giftPremium(
 
   if (error) throw new Error(error.message);
 
+  const label = planLabel(plan);
+
+  // Look up the user's email
+  const {
+    data: { user: giftedUser },
+  } = await adminClient.auth.admin.getUserById(userId);
+
+  // Send in-app notification
+  await adminClient.from("notifications").insert({
+    user_id: userId,
+    title: "You've been gifted Premium!",
+    message: `Your account has been upgraded to the ${label} for ${durationDays} days. Enjoy your premium features!`,
+    type: "success",
+    is_broadcast: false,
+    sent_by_admin: true,
+  });
+
+  // Send email notification
+  if (giftedUser?.email) {
+    try {
+      await sendGiftPremiumEmail({
+        to: giftedUser.email,
+        planLabel: label,
+        durationDays,
+        expiresAt: expiresAt.toISOString(),
+      });
+    } catch (e) {
+      console.error("[giftPremium] Email send failed:", e);
+    }
+  }
+
   revalidatePath("/admin/subscriptions");
   return { success: true, expiresAt: expiresAt.toISOString() };
 }
@@ -296,4 +329,27 @@ export async function toggleAdminRole(userId: string, currentRole: string) {
 
   revalidatePath("/admin");
   return { success: true, newRole: newIsAdmin ? "super_admin" : "user" };
+}
+
+/**
+ * Permanently deletes a user account (auth user + cascaded data). Irreversible.
+ * Admins cannot delete their own account here.
+ */
+export async function deleteUserAccount(userId: string) {
+  const currentUser = await checkAdminAccess();
+
+  if (currentUser.id === userId) {
+    throw new Error("You can't delete your own account from the admin panel.");
+  }
+
+  const adminClient = createSupabaseAdminClient();
+
+  // Hard-delete the auth user; related rows (profiles, vaults, tokens, …)
+  // cascade via their foreign-key constraints.
+  const { error } = await adminClient.auth.admin.deleteUser(userId);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/users");
+  return { success: true };
 }

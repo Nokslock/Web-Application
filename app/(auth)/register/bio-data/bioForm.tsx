@@ -9,7 +9,6 @@ import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { FaCheck, FaXmark } from "react-icons/fa6";
 import { toast } from "sonner";
-import { initializeVaultKey } from "@/lib/vaultKeyManager";
 
 export default function BioForm() {
   const router = useRouter();
@@ -91,7 +90,7 @@ export default function BioForm() {
     }
 
     try {
-      const { data: signUpData, error: supabaseError } = await supabase.auth.signUp({
+      const { error: supabaseError } = await supabase.auth.signUp({
         email: email,
         password: formData.password,
         options: {
@@ -106,12 +105,11 @@ export default function BioForm() {
 
       if (supabaseError) throw supabaseError;
 
-      // --- ZERO-KNOWLEDGE KEY SETUP ---
-      // Generate salt → Derive Master Key → Generate Vault Key → Wrap → Save
-      const userId = signUpData.user?.id;
-      if (userId) {
-        await initializeVaultKey(formData.password, userId);
-      }
+      // NOTE: vault encryption keys are NOT created here. `signUp` with email
+      // confirmation returns no session, so an insert into `user_encryption_keys`
+      // would run unauthenticated (auth.uid() is null) and be rejected by RLS.
+      // Keys are created at /setup-vault after the user verifies + signs in,
+      // where they also choose a master password separate from their login one.
 
       toast.info("Verification code sent to your email.");
       sessionStorage.removeItem("registerEmail");

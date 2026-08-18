@@ -230,6 +230,57 @@ export async function getDmsStats() {
   return { totalActive, totalTriggered, totalCancelled, activeSwitches };
 }
 
+export async function searchUsersByEmail(query: string) {
+  await checkAdminAccess();
+  const adminClient = createSupabaseAdminClient();
+
+  const {
+    data: { users },
+    error,
+  } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 1000 });
+
+  if (error) throw error;
+
+  const lowerQuery = query.toLowerCase();
+  return users
+    .filter((u) => u.email?.toLowerCase().includes(lowerQuery))
+    .slice(0, 10)
+    .map((u) => ({
+      id: u.id,
+      email: u.email ?? "",
+      full_name: u.user_metadata?.full_name || "N/A",
+    }));
+}
+
+export async function giftPremium(
+  userId: string,
+  plan: "monthly" | "6month" | "yearly",
+  durationDays: number,
+) {
+  await checkAdminAccess();
+  const adminClient = createSupabaseAdminClient();
+
+  const now = new Date();
+  const expiresAt = new Date(now);
+  expiresAt.setDate(expiresAt.getDate() + durationDays);
+
+  const { error } = await adminClient
+    .from("profiles")
+    .update({
+      plan,
+      plan_started_at: now.toISOString(),
+      plan_expires_at: expiresAt.toISOString(),
+      plan_reference: `admin_gift_${now.getTime()}`,
+      plan_cancelled: false,
+    })
+    .eq("id", userId);
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin/subscriptions");
+  return { success: true, expiresAt: expiresAt.toISOString() };
+}
+
 export async function toggleAdminRole(userId: string, currentRole: string) {
   await checkAdminAccess();
   const adminClient = createSupabaseAdminClient();

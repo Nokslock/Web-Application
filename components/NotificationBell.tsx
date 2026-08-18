@@ -13,7 +13,9 @@ import {
   getMyNotifications,
   markNotificationRead,
   markAllNotificationsRead,
+  clearAllNotifications,
 } from "@/app/actions/notifications";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 
 type Notification = {
   id: string;
@@ -87,11 +89,57 @@ export default function NotificationBell() {
     }
   }, []);
 
-  // Fetch on mount and poll every 30 seconds
+  // Fetch on mount, then stay current via realtime rather than polling — this
+  // matches the mobile app's NotificationProvider.listenForNotifications().
+  //
+  // Two subscriptions because a user's feed is the union of two disjoint sets:
+  // rows addressed to them, and broadcast rows addressed to nobody. Postgres
+  // changes filters cannot express that as one OR, so we listen twice and
+  // refetch, which also recomputes broadcast read-state from notification_reads.
+  //
+  // Requires `notifications` to be in the supabase_realtime publication.
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
+
+    const supabase = getSupabaseBrowserClient();
+    let cancelled = false;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    (async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user || cancelled) return;
+
+      channel = supabase
+        .channel("notifications-web")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => fetchNotifications(),
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "notifications",
+            filter: "is_broadcast=eq.true",
+          },
+          () => fetchNotifications(),
+        )
+        .subscribe();
+    })();
+
+    return () => {
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [fetchNotifications]);
 
   // Refetch when dropdown opens
@@ -119,6 +167,22 @@ export default function NotificationBell() {
   const handleMarkAllRead = async () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
     markAllNotificationsRead().catch(() => fetchNotifications());
+  };
+
+  // Deletes personal notifications outright, same as mobile. Confirmed first
+  // because it is irreversible and now clears the list on every signed-in
+  // device, not just this browser.
+  const handleClearAll = async () => {
+    if (
+      !window.confirm(
+        "Clear all notifications? This permanently deletes them on all your devices.",
+      )
+    ) {
+      return;
+    }
+    setNotifications([]);
+    setIsOpen(false);
+    clearAllNotifications().catch(() => fetchNotifications());
   };
 
   return (
@@ -219,11 +283,17 @@ export default function NotificationBell() {
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="p-2 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl border-t border-gray-100 dark:border-gray-800">
-              <p className="w-full py-2 text-xs font-medium text-gray-400 text-center">
+            <div className="flex items-center justify-between gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl border-t border-gray-100 dark:border-gray-800">
+              <p className="text-xs font-medium text-gray-400">
                 {notifications.length} notification
                 {notifications.length !== 1 ? "s" : ""}
               </p>
+              <button
+                onClick={handleClearAll}
+                className="text-xs font-medium text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
+              >
+                Clear all
+              </button>
             </div>
           )}
         </div>

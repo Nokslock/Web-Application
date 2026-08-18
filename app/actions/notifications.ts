@@ -190,6 +190,57 @@ export async function markNotificationRead(notificationId: string) {
   }
 }
 
+// ─── USER: Clear all notifications ───────────────────────────
+// Mirrors the mobile app's clearAll (NotificationService.clearAllNotifications)
+// so the two clients behave identically against the shared tables.
+//
+// Personal notifications are deleted outright. Broadcasts are shared rows that
+// other users still need, so they are dismissed by marking them read instead.
+export async function clearAllNotifications() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("Unauthorized");
+
+  const { error: deleteError } = await supabase
+    .from("notifications")
+    .delete()
+    .eq("user_id", user.id);
+
+  if (deleteError) throw new Error(deleteError.message);
+
+  const { data: broadcasts } = await supabase
+    .from("notifications")
+    .select("id")
+    .eq("is_broadcast", true);
+
+  if (broadcasts && broadcasts.length > 0) {
+    const { data: existingReads } = await supabase
+      .from("notification_reads")
+      .select("notification_id")
+      .eq("user_id", user.id);
+
+    const readIds = new Set(
+      (existingReads || []).map(
+        (r: { notification_id: string }) => r.notification_id,
+      ),
+    );
+
+    const newReads = broadcasts
+      .filter((b: { id: string }) => !readIds.has(b.id))
+      .map((b: { id: string }) => ({
+        user_id: user.id,
+        notification_id: b.id,
+      }));
+
+    if (newReads.length > 0) {
+      await supabase.from("notification_reads").insert(newReads);
+    }
+  }
+}
+
 // ─── ADMIN: Get notification history ─────────────────────────
 export async function getNotificationHistory(limit = 50) {
   const supabase = await createSupabaseServerClient();

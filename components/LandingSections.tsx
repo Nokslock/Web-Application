@@ -417,7 +417,7 @@ function FeaturesSection() {
                     </p>
                 </div>
 
-                <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-fr">
+                <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-4 gap-4 md:auto-rows-fr">
                     {features.map((f) => (
                         <div
                             key={f.title}

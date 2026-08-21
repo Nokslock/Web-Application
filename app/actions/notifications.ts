@@ -49,7 +49,7 @@ export async function sendNotification({
   target: "all" | "single";
   userId?: string;
 }) {
-  // Verify admin
+  // Verify admin or moderator
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -59,11 +59,16 @@ export async function sendNotification({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("is_admin")
+    .select("role, is_admin")
     .eq("id", user.id)
     .single();
 
-  if (!profile?.is_admin) {
+  const isStaff =
+    profile?.role === "admin" ||
+    profile?.role === "moderator" ||
+    profile?.is_admin;
+
+  if (!isStaff) {
     throw new Error("Unauthorized");
   }
 
@@ -252,11 +257,16 @@ export async function getNotificationHistory(limit = 50) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("is_admin")
+    .select("role, is_admin")
     .eq("id", user.id)
     .single();
 
-  if (!profile?.is_admin) throw new Error("Unauthorized");
+  const isStaff =
+    profile?.role === "admin" ||
+    profile?.role === "moderator" ||
+    profile?.is_admin;
+
+  if (!isStaff) throw new Error("Unauthorized");
 
   const adminClient = createSupabaseAdminClient();
 

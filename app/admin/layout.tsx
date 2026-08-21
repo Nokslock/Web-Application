@@ -1,8 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import IdleTimeoutProvider from "@/components/IdleTimeoutProvider";
+import { getViewerStaffRole } from "@/app/actions/admin";
+import type { StaffRole } from "@/app/actions/admin";
 import {
   FaShieldHalved,
   FaArrowLeft,
@@ -27,6 +30,11 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [viewerRole, setViewerRole] = useState<StaffRole>("admin");
+
+  useEffect(() => {
+    getViewerStaffRole().then(setViewerRole);
+  }, []);
 
   function isActive(item: (typeof navItems)[number]) {
     return item.exact ? pathname === item.href : pathname.startsWith(item.href);
@@ -53,11 +61,21 @@ export default function AdminLayout({
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="text-xs font-mono bg-red-500/20 text-red-200 px-2 py-1 rounded border border-red-500/50">
-            Authorized Access Only
+          <div
+            className={`text-xs font-mono px-2 py-1 rounded border ${
+              viewerRole === "admin"
+                ? "bg-red-500/20 text-red-200 border-red-500/50"
+                : "bg-amber-500/20 text-amber-200 border-amber-500/50"
+            }`}
+          >
+            {viewerRole === "admin" ? "Admin" : "Moderator"}
           </div>
-          <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-xs font-bold">
-            A
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+              viewerRole === "admin" ? "bg-red-600" : "bg-amber-600"
+            }`}
+          >
+            {viewerRole === "admin" ? "A" : "M"}
           </div>
         </div>
       </nav>

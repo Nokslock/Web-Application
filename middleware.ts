@@ -111,14 +111,17 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/access-denied", request.url));
     }
 
-    // Check for admin role in profiles table
     const { data: profile } = await supabase
       .from("profiles")
-      .select("is_admin")
+      .select("role, is_admin")
       .eq("id", user.id)
       .single();
 
-    if (!profile?.is_admin) {
+    const role = profile?.role;
+    const isStaff =
+      role === "admin" || role === "moderator" || profile?.is_admin;
+
+    if (!isStaff) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }

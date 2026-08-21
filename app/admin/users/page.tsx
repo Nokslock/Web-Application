@@ -1,4 +1,4 @@
-import { getUsersList } from "@/app/actions/admin";
+import { getUsersList, getViewerStaffRole } from "@/app/actions/admin";
 import UsersTable from "@/components/admin/UsersTable";
 import { Suspense } from "react";
 import { FaSpinner } from "react-icons/fa6";
@@ -6,7 +6,10 @@ import { FaSpinner } from "react-icons/fa6";
 export const dynamic = "force-dynamic";
 
 export default async function AdminUsersPage() {
-  const users = await getUsersList(1, 100);
+  const [users, viewerRole] = await Promise.all([
+    getUsersList(1, 100),
+    getViewerStaffRole(),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -15,7 +18,9 @@ export default async function AdminUsersPage() {
           Users
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-          Manage accounts, roles, and access.
+          {viewerRole === "admin"
+            ? "Manage accounts, roles, and access."
+            : "View accounts and user information."}
         </p>
       </div>
 
@@ -26,7 +31,7 @@ export default async function AdminUsersPage() {
           </div>
         }
       >
-        <UsersTable users={users} />
+        <UsersTable users={users} viewerRole={viewerRole} />
       </Suspense>
     </div>
   );

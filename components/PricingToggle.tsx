@@ -6,12 +6,12 @@ import UpgradeButton from "@/components/UpgradeButton";
 import ChangePlanButton from "@/components/ChangePlanButton";
 import { isStripeEnabled } from "@/lib/payments";
 
-// --- PRICES (USD) ---
-const MONTHLY = 5;
-const SIXMONTH = 22.5;
-const SIXMONTH_ORIGINAL = 30;
-const YEARLY = 45;
-const YEARLY_ORIGINAL = 60;
+// --- PRICES (USD, Apple price points) ---
+const MONTHLY = 0.99;
+const SIXMONTH = 5.89;
+const SIXMONTH_ORIGINAL = 5.94;
+const YEARLY = 11.49;
+const YEARLY_ORIGINAL = 11.88;
 const YEARLY_PER_MONTH = YEARLY / 12;
 
 function formatPrice(amount: number): string {
@@ -196,7 +196,7 @@ export default function PricingToggle({
                 {formatPrice(SIXMONTH_ORIGINAL)}
               </span>
               <span className="text-[10px] bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-bold">
-                Save 25%
+                Save 1%
               </span>
             </div>
             <p className="text-gray-400 dark:text-gray-500 text-xs mt-2">
@@ -260,7 +260,7 @@ export default function PricingToggle({
                 {formatPrice(YEARLY_ORIGINAL)}
               </span>
               <span className="text-[10px] bg-green-400/20 text-green-200 px-2 py-0.5 rounded-full font-bold backdrop-blur-sm">
-                Save 25%
+                Save 3%
               </span>
             </div>
             <p className="text-blue-100 text-xs mt-2 opacity-80">

@@ -1,7 +1,7 @@
 "use client";
 
 type BreakdownProps = {
-  roleDistribution: { admins: number; users: number };
+  roleDistribution: { admins: number; moderators: number; users: number };
   providerBreakdown: Record<string, number>;
   totalUsers: number;
 };
@@ -59,7 +59,7 @@ export default function UserBreakdown({
           Role Distribution
         </h3>
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-5">
-          Admin vs regular users
+          Admins, moderators &amp; users
         </p>
 
         {/* Donut-like visual */}
@@ -75,24 +75,39 @@ export default function UserBreakdown({
                 className="text-gray-100 dark:text-gray-700"
                 strokeWidth="3"
               />
-              <circle
-                cx="18"
-                cy="18"
-                r="15.915"
-                fill="none"
-                stroke="#8b5cf6"
-                strokeWidth="3"
-                strokeDasharray={`${
-                  totalUsers > 0
-                    ? (roleDistribution.admins / totalUsers) * 100
-                    : 0
-                } ${100 - (totalUsers > 0 ? (roleDistribution.admins / totalUsers) * 100 : 0)}`}
-                strokeLinecap="round"
-              />
+              {(() => {
+                const adminPct = totalUsers > 0 ? (roleDistribution.admins / totalUsers) * 100 : 0;
+                const modPct = totalUsers > 0 ? (roleDistribution.moderators / totalUsers) * 100 : 0;
+                return (
+                  <>
+                    <circle
+                      cx="18"
+                      cy="18"
+                      r="15.915"
+                      fill="none"
+                      stroke="#8b5cf6"
+                      strokeWidth="3"
+                      strokeDasharray={`${adminPct} ${100 - adminPct}`}
+                      strokeLinecap="round"
+                    />
+                    <circle
+                      cx="18"
+                      cy="18"
+                      r="15.915"
+                      fill="none"
+                      stroke="#f59e0b"
+                      strokeWidth="3"
+                      strokeDasharray={`${modPct} ${100 - modPct}`}
+                      strokeDashoffset={`${-adminPct}`}
+                      strokeLinecap="round"
+                    />
+                  </>
+                );
+              })()}
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="text-lg font-black text-gray-900 dark:text-white">
-                {roleDistribution.admins}
+                {roleDistribution.admins + roleDistribution.moderators}
               </span>
             </div>
           </div>
@@ -107,6 +122,17 @@ export default function UserBreakdown({
               </div>
               <span className="font-bold text-sm text-gray-900 dark:text-white">
                 {roleDistribution.admins}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                <span className="text-sm text-gray-600 dark:text-gray-300">
+                  Moderators
+                </span>
+              </div>
+              <span className="font-bold text-sm text-gray-900 dark:text-white">
+                {roleDistribution.moderators}
               </span>
             </div>
             <div className="flex items-center justify-between">

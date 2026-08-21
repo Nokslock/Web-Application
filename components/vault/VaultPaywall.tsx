@@ -70,8 +70,8 @@ export default function VaultPaywall() {
 
       <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">
         {isStripeEnabled
-          ? "30-day money-back guarantee · Cancel anytime"
-          : "Available on iOS and Android"}
+          ? "Starting at $0.99/month · Cancel anytime"
+          : "Starting at $0.99/month · Available on iOS and Android"}
       </p>
     </div>
   );

@@ -16,10 +16,10 @@ type User = {
   last_sign_in_at?: string;
 };
 
-type FilterRole = "all" | "super_admin" | "user";
+type FilterRole = "all" | "admin" | "moderator" | "user";
 type FilterStatus = "all" | "active" | "inactive";
 
-export default function UsersTable({ users }: { users: User[] }) {
+export default function UsersTable({ users, viewerRole }: { users: User[]; viewerRole: string }) {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<FilterRole>("all");
   const [statusFilter, setStatusFilter] = useState<FilterStatus>("all");
@@ -106,7 +106,7 @@ export default function UsersTable({ users }: { users: User[] }) {
         {/* Filter pills */}
         <div className="flex flex-wrap gap-2">
           <div className="flex gap-1 bg-gray-100 dark:bg-gray-900 rounded-lg p-0.5 text-xs font-medium">
-            {(["all", "super_admin", "user"] as FilterRole[]).map((r) => (
+            {(["all", "admin", "moderator", "user"] as FilterRole[]).map((r) => (
               <button
                 key={r}
                 onClick={() => setRoleFilter(r)}
@@ -118,9 +118,11 @@ export default function UsersTable({ users }: { users: User[] }) {
               >
                 {r === "all"
                   ? "All Roles"
-                  : r === "super_admin"
+                  : r === "admin"
                     ? "Admin"
-                    : "User"}
+                    : r === "moderator"
+                      ? "Moderator"
+                      : "User"}
               </button>
             ))}
           </div>
@@ -197,12 +199,18 @@ export default function UsersTable({ users }: { users: User[] }) {
                   <td className="px-5 py-3.5">
                     <span
                       className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold ${
-                        user.role === "super_admin"
+                        user.role === "admin"
                           ? "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300"
-                          : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                          : user.role === "moderator"
+                            ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
+                            : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
                       }`}
                     >
-                      {user.role === "super_admin" ? "Admin" : "User"}
+                      {user.role === "admin"
+                        ? "Admin"
+                        : user.role === "moderator"
+                          ? "Moderator"
+                          : "User"}
                     </span>
                   </td>
                   <td className="px-5 py-3.5">
@@ -238,7 +246,11 @@ export default function UsersTable({ users }: { users: User[] }) {
                     {format(new Date(user.created_at), "MMM d, yyyy")}
                   </td>
                   <td className="px-5 py-3.5 text-right">
-                    <UserRowActions user={user} />
+                    {viewerRole === "admin" ? (
+                      <UserRowActions user={user} />
+                    ) : (
+                      <span className="text-xs text-gray-400">—</span>
+                    )}
                   </td>
                 </tr>
               );

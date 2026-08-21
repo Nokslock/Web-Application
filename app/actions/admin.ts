@@ -6,34 +6,59 @@ import { revalidatePath } from "next/cache";
 import { sendGiftPremiumEmail } from "@/lib/email";
 import { planLabel } from "@/lib/subscription";
 
-/**
- * Checks if the current user is a super_admin.
- */
-async function checkAdminAccess() {
+export type StaffRole = "user" | "moderator" | "admin";
+
+async function getViewerRole(): Promise<{
+  user: { id: string; email?: string };
+  role: StaffRole;
+}> {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    throw new Error("Unauthorized: No user found");
-  }
+  if (!user) throw new Error("Unauthorized: No user found");
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("is_admin")
+    .select("role, is_admin")
     .eq("id", user.id)
     .single();
 
-  if (!profile?.is_admin) {
-    throw new Error("Unauthorized: Insufficient permissions");
+  // Support both new `role` column and legacy `is_admin` boolean
+  let role: StaffRole = "user";
+  if (profile?.role === "admin" || profile?.role === "moderator") {
+    role = profile.role;
+  } else if (profile?.is_admin) {
+    role = "admin";
   }
 
+  return { user, role };
+}
+
+async function checkStaffAccess() {
+  const { user, role } = await getViewerRole();
+  if (role !== "admin" && role !== "moderator") {
+    throw new Error("Unauthorized: Insufficient permissions");
+  }
+  return { user, role };
+}
+
+async function checkAdminAccess() {
+  const { user, role } = await getViewerRole();
+  if (role !== "admin") {
+    throw new Error("Unauthorized: Admin access required");
+  }
   return user;
 }
 
+export async function getViewerStaffRole(): Promise<StaffRole> {
+  const { role } = await getViewerRole();
+  return role;
+}
+
 export async function getAdminStats() {
-  await checkAdminAccess();
+  await checkStaffAccess();
   const adminClient = createSupabaseAdminClient();
 
   const {
@@ -46,21 +71,18 @@ export async function getAdminStats() {
   const now = new Date();
   const totalUsers = users.length;
 
-  // Active Users (last sign in within 30 days)
   const thirtyDaysAgo = new Date(now);
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   const activeUsers = users.filter(
     (u) => u.last_sign_in_at && new Date(u.last_sign_in_at) > thirtyDaysAgo,
   ).length;
 
-  // New Signups (last 7 days)
   const sevenDaysAgo = new Date(now);
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
   const newSignups = users.filter(
     (u) => u.created_at && new Date(u.created_at) > sevenDaysAgo,
   ).length;
 
-  // Previous 7-day signups (for growth comparison)
   const fourteenDaysAgo = new Date(now);
   fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
   const prevWeekSignups = users.filter(
@@ -77,25 +99,28 @@ export async function getAdminStats() {
         : 0
       : Math.round(((newSignups - prevWeekSignups) / prevWeekSignups) * 100);
 
-  // Verified emails
   const verifiedUsers = users.filter((u) => u.email_confirmed_at).length;
 
   // Role Distribution
-  const { count } = await adminClient
+  const { data: roleProfiles } = await adminClient
     .from("profiles")
-    .select("*", { count: "exact", head: true })
-    .eq("is_admin", true);
-  const adminCount = count ?? 0;
-  const regularUsers = totalUsers - adminCount;
+    .select("role, is_admin");
 
-  // Auth Provider Breakdown
+  const allProfiles = roleProfiles ?? [];
+  const adminCount = allProfiles.filter(
+    (p: any) => p.role === "admin" || (!p.role && p.is_admin),
+  ).length;
+  const moderatorCount = allProfiles.filter(
+    (p: any) => p.role === "moderator",
+  ).length;
+  const regularUsers = totalUsers - adminCount - moderatorCount;
+
   const providerCounts: Record<string, number> = {};
   users.forEach((u) => {
     const provider = u.app_metadata?.provider || "email";
     providerCounts[provider] = (providerCounts[provider] || 0) + 1;
   });
 
-  // Signup Timeline (last 30 days, grouped by day)
   const signupTimeline: { date: string; count: number }[] = [];
   for (let i = 29; i >= 0; i--) {
     const day = new Date(now);
@@ -116,14 +141,14 @@ export async function getAdminStats() {
     newSignups,
     signupGrowth,
     verifiedUsers,
-    roleDistribution: { admins: adminCount, users: regularUsers },
+    roleDistribution: { admins: adminCount, moderators: moderatorCount, users: regularUsers },
     providerBreakdown: providerCounts,
     signupTimeline,
   };
 }
 
 export async function getUsersList(page = 1, limit = 100) {
-  await checkAdminAccess();
+  await checkStaffAccess();
   const adminClient = createSupabaseAdminClient();
 
   const {
@@ -136,20 +161,27 @@ export async function getUsersList(page = 1, limit = 100) {
 
   if (error) throw error;
 
-  // Fetch admin flags from profiles
   const { data: profiles } = await adminClient
     .from("profiles")
-    .select("id, is_admin");
+    .select("id, is_admin, role");
 
-  const adminMap = new Map(
-    (profiles ?? []).map((p: { id: string; is_admin: boolean }) => [p.id, p.is_admin]),
+  const roleMap = new Map(
+    (profiles ?? []).map((p: { id: string; is_admin: boolean; role: string | null }) => {
+      let role: StaffRole = "user";
+      if (p.role === "admin" || p.role === "moderator") {
+        role = p.role;
+      } else if (p.is_admin) {
+        role = "admin";
+      }
+      return [p.id, role];
+    }),
   );
 
   return users.map((u) => ({
     id: u.id,
     email: u.email,
     full_name: u.user_metadata?.full_name || "N/A",
-    role: adminMap.get(u.id) ? "super_admin" : "user",
+    role: roleMap.get(u.id) ?? "user",
     provider: u.app_metadata?.provider || "email",
     email_confirmed: !!u.email_confirmed_at,
     created_at: u.created_at,
@@ -158,7 +190,7 @@ export async function getUsersList(page = 1, limit = 100) {
 }
 
 export async function getSubscriptionStats() {
-  await checkAdminAccess();
+  await checkStaffAccess();
   const adminClient = createSupabaseAdminClient();
 
   const { data: profiles } = await adminClient
@@ -193,7 +225,7 @@ export async function getSubscriptionStats() {
 }
 
 export async function getDmsStats() {
-  await checkAdminAccess();
+  await checkStaffAccess();
   const adminClient = createSupabaseAdminClient();
 
   const { data: switches } = await adminClient
@@ -233,7 +265,7 @@ export async function getDmsStats() {
 }
 
 export async function searchUsersByEmail(query: string) {
-  await checkAdminAccess();
+  await checkStaffAccess();
   const adminClient = createSupabaseAdminClient();
 
   const {
@@ -259,7 +291,7 @@ export async function giftPremium(
   plan: "monthly" | "6month" | "yearly",
   durationDays: number,
 ) {
-  await checkAdminAccess();
+  await checkStaffAccess();
   const adminClient = createSupabaseAdminClient();
 
   const now = new Date();
@@ -281,12 +313,10 @@ export async function giftPremium(
 
   const label = planLabel(plan);
 
-  // Look up the user's email
   const {
     data: { user: giftedUser },
   } = await adminClient.auth.admin.getUserById(userId);
 
-  // Send in-app notification
   await adminClient.from("notifications").insert({
     user_id: userId,
     title: "You've been gifted Premium!",
@@ -296,7 +326,6 @@ export async function giftPremium(
     sent_by_admin: true,
   });
 
-  // Send email notification
   if (giftedUser?.email) {
     try {
       await sendGiftPremiumEmail({
@@ -314,27 +343,22 @@ export async function giftPremium(
   return { success: true, expiresAt: expiresAt.toISOString() };
 }
 
-export async function toggleAdminRole(userId: string, currentRole: string) {
+export async function setUserRole(userId: string, newRole: StaffRole) {
   await checkAdminAccess();
   const adminClient = createSupabaseAdminClient();
 
-  const newIsAdmin = currentRole !== "super_admin";
-
   const { error } = await adminClient
     .from("profiles")
-    .update({ is_admin: newIsAdmin })
+    .update({ role: newRole, is_admin: newRole === "admin" })
     .eq("id", userId);
 
   if (error) throw new Error(error.message);
 
   revalidatePath("/admin");
-  return { success: true, newRole: newIsAdmin ? "super_admin" : "user" };
+  revalidatePath("/admin/users");
+  return { success: true, newRole };
 }
 
-/**
- * Permanently deletes a user account (auth user + cascaded data). Irreversible.
- * Admins cannot delete their own account here.
- */
 export async function deleteUserAccount(userId: string) {
   const currentUser = await checkAdminAccess();
 
@@ -344,8 +368,6 @@ export async function deleteUserAccount(userId: string) {
 
   const adminClient = createSupabaseAdminClient();
 
-  // Hard-delete the auth user; related rows (profiles, vaults, tokens, …)
-  // cascade via their foreign-key constraints.
   const { error } = await adminClient.auth.admin.deleteUser(userId);
   if (error) throw new Error(error.message);
 
